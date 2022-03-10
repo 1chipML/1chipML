@@ -1,3 +1,4 @@
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5704/badge)](https://bestpractices.coreinfrastructure.org/projects/5704)
 # Welcome to the microML library!
 
 ## Introduction
