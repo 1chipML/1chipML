@@ -20,9 +20,9 @@ actions:
 
 As a contributor, you'll have to follow the rules below:
 
-- When contributing to microML, please first discuss the change
-you wish to make or share by pulling a request on the github
-microML page.
+- When contributing to microML, please first talk to us, then
+make or share your suggested change by pulling a request on
+the github microML page.
 - Once your proposition has been accepted, you will
 be able to start your contribution.
 - Once the contribution is completed, you can pull a new request
@@ -32,3 +32,6 @@ the next library release.
 Please note that we have a code of conduct (see CODE_OF_CONDUCT),
 you are expected to follow it in all your interactions with this project.
 
+# Further details
+
+Please, also have a look at the file RELEASES.

@@ -19,5 +19,5 @@ Contributors and maintainers should always follow the code of conduct which can
 be found in CODE_OF_CONDUCT.
 
 The microML development is governed by the microML maintainers which functions
-are described in MAINTAINERS.
+are described in MAINTAINERS/CONTRIBUTING.
 
