@@ -1,12 +1,12 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5704/badge)](https://bestpractices.coreinfrastructure.org/projects/5704)
-# Welcome to the microML library!
+# Welcome to the 1chipML library!
 
 ## Introduction
 
-microML is a library for basic numerical crunching and machine learning for microcontrollers.
+1chipML is a library for basic numerical crunching and machine learning for microcontrollers.
 As the Internet of Things and Edge Computing are becoming a ubiquitous reality, we need to a
 reliable and open framework to use on limited and low power demanding hardware.
-The expected benefits are endless and we expect microML will play an essential role in enabling
+The expected benefits are endless and we expect 1chipML will play an essential role in enabling
 this new computing revolution!
 
 This library is implemented by team of developers who are refered to as maintainers or contributors,
