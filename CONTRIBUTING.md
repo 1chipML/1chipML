@@ -20,9 +20,9 @@ actions:
 
 As a contributor, you'll have to follow the rules below:
 
-- When contributing to microML, please first talk to us, then
+- When contributing to 1chipML, please first talk to us, then
 make or share your suggested change by pulling a request on
-the github microML page.
+the github 1chipML page.
 - Once your proposition has been accepted, you will
 be able to start your contribution.
 - Once the contribution is completed, you can pull a new request
