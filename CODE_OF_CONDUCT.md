@@ -1,6 +1,6 @@
 # Code of conduct
 
-The microML community is dedicated to providing a harassment-free experience for everyone, regardless of gender, gender identity and expression, sexual orientation, disability, physical appearance, body size, age, race, or religion. We do not tolerate harassment of participants in any form. This code of conduct applies to all microML spaces. Anyone who violates this code of conduct may be sanctioned or expelled from these spaces at the discretion of the microML maintainers team. All participants are responsible for knowing and abiding by these rules.
+The 1chipML community is dedicated to providing a harassment-free experience for everyone, regardless of gender, gender identity and expression, sexual orientation, disability, physical appearance, body size, age, race, or religion. We do not tolerate harassment of participants in any form. This code of conduct applies to all 1chipML spaces. Anyone who violates this code of conduct may be sanctioned or expelled from these spaces at the discretion of the 1chipML maintainers team. All participants are responsible for knowing and abiding by these rules.
 
 # Reporting Code of Conduct Issues
 
