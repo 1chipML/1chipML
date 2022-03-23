@@ -8,7 +8,7 @@
 #include<stdlib.h>
 #include<math.h>
 
-#include "../src/microml.h"
+#include "../src/1chipml.h"
 
 int main(void){
  /* Variables and pointers declarations */
