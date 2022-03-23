@@ -1,4 +1,4 @@
-/* This file is part of the microML library. */
+/* This file is part of the 1chipML library. */
 
 #include "gauss_elimination.h"
 
