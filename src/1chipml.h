@@ -5,8 +5,8 @@
  *                    jeanmichel.sellier@gmail.com       *
  * Ext. contributors: n.a.                               *
  * Created          : 01 Apr. 2021, Montreal, QC, Canada *
- * Last modified    : 08 Feb. 2022, Montreal, QC, Canada *
- * Description      : microML                            *
+ * Last modified    : 23 Mar. 2022, Montreal, QC, Canada *
+ * Description      : 1chipML                            *
  * License          : Apache 2                           *
  * ***************************************************** */
 
@@ -14,7 +14,7 @@
 #include<stdlib.h>
 #include<math.h>
 
-/* Include microML methods below */
+/* Include 1chipML methods below */
 #include "./linear_congruential_random_generator.h"
 #include "./gauss_elimination.h"
 
