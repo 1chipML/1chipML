@@ -1,9 +1,19 @@
+
+<html>
+<p align="center">
+  <img src="https://github.com/1chipML/artwork/blob/main/1chipML%2BLFAI%26Data.png" alt="1chipML logo and LF AI & Data Logo" width="300">
+</p>
+
+<h1 align="center">
+  1chipML
+</h1>
+
+
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5704/badge)](https://bestpractices.coreinfrastructure.org/projects/5704)
-# Welcome to the 1chipML library!
 
 ## Introduction
 
-1chipML is a library for basic numerical crunching and machine learning for microcontrollers.
+1chipML is an open source library for basic numerical crunching and machine learning for microcontrollers.
 As the Internet of Things and Edge Computing are becoming a ubiquitous reality, we need to a
 reliable and open framework to use on limited and low power demanding hardware.
 The expected benefits are endless and we expect 1chipML will play an essential role in enabling
@@ -11,6 +21,8 @@ this new computing revolution!
 
 This library is implemented by team of developers who are refered to as maintainers or contributors,
 depending on their actual role.
+  
+The 1chipML project is hosted as a Sandbox project at the [LF AI & Data Foundation](https://lfaidata.foundation).
 
 ## Installation and Usage
 
