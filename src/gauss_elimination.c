@@ -6,7 +6,7 @@
    to solve a system of n linear equations of the type matrix_a*x=vector_b.
    Inputs: n, matrix_a[][], vector_b[].
    Outputs: pointer to the solution array x[] */
-gauss_real* gauss_elimination(int n,gauss_real matrix_a[n][n],gauss_real vector_b[n]){
+gauss_real* gauss_elimination(int n,gauss_real **matrix_a,gauss_real *vector_b){
 
  /* Variables and pointers declarations */
  int i,j,k;
