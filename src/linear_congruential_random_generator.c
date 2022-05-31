@@ -8,7 +8,7 @@
    returns a pseudo-random real number in the range [0, 1.0]. */
 
 /* Variables and pointers declarations */
-int ISEED=38467.; /* Default value in case the user does not specify the seed */
+int ISEED=16.; /* Default value in case the user does not specify the seed */
 
 /* Set the seed for the random number generator */
 void set_linear_congruential_generator_seed(int num){
@@ -17,8 +17,8 @@ void set_linear_congruential_generator_seed(int num){
 
 /* Linear congruential random number generator */
 lcrg_real linear_congruential_random_generator(void){
- ISEED=fmod(1027.*ISEED,1048576.);
- return(ISEED/1048576.);
+ ISEED=fmod(75.*ISEED+74.,65537.);
+ return(ISEED/65537.);
 }
 
 /* -- End of file -- */
