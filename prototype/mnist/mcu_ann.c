@@ -102,7 +102,6 @@ void activation_func(layer *layer) {
  * Inference one data sample. 
  */
 double *feedforward(network *ann, double *inputs) {
-
   /* scan all the layers */
   for (unsigned int l = 0; l < ann->num_of_hidden_layers+1; l++){
     double *previous_output = l == 0 ? inputs : ann->layers[l-1]->output;
@@ -111,9 +110,11 @@ double *feedforward(network *ann, double *inputs) {
     for (unsigned int n = 0; n < ann->layers[l]->num_of_neurons; n++) {
       double y = 0.;
       /* linear product between w[] and x[] + b */
-      for (unsigned int i = 0; i < ann->layers[l]->num_of_inputs; i++)
-        y += previous_output[n] * ann->layers[l]->weights[n*ann->layers[l]->num_of_inputs+i]; 
-
+      for (unsigned int i = 0; i < ann->layers[l]->num_of_inputs; i++) {
+        // printf("%f x %f ", previous_output[i], ann->layers[l]->weights[i*ann->layers[l]->num_of_neurons+n]);
+        y += previous_output[i] * ann->layers[l]->weights[i*ann->layers[l]->num_of_neurons+n]; 
+      }
+      // printf("\n");
       ann->layers[l]->output[n] = y + ann->layers[l]->biases[n];
     }
 
@@ -196,6 +197,18 @@ void display_model(network *ann) {
 }
 
 /*
+ * Normalize input data.
+ */
+void normalize(double *inputs, int size) {
+  printf("Inputs:\n");
+  for (unsigned int i = 0; i < size; i++) {
+    printf("%f ", inputs[i]);
+    // inputs[i] = inputs[i] / 255;
+  }
+  printf("\n");
+}
+
+/*
  * Main function.
  * Compile: gcc mcu_ann.c -lm -std=c99 -Wall -Ofast
  * Run: ./a.out
@@ -203,15 +216,17 @@ void display_model(network *ann) {
 int main(int argc,char *argv[]) {
   network *nn = load_model();
 
-  display_model(nn);
+  // display_model(nn);
 
-/*   double *outuputs = feedforward(nn, inputs);
+  normalize(test_2_input, 784);
+
+  double *outuputs = feedforward(nn, test_2_input);
 
   unsigned int result = argmax(outuputs, nn->num_of_outputs);
 
   printf("predict = %d\n", result);
-  printf("label = %d\n", label);
- */
+  printf("label = %d\n", test_2_label);
+ 
   release_model(nn);
 
 }
