@@ -86,7 +86,7 @@ void activation_func(layer *layer) {
       sum += exp(layer->output[n]);
     }
     for (unsigned int n = 0; n < layer->num_of_neurons; n++) {
-      layer->output[n] = layer->output[n] / sum;
+      layer->output[n] = exp(layer->output[n]) / sum;
     }
   } else {
     /* Default is linear */
