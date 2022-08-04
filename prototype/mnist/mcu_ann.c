@@ -83,10 +83,11 @@ void activation_func(layer *layer) {
   } else if (layer->act_function == softmax) {
     double sum = 0.;
     for (unsigned int n = 0; n < layer->num_of_neurons; n++) {
-      sum += exp(layer->output[n]);
+      layer->output[n] = exp(layer->output[n]);
+      sum += layer->output[n];
     }
     for (unsigned int n = 0; n < layer->num_of_neurons; n++) {
-      layer->output[n] = exp(layer->output[n]) / sum;
+      layer->output[n] = layer->output[n] / sum;
     }
   } else {
     /* Default is linear */
@@ -218,14 +219,20 @@ int main(int argc,char *argv[]) {
 
   // display_model(nn);
 
-  normalize(test_2_input, 784);
+  double *test_inputs[] = {test_1_input, test_2_input, test_3_input};
+  int test_labels[] = {test_1_label, test_2_label, test_3_label};
 
-  double *outuputs = feedforward(nn, test_2_input);
+  for (int i = 0; i < 3; i++) {
+    normalize(test_inputs[i], 784);
 
-  unsigned int result = argmax(outuputs, nn->num_of_outputs);
+    double *outuputs = feedforward(nn, test_inputs[i]);
 
-  printf("predict = %d\n", result);
-  printf("label = %d\n", test_2_label);
+    unsigned int result = argmax(outuputs, nn->num_of_outputs);
+
+    printf("predict = %d\n", result);
+    printf("label = %d\n\n", test_labels[i]);
+  }
+
  
   release_model(nn);
 
