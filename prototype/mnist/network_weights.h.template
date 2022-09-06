@@ -1,0 +1,23 @@
+#ifndef _WEIGHTS_
+#define _WEIGHTS_
+
+/* Repalce string start with # and end with # to value. */
+#define NUM_OF_INPUTS #NUM_OF_INPUTS#
+#define NUM_OF_OUTPUTS #NUM_OF_OUTPUTS#
+#define NUM_OF_HIDDEN_LAYERS #NUM_OF_HIDDEN_LAYERS#
+
+/* 4 rows 2 columns {1, 2} is first row */
+double layer_1_weights[] = #WEIGHTS_1#; 
+double layer_1_biases[] = #BIASES_1#;
+
+double layer_2_weights[] = #WEIGHTS_2#; 
+double layer_2_biases[] = #BIASES_2#;
+
+double layer_3_weights[] = #WEIGHTS_3#; 
+double layer_3_biases[] = #BIASES_3#;
+
+double *weights[] = {layer_1_weights, layer_2_weights, layer_3_weights};
+double *biases[] = {layer_1_biases, layer_2_biases, layer_3_biases};
+unsigned int neurons[] = {#NEURON_1#, #NEURON_2#, #NUM_OF_OUTPUTS#};
+
+#endif
