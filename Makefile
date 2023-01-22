@@ -27,12 +27,17 @@ FFT: ./tests/test_FFT.c ./src/FFT.c ./src/DFT.c ./src/linear_congruential_random
 DFT: ./tests/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
+lanczos: ./tests/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c 
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+
+
 run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
 	./test_poly_interpolation.out
 	./test_DFT.out
 	./test_FFT.out
+	./test_lanczos.out
 
 clean:
 	rm -rf test_*.out

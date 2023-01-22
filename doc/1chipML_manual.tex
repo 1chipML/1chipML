@@ -9,6 +9,8 @@
 \usepackage{amsmath}
 \usepackage{setspace}
 \usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \begin{document}
 
@@ -381,8 +383,55 @@ Work in progress.
 Work in progress.
 \subsection{The Lanczos method}
 
-Work in progress.
+The lanczos method is an iterative algorithm for approximating the eigenvalues and eigenvectors of a symmetrical, sparse matrix.
 
+The algorithm generates a sequence of orthonormal vectors, called the Lanczos basis, that form an approximation of the eigenvectors of the matrix. At each iteration, the algorithm computes values forming a tridiagonal matrix that is similar to the original matrix and has the same eigenvalues.
+
+The basic idea behind the Lanczos algorithm is to generate an orthonormal basis for the subspace spanned by the approximate eigenvectors of the matrix and then use this basis to construct the tridiagonal matrix.
+
+Here is a pseudo-code of the algorithm :
+
+\begin{algorithm}
+  \caption{Lanczos Algorithm}
+  \begin{algorithmic}[1]
+    \State $\text{$x_{0}$} \gets \text{Random unit vector}$
+    \State $\beta_{0} \gets 0$
+  \For{\texttt{i = 1; i $\le$ k; i++}} \Comment{k is the number of iterations}
+    \State $\textit{v}_{i} \gets Ax_{i-1} - \beta_{i}\textit{v}_{i-1}$
+    \State $\alpha_{i} \gets v_{i}^{T} \cdot x_{i-1}$
+    \State $v_{i} \gets v_{i}/||v_{i}||$
+    \State $x_{i} \gets v_{i}$
+    \State $\beta_{i} \gets ||v_{i}||$
+  \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+$$
+T=
+\begin{bmatrix}
+  \alpha_{1} & \beta_{1} & \ldots & 0\\
+  \beta_{1} & \alpha_{2} & \beta_{2} & \vdots \\
+  \vdots & \beta_{2} &  \ddots & \beta_{k} \\
+  0 & \ldots & \beta_{k} & \alpha_{k}
+\end{bmatrix}
+$$
+
+$$
+V=
+\begin{bmatrix}
+  v_{0} & v_{1} & \ldots & v_{n} \\
+\end{bmatrix}
+$$
+The Lanczos algorithm is useful for solving large sparse eigenvalue problems since it generates a small, dense tridiagonal matrix that can be solved efficiently, rather than solving the entire matrix. It can also be used to compute a few eigenvalues and eigenvectors of the matrix, rather than all of them.
+
+Due to the rounding error caused by the IEEE-754 standard, the Lanczos algorithm is vulnerable to numerical instability. When applying the algorithm, Lanczos bases tend to loose their orthogonality. To overcome this issue, the Gram-Schmidt algorithm is applied after every iteration to reorthogonalize the vectors $v_{i}$.
+
+The Lanczos algorithm does not directly outputs the eigenvalues and the eigenvectors associated with the original matrix. Further steps are needed to compute those values. However, the Lanczos algorithm does help finding those values by providing a tridiagonal matrix T which is much easier to compute. 
+
+  The eigenvalues and eigenvectors of T can be calculated using standard methods such as the Jacobi algorithm. 
+
+  Once the eigenvectors and eigenvalues of T are known, the eigenvectors of the original matrix can be approximated by linear combinations of the Lanczos basis vectors. For example, given an eigenvector of T, say $\gamma$, corresponding eigenvector of the original matrix, say $\lambda$ is given by $\lambda = V\gamma$ 
+  
 \section{Statistical approaches}
 
 Work in progress.
