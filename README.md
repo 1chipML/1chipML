@@ -47,5 +47,5 @@ on a computer before deployment on microcontrollers.
 
 To run the tests on computer, simply type the following command in a shell:
 
-> make tests
+> make test
 
