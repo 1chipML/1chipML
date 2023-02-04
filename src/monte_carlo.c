@@ -1,15 +1,7 @@
 #include "monte_carlo.h"
 #include <math.h>
 #include <stdlib.h>
-
-typedef struct Node {
-    unsigned nVisits;
-    int score;
-    unsigned nChildren;
-    struct Node* parent;
-    struct Node* children;
-    Board state;
-}  Node;
+#include <stdio.h>
 
 int get_score(Board* board, int player) {
     if (board->values[0] == 0 & board->values[1] == 0) {
@@ -21,13 +13,6 @@ int get_score(Board* board, int player) {
     if (board->values[1] == 1) {
         return 2;
     }
-}
-
-char is_valid_action(Board* board, Action* action, int player) {
-    if (action->player == player & board->values[action->x_pos] == 0) {
-        return 1;
-    }
-    return 0;
 }
 
 Action* get_possible_actions(Board board) {
@@ -52,17 +37,11 @@ Action* get_possible_actions(Board board) {
     return possibleActions;
 }
 
-Board play_action(Board board, Action* action) {
-    Board childBoard = board;
-    childBoard.values[action->x_pos] = action->player;
-    return childBoard;
-}
-
-int calc_UCB(Node *node) {
+int calc_UCB(Node* node) {
     if(node->nVisits == 0) {
         return __INT_MAX__; 
     }
-    return node->score / node->nVisits; // (node->score / node->nVisits) + sqrt(2 * log(node->parent->nVisits) / node->nVisits);
+    return node->score / node->nVisits;
 }
 
 Node* find_max_UCB(Node *children){
@@ -93,13 +72,13 @@ void remove_action(int randomActionIdx, Action* possibleActions) {
     }
 }
 
-void expand_leaf(Node* node, int player) {
+void expand_leaf(Node* node, int player, char (*isValidAction)(Board*, Action*, int), Board (*playAction)(Board, Action*)) {
     Action* possibleActions = get_possible_actions(node->state);
     int nValidActions = 0;
 
     // Check if action is valid, if it is, add to children, if not, don't add
     for (int i = 0; i < 4; i++) {
-        if (is_valid_action(&(node->state), possibleActions + i, player)) {
+        if (isValidAction(&(node->state), possibleActions + i, player)) {
             nValidActions++;
         }
     }
@@ -108,18 +87,18 @@ void expand_leaf(Node* node, int player) {
     
     nValidActions  = 0;
     for (int i = 0; i < 4; i++) {
-        if (is_valid_action(&(node->state), possibleActions + i, player)) {
+        if (isValidAction(&(node->state), possibleActions + i, player)) {
             (node->children + nValidActions)->nVisits = 0;
             (node->children + nValidActions)->score = 0;
             (node->children + nValidActions)->nChildren = 0;
-            (node->children + nValidActions)->state = play_action(node->state, possibleActions + i);
+            (node->children + nValidActions)->state = playAction(node->state, possibleActions + i);
             (node->children + nValidActions)->parent = node;
             nValidActions++;
         }
     }
 }
 
-int simulate_episode(Node* node, int player) {
+int simulate_episode(Node* node, int player, char (*isValidAction)(Board*, Action*, int), Board (*playAction)(Board, Action*)) {
     Board simulationBoard = node->state;
     Action* possibleActions = get_possible_actions(simulationBoard);
     int nPossibleActions = 2; // Change for size of possible actions
@@ -135,9 +114,9 @@ int simulate_episode(Node* node, int player) {
     while (nPossibleActions > 0) {
         // Pick random action
         int random_action_idx = rand() % (nPossibleActions + 1);
-        if (is_valid_action(&(node->state), &possibleActions[random_action_idx], player)) {
-            // Play action
-            simulationBoard = play_action(simulationBoard, &possibleActions[random_action_idx]);
+        if (isValidAction(&(node->state), &possibleActions[random_action_idx], player)) {
+            // Play action 
+            simulationBoard = playAction(simulationBoard, &possibleActions[random_action_idx]);
         }
         // Remove action from possible actions
         remove_action(random_action_idx, possibleActions);
@@ -167,7 +146,7 @@ void backpropagate(Node *node, int score) {
     }
 }
 
-Board monte_carlo(Board board, int player) {
+Board monte_carlo(Board board, int player, char (*isValidAction)(Board*, Action*, int), Board (*playAction)(Board, Action*)) {
     Node* node = malloc(sizeof(Node));
     node->nVisits = 0;
     node->score = 0;
@@ -175,8 +154,8 @@ Board monte_carlo(Board board, int player) {
 
     while (node->nVisits == 0 | calc_UCB(node) < 2) {
         Node* selected_node = select_node(node);
-        expand_leaf(selected_node, player);
-        int score = simulate_episode(node, player);
+        expand_leaf(selected_node, player, isValidAction, playAction);
+        int score = simulate_episode(node, player, isValidAction, playAction);
         backpropagate(node, score);
     }
 
