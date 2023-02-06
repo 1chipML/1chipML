@@ -1,7 +1,9 @@
 #ifndef FFT_H
 #define FFT_H
 
-#define fft_real double
+#ifndef fft_real
+    #define fft_real double
+#endif
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
