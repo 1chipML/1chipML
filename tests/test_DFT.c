@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <time.h>
 
-static int compareFT(const unsigned length, fft_real* incomingReals, 
-  fft_real* incomingImgs, fft_real* expectedReals, fft_real* expectedImgs) {
+static int compareFT(const unsigned length, dft_real* incomingReals, 
+  dft_real* incomingImgs, dft_real* expectedReals, dft_real* expectedImgs) {
 
-  const fft_real epsilon = 1e-20;
+  const dft_real epsilon = 1e-20;
 
   for (unsigned i = 0; i < length; ++i) {
     if (abs(incomingReals[i] - expectedReals[i]) > epsilon ||
@@ -23,10 +23,10 @@ static void knownTestingDFT() {
   unsigned length = 4;
 
   // allocate arrays for testing
-  fft_real dftReals[] = {8, 4, 8, 0};
-  fft_real dftImgs[] = {0, 0, 0, 0};
-  fft_real expectedReals[] = {20, 0, 12, 0};
-  fft_real expectedImgs[] = {0, -4, 0, 4};
+  dft_real dftReals[] = {8, 4, 8, 0};
+  dft_real dftImgs[] = {0, 0, 0, 0};
+  dft_real expectedReals[] = {20, 0, 12, 0};
+  dft_real expectedImgs[] = {0, -4, 0, 4};
 
   DFT(length, dftReals, dftImgs, 1);
 
@@ -44,10 +44,10 @@ static void knownTestingDFTI() {
   unsigned length = 4;
 
   // allocate arrays for testing
-  fft_real dftReals[] = {20, 0, 12, 0};
-  fft_real dftImgs[] = {0, -4, 0, 4};
-  fft_real expectedReals[] = {8, 4, 8, 0};
-  fft_real expectedImgs[] = {0, 0, 0, 0};
+  dft_real dftReals[] = {20, 0, 12, 0};
+  dft_real dftImgs[] = {0, -4, 0, 4};
+  dft_real expectedReals[] = {8, 4, 8, 0};
+  dft_real expectedImgs[] = {0, 0, 0, 0};
 
   DFT(length, dftReals, dftImgs, -1);
 
