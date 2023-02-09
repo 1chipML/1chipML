@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos
 
 test: all run_all_tests
 
