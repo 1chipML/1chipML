@@ -3,14 +3,8 @@
 #include <stdlib.h>
 
 /**
- * This method implements bit reversal needed by the FFT. It swaps elements
- * located at the i index with other elements at the j index.
- * 
- * According to A. A. Yong, "A better FFT bit-reversal algorithm without tables," 
- * in IEEE Transactions on Signal Processing, vol. 39, no. 10, pp. 2365-2367, 
- * Oct. 1991, doi: 10.1109/78.91199,
- * 
- * j + length / 2 is the reversal of i + 1, when i is even and j is the reversal.
+ * This method implements bit reversal needed by the FFT.
+ * Uses the Gold and Rader's bit reversal algorithm
  * @param length The length of the input vectors. Must be a power of 2
  * @param realArray 1D array containing the real part of the incoming vector.
  * @param imaginaryArray 1D array containing the imaginary part of the incoming vector.
