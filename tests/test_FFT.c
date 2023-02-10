@@ -92,22 +92,15 @@ static void randomTestingFFTI(const unsigned maxLengthPower) {
   
 }
 
-static void knownTestingFFT() {
-  const unsigned length = 4;
+static void knownTestingFFT(const unsigned length,
+  fft_real* inputReals,
+  fft_real* inputImaginaries,
+  fft_real* expectedReals, 
+  fft_real* expectedImaginaries) {
 
-  // allocate arrays for testing
-  fft_real fftReals[] = {8, 4, 8, 0};
-  fft_real fftImgs[] = {0, 0, 0, 0};
-  fft_real dftReals[] = {20, 0, 12, 0};
-  fft_real dftImgs[] = {0, -4, 0, 4};
+  FFT(length, inputReals, inputImaginaries, 1);
 
-  FFT(length, fftReals, fftImgs, 1);
-  printf("FFT output:\n");
-  for (unsigned i = 0; i < length; ++i) {
-    printf("real: %f , img: %f\n", fftReals[i], fftImgs[i]);
-  }
-
-  int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
+  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
 
   printf("Known testing FFT: is the FFT working as intended? ");
   if (isSimilar == 0)
@@ -117,18 +110,15 @@ static void knownTestingFFT() {
 
 }
 
-static void knownTestingFFTI() {
-  const unsigned length = 4;
+static void knownTestingFFTI(const unsigned length,
+  fft_real* inputReals,
+  fft_real* inputImaginaries,
+  fft_real* expectedReals, 
+  fft_real* expectedImaginaries) {
 
-  // allocate arrays for testing
-  fft_real dftReals[] = {8, 4, 8, 0};
-  fft_real dftImgs[] = {0, 0, 0, 0};
-  fft_real fftReals[] = {20, 0, 12, 0};
-  fft_real fftImgs[] = {0, -4, 0, 4};
+  FFT(length, inputReals, inputImaginaries, -1);
 
-  FFT(length, fftReals, fftImgs, -1);
-
-  int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
+  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
 
   printf("Known testing inverse FFT: is the FFT working as intended? ");
   if (isSimilar == 0)
@@ -147,8 +137,19 @@ int main() {
   const unsigned randomLengthPower = 8;
   randomTestingFFT(randomLengthPower);
   randomTestingFFTI(randomLengthPower);
-  knownTestingFFT();
-  knownTestingFFTI();
+
+  const unsigned length = 4;
+  fft_real FFTinputReals[] = {8, 4, 8, 0};
+  fft_real FFTinputImgs[] = {0, 0, 0, 0};
+  fft_real FFTexpectedReals[] = {20, 0, 12, 0};
+  fft_real FFTexpectedImgs[] = {0, -4, 0, 4};
+  knownTestingFFT(length, FFTinputReals, FFTinputImgs, FFTexpectedReals, FFTexpectedImgs);
+
+  fft_real FFTIinputReals[] = {20, 0, 12, 0};
+  fft_real FFTIinputImgs[] = {0, -4, 0, 4};
+  fft_real FFTIexpectedReals[] = {8, 4, 8, 0};
+  fft_real FFTIexpectedImgs[] = {0, 0, 0, 0};
+  knownTestingFFTI(length, FFTIinputReals, FFTIinputImgs, FFTIexpectedReals, FFTIexpectedImgs);
 
   return 0;
 }
