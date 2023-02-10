@@ -14,10 +14,8 @@
  */
 void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, const int dir) {
 
-  dft_real outputReals[length];
-  dft_real outputImaginaries[length];
-  memset(outputReals, 0, length * sizeof(dft_real));
-  memset(outputImaginaries, 0, length * sizeof(dft_real));
+  dft_real* outputReals = calloc(length, sizeof(dft_real));
+  dft_real* outputImaginaries = calloc(length, sizeof(dft_real));
 
   int thetaFactor = -1;
   if (dir < 0) {
@@ -36,13 +34,17 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, c
 
   // inverse DFT
   if (dir < 0) {
+    const dft_real inverseLength = 1.0 / length;
     for (unsigned i = 0; i < length; ++i) {
-      outputReals[i] /= length;
-      outputImaginaries[i] /= length;
+      outputReals[i] *= inverseLength;
+      outputImaginaries[i] *= inverseLength;
     }
   }
 
   // place result in arrays
   memcpy(realArray, outputReals, length * sizeof(dft_real));
   memcpy(imaginaryArray, outputImaginaries, length * sizeof(dft_real));
+
+  free(outputReals);
+  free(outputImaginaries);
 }
