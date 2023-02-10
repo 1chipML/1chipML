@@ -21,10 +21,10 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-FFT: ./tests/test_FFT.c ./src/FFT.c ./src/DFT.c
+FFT: ./tests/test_FFT.c ./src/FFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-DFT: ./tests/test_DFT.c ./src/DFT.c
+DFT: ./tests/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:

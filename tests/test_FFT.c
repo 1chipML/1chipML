@@ -19,10 +19,9 @@ static int compareFT(const unsigned length, fft_real* incomingReals,
   return 0;
 }
 
-static void randomTestingFFT() {
+static void randomTestingFFT(const unsigned maxLengthPower) {
 
-  // limit length to 8 for faster testing
-  const unsigned length = (unsigned)pow(2, rand() % 9);
+  const unsigned length = (unsigned)pow(2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
 
   // allocate arrays for testing
   fft_real fftReals[length];
@@ -31,7 +30,7 @@ static void randomTestingFFT() {
   fft_real dftImgs[length];
 
   for (unsigned i = 0; i < length; ++i) {
-    fftReals[i] = (float)rand() / RAND_MAX;
+    fftReals[i] = linear_congruential_random_generator();
     fftImgs[i] = 0;
     dftReals[i] = fftReals[i];
     dftImgs[i] = fftImgs[i];
@@ -63,10 +62,9 @@ static void randomTestingFFT() {
   
 }
 
-static void randomTestingFFTI() {
+static void randomTestingFFTI(const unsigned maxLengthPower) {
 
-  // limit length to 8 for faster testing
-  const unsigned length = (unsigned)pow(2, rand() % 9);
+  const unsigned length = (unsigned)pow(2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
 
   // allocate arrays for testing
   fft_real reals[length];
@@ -75,7 +73,7 @@ static void randomTestingFFTI() {
   fft_real fftImgs[length];
 
   for (unsigned i = 0; i < length; ++i) {
-    reals[i] = (float)rand() / RAND_MAX;
+    reals[i] = linear_congruential_random_generator();
     imgs[i] = 0;
     fftReals[i] = reals[i];
     fftImgs[i] = imgs[i];
@@ -144,12 +142,13 @@ int main() {
 
   int seed = time(NULL);
   printf("seed used : %d\n", seed);
-  srand(seed);
+  set_linear_congruential_generator_seed(seed);
 
+  const unsigned randomLengthPower = 8;
+  randomTestingFFT(randomLengthPower);
+  randomTestingFFTI(randomLengthPower);
   knownTestingFFT();
   knownTestingFFTI();
-  randomTestingFFT();
-  randomTestingFFTI();
 
   return 0;
 }
