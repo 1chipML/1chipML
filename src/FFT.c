@@ -2,6 +2,19 @@
 #include <math.h>
 #include <stdlib.h>
 
+/**
+ * This method implements bit reversal needed by the FFT. It swaps elements
+ * located at the i index with other elements at the j index.
+ * 
+ * According to A. A. Yong, "A better FFT bit-reversal algorithm without tables," 
+ * in IEEE Transactions on Signal Processing, vol. 39, no. 10, pp. 2365-2367, 
+ * Oct. 1991, doi: 10.1109/78.91199,
+ * 
+ * j + length / 2 is the reversal of i + 1, when i is even and j is the reversal.
+ * @param length The length of the input vectors. Must be a power of 2
+ * @param realArray 1D array containing the real part of the incoming vector.
+ * @param imaginaryArray 1D array containing the imaginary part of the incoming vector.
+ */
 static void bitReversal(unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
   
   const unsigned N2 = length >> 1;
@@ -60,9 +73,10 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, co
     depth <<= 1;
 
     // factors for trigonometric recurrence formula
-    fft_real wtempSin = sin(M_PI / depth);
+    const fft_real piOverDepth = M_PI / depth;
+    fft_real wtempSin = sin(piOverDepth);
     fft_real wRealFactor = -2.0 * wtempSin * wtempSin;
-    fft_real wImaginaryFactor = thetaFactor * sin(2.0 * M_PI / depth);
+    fft_real wImaginaryFactor = thetaFactor * sin(2.0 * piOverDepth);
 
     fft_real wReal = 1.0;
     fft_real wImaginary = 0.0;
@@ -89,9 +103,10 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, co
 
   // inverse FFT
   if (dir < 0) {
+    const fft_real inverseLength = 1.0 / length;
     for (unsigned i = 0; i < length; ++i) {
-      realArray[i] /= length;
-      imaginaryArray[i] /= length;
+      realArray[i] *= inverseLength;
+      imaginaryArray[i] *= inverseLength;
     }
   }
 
