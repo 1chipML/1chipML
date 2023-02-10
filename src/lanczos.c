@@ -1,4 +1,5 @@
 #include "lanczos.h"
+#include "linear_congruential_random_generator.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,14 +93,15 @@ static void gramSchmidt(lanczos_real* vectorList, uint_least8_t nbVectors,
 
 static void getRandomUnitVector(lanczos_real* vector, uint_least8_t dim) {
   for (uint_least8_t i = 0; i < dim; ++i) {
-    vector[i] = rand() % 10;
+    vector[i] = linear_congruential_random_generator();
   }
 
   makeUnitVector(vector, dim);
 }
 
-void lanczos(lanczos_real* matrix, uint_least8_t dim, lanczos_real* tMatrix,
-             lanczos_real* vMatrix, uint_least8_t nbIter) {
+void lanczos(lanczos_real* matrix, uint_least8_t dim, uint_least8_t nbIter,
+             lanczos_real* initialVector, lanczos_real* tMatrix,
+             lanczos_real* vMatrix) {
   lanczos_real q0[dim];
   lanczos_real q1[dim];
 
@@ -107,8 +109,13 @@ void lanczos(lanczos_real* matrix, uint_least8_t dim, lanczos_real* tMatrix,
   // Temporary vector to store the transpose of the V matrix.
   lanczos_real vTranspose[nbIter][dim];
 
-  // q1 is a random unit vector and q0 is a vector filled with 0
-  getRandomUnitVector(q1, dim);
+  if (initialVector == NULL) {
+    // q1 is a random unit vector and q0 is a vector filled with 0
+    getRandomUnitVector(q1, dim);
+  } else {
+    makeUnitVector(initialVector, dim);
+    memcpy(q1, initialVector, dim * sizeof(lanczos_real));
+  }
   memset(q0, 0, dim * sizeof(lanczos_real));
 
   for (uint_least8_t i = 0; i < nbIter; ++i) {

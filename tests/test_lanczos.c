@@ -20,7 +20,8 @@ static int isAlmostZero(const double* value) {
 static int validateEigenValue(double* tMatrix, double eigenValue) {
   double identity[nbIter][nbIter] = {{1.0, 0.0}, {0.0, 1.0}};
   double tCopy[nbIter][nbIter];
-  memcpy(&tCopy[0][0], tMatrix, (nbIter) * (nbIter) * sizeof(double));
+  memcpy(tCopy[0], tMatrix, (nbIter) * (nbIter) * sizeof(double));
+
   vectorScale(&identity[0][0], nbIter * nbIter, eigenValue);
   vectorSubstract(&tCopy[0][0], &identity[0][0], nbIter * nbIter);
   double determinant = computeDeterminant2X2(&tCopy[0][0]);
@@ -36,8 +37,10 @@ int testLanczos() {
       {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}};
   double tMatrix[nbIter][nbIter] = {{0.0, 0.0}, {0.0, 0.0}};
   double vMatrix[nbIter][size] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+  double initialVector[size] = {1.0, 2.0, 3.0};
 
-  lanczos(initialMatrix[0], size, tMatrix[0], vMatrix[0], nbIter);
+  lanczos(initialMatrix[0], size, nbIter, initialVector, tMatrix[0],
+          vMatrix[0]);
 
   // Eigenvalues were manually calculated for this test.
   if(validateEigenValue(&tMatrix[0][0], 3.0) != 0)
@@ -52,7 +55,7 @@ int testLanczos() {
   // the matrix A we simply compute V times the eigen vector
   {
     // With eigenvector (1, 1, 1)
-    double eigenVector[] = {3.13786, 1};
+    double eigenVector[] = {2.44949, 1};
     double output[3];
     uint_least8_t dims[] = {size, nbIter, 1};
     matrixMultiply(&vMatrix[0][0], eigenVector, dims, output);
