@@ -80,8 +80,11 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, co
 
         // Complex multiplications, using a butterfly operation
         unsigned i1 = branch + nElements;
-        fft_real tReal = wReal * realArray[i1] - wImaginary * imaginaryArray[i1];
-        fft_real tImaginary = wReal * imaginaryArray[i1] + wImaginary * realArray[i1];
+        fft_real realArrayi1 = realArray[i1];
+        fft_real imaginaryArrayi1 = imaginaryArray[i1];
+
+        fft_real tReal = wReal * realArrayi1 - wImaginary * imaginaryArrayi1;
+        fft_real tImaginary = wReal * imaginaryArrayi1 + wImaginary * realArrayi1;
         realArray[i1] = realArray[branch] - tReal;
         imaginaryArray[i1] = imaginaryArray[branch] - tImaginary;
         realArray[branch] += tReal;

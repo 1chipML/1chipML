@@ -27,8 +27,8 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, c
     for (unsigned k = 0; k < length; ++k) {
       dft_real wCos = cos(k * exponentBase); // real part
       dft_real wSin = sin(k * exponentBase); // imaginary part
-      outputReals[i] += (realArray[k] * wCos - imaginaryArray[k] * wSin); // real
-      outputImaginaries[i] += (realArray[k] * wSin + imaginaryArray[k] * wCos); // imaginary
+      outputReals[i] += realArray[k] * wCos - imaginaryArray[k] * wSin; // real
+      outputImaginaries[i] += realArray[k] * wSin + imaginaryArray[k] * wCos; // imaginary
     }
   }
 

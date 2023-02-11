@@ -19,18 +19,15 @@ static int compareFT(const unsigned length, dft_real* incomingReals,
   return 0;
 }
 
-static void knownTestingDFT() {
-  unsigned length = 4;
+static void knownTestingDFT(const unsigned length,
+  fft_real* inputReals,
+  fft_real* inputImaginaries,
+  fft_real* expectedReals, 
+  fft_real* expectedImaginaries) {
 
-  // allocate arrays for testing
-  dft_real dftReals[] = {8, 4, 8, 0};
-  dft_real dftImgs[] = {0, 0, 0, 0};
-  dft_real expectedReals[] = {20, 0, 12, 0};
-  dft_real expectedImgs[] = {0, -4, 0, 4};
+  DFT(length, inputReals, inputImaginaries, 1);
 
-  DFT(length, dftReals, dftImgs, 1);
-
-  int isSimilar = compareFT(length, dftReals, dftImgs, expectedReals, expectedImgs);
+  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
 
   printf("Known testing DFT: is the DFT working as intended? ");
   if (isSimilar == 0)
@@ -40,18 +37,15 @@ static void knownTestingDFT() {
 
 }
 
-static void knownTestingDFTI() {
-  unsigned length = 4;
+static void knownTestingDFTI(const unsigned length,
+  fft_real* inputReals,
+  fft_real* inputImaginaries,
+  fft_real* expectedReals, 
+  fft_real* expectedImaginaries) {
 
-  // allocate arrays for testing
-  dft_real dftReals[] = {20, 0, 12, 0};
-  dft_real dftImgs[] = {0, -4, 0, 4};
-  dft_real expectedReals[] = {8, 4, 8, 0};
-  dft_real expectedImgs[] = {0, 0, 0, 0};
+  DFT(length, inputReals, inputImaginaries, -1);
 
-  DFT(length, dftReals, dftImgs, -1);
-
-  int isSimilar = compareFT(length, dftReals, dftImgs, expectedReals, expectedImgs);
+  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
 
   printf("Known testing inverse DFT: is the DFT working as intended? ");
   if (isSimilar == 0)
@@ -63,8 +57,18 @@ static void knownTestingDFTI() {
 
 int main() {
 
-  knownTestingDFT();
-  knownTestingDFTI();
+  const unsigned length = 4;
+  fft_real DFTinputReals[] = {8, 4, 8, 0};
+  fft_real DFTinputImgs[] = {0, 0, 0, 0};
+  fft_real DFTexpectedReals[] = {20, 0, 12, 0};
+  fft_real DFTexpectedImgs[] = {0, -4, 0, 4};
+  knownTestingDFT(length, DFTinputReals, DFTinputImgs, DFTexpectedReals, DFTexpectedImgs);
+
+  fft_real DFTIinputReals[] = {20, 0, 12, 0};
+  fft_real DFTIinputImgs[] = {0, -4, 0, 4};
+  fft_real DFTIexpectedReals[] = {8, 4, 8, 0};
+  fft_real DFTIexpectedImgs[] = {0, 0, 0, 0};
+  knownTestingDFTI(length, DFTIinputReals, DFTIinputImgs, DFTIexpectedReals, DFTIexpectedImgs);
 
   return 0;
 }
