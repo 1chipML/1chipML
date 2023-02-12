@@ -16,8 +16,8 @@ void test() {
     //end = clock();
     //printf("time actual = %.10f\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
-    fast_sincos_real approx = fastCosInternal(0.1, 5);
-    fast_sincos_real actual = cos(0.1);
+    fast_sincos_real approx = fastCos(-4, 5);
+    fast_sincos_real actual = cos(-4);
     printf("approx = %.20f\n", approx);
     printf("actual = %.20f\n", actual);
 
@@ -71,7 +71,36 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
  * @return A cosine approximation of the angle
 */
 fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) {
-    return fastSin(FAST_PI_DIV_2 - angleRadians, degree);
+    // Isolate the angle in the first quandrant
+    // Isolate the angle in the first quandrant
+    int negativeFactor = 0;
+    fast_sincos_real clampedAngle = angleRadians;
+    if (clampedAngle < 0) {
+        clampedAngle = -clampedAngle;
+    }
+    
+    clampedAngle = fmod(clampedAngle, FAST_PI_TIMES_2);
+    
+    if (clampedAngle >= FAST_PI) {
+        clampedAngle -= FAST_PI;
+        negativeFactor ^= 1;
+    }
+
+    if(clampedAngle >= FAST_PI_DIV_2) {
+        clampedAngle = FAST_PI - clampedAngle;
+        negativeFactor ^= 1;
+    }
+
+    //printf("clamped = %.5f\n", (double)negativeFactor * clampedAngle);
+
+    fast_sincos_real returnedValue;
+    if(clampedAngle < FAST_PI_DIV_4) {
+        returnedValue = fastCosInternal(clampedAngle, degree);
+    } else {
+        returnedValue = fastSinInternal(FAST_PI_DIV_2 - clampedAngle, degree);
+    }
+
+    return negativeFactor ? -returnedValue : returnedValue;
 }
 
 
@@ -96,12 +125,18 @@ static fast_sincos_real fastSinInternal(const fast_sincos_real angleRadians, con
                 * angleRadiansSquared -1.6666636754299513e-1)
                 * angleRadiansSquared +9.9999998617934201e-1)
                 * angleRadians;
+        case 5:
         default: // 5
             return ((
                 8.1215579245991201e-3
                 *angleRadiansSquared-1.6660161988228715e-1)
                 *angleRadiansSquared+9.9999499756161918e-1)
                 *angleRadians;
+        case 3:
+            return (
+                -1.6034401672287444e-1
+                *angleRadiansSquared+9.9903142291243359e-1)
+                *angleRadians-1.2156602888538742e-99;
     }
 }
 
@@ -126,11 +161,18 @@ static fast_sincos_real fastCosInternal(const fast_sincos_real angleRadians, con
                 *angleRadiansSquared+4.1666616739207635e-2)
                 *angleRadiansSquared-4.9999999615433476e-1)
                 *angleRadiansSquared+9.9999999995260044e-1;
+        case 5:
         default: // 5, is 6 in reality
             return ((
                 -1.3585908510113299e-3
                 *angleRadiansSquared+4.1655026884251524e-2)
                 *angleRadiansSquared-4.9999856695848848e-1)
                 *angleRadiansSquared+9.9999997242332292e-1;
+        
+        case 3: // is 4 in reality
+            return (
+                4.0398535966168857e-2
+                *angleRadiansSquared-4.9970814035466399e-1)
+                *angleRadiansSquared+9.9999003495519596e-1;
     }
 }
