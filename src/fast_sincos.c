@@ -70,10 +70,11 @@ fast_sincos_real fastSin(fast_sincos_real angleRadians) {
 static fast_sincos_real fastSinInternal(fast_sincos_real angleRadians) {
     printf("sin Internal\n");
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
-    return ((
+    return (((
         -1.9462116998273101e-4
         *angleRadiansSquared+8.3315846064878458e-3)
         *angleRadiansSquared-1.6666636754299513e-1)
+        *angleRadiansSquared+9.9999998617934201e-1)
         *angleRadians;
 }
 
@@ -88,9 +89,10 @@ static fast_sincos_real fastSinInternal(fast_sincos_real angleRadians) {
 static fast_sincos_real fastCosInternal(fast_sincos_real angleRadians) {
     printf("cos Internal\n");
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
-    return ((
+    return (((
         2.4379929375956876e-5
         *angleRadians-1.3886619210252882e-3)
         *angleRadiansSquared+4.1666616739207635e-2)
+        *angleRadiansSquared-4.9999999615433476e-1)
         *angleRadiansSquared+9.9999999995260044e-1;
 }
