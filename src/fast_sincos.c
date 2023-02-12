@@ -30,32 +30,35 @@ void test() {
 */
 fast_sincos_real fastSin(fast_sincos_real angleRadians) {
 
-    int negativeFactor = 1;
+    int negativeFactor = 0;
     double clampedAngle = angleRadians;
     if (clampedAngle < 0) {
-        negativeFactor = -1;
+        negativeFactor = 1;
         clampedAngle = -clampedAngle;
     }
 
-    const double div = clampedAngle * FAST_1_DIV_PI_TIMES_2;
-    clampedAngle = (div - (int)div) * FAST_PI_TIMES_2;
+    
+    clampedAngle = fmod(clampedAngle, FAST_PI_TIMES_2);
     
     if (clampedAngle >= FAST_PI) {
         clampedAngle -= FAST_PI;
-        negativeFactor = -negativeFactor;
+        negativeFactor ^= 1;
     }
 
     if(clampedAngle >= FAST_PI_DIV_2) {
         clampedAngle = FAST_PI - clampedAngle;
     }
 
-    printf("clamped = %.5f\n", (double)negativeFactor * clampedAngle);
+    //printf("clamped = %.5f\n", (double)negativeFactor * clampedAngle);
 
+    double returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
-        return (double)negativeFactor * fastSinInternal(clampedAngle);
+        returnedValue = fastSinInternal(clampedAngle);
+    } else {
+        returnedValue = fastCosInternal(FAST_PI_DIV_2 - clampedAngle);
     }
 
-    return (double)negativeFactor * fastCosInternal(FAST_PI_DIV_2 - clampedAngle);
+    return negativeFactor ? -returnedValue : returnedValue;
 }
 
 
@@ -68,7 +71,7 @@ fast_sincos_real fastSin(fast_sincos_real angleRadians) {
  * @return A sine approximation of the angle
 */
 static fast_sincos_real fastSinInternal(fast_sincos_real angleRadians) {
-    printf("sin Internal\n");
+    //printf("sin Internal\n");
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
     return (((
         -1.9462116998273101e-4
@@ -87,7 +90,7 @@ static fast_sincos_real fastSinInternal(fast_sincos_real angleRadians) {
  * @return A cosine approximation of the angle
 */
 static fast_sincos_real fastCosInternal(fast_sincos_real angleRadians) {
-    printf("cos Internal\n");
+    //printf("cos Internal\n");
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
     return (((
         2.4379929375956876e-5
