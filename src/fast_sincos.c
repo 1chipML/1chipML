@@ -3,8 +3,8 @@
 #include "fast_sincos.h"
 //#include <time.h>
 
-static fast_sincos_real fastSinInternal(const fast_sincos_real angleRadians, const int degree);
-static fast_sincos_real fastCosInternal(const fast_sincos_real angleRadians, const int degree);
+static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int degree);
+static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int degree);
 
 void test() {
 
@@ -16,8 +16,8 @@ void test() {
     //end = clock();
     //printf("time actual = %.10f\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
-    fast_sincos_real approx = fastCos(-4, 5);
-    fast_sincos_real actual = cos(-4);
+    fast_sincos_real approx = fastSin(0.5, 3);
+    fast_sincos_real actual = sin(0.5);
     printf("approx = %.20f\n", approx);
     printf("actual = %.20f\n", actual);
 
@@ -51,13 +51,11 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
         clampedAngle = FAST_PI - clampedAngle;
     }
 
-    //printf("clamped = %.5f\n", (double)negativeFactor * clampedAngle);
-
     fast_sincos_real returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
-        returnedValue = fastSinInternal(clampedAngle, degree);
+        returnedValue = fastSinChebyshev(clampedAngle, degree);
     } else {
-        returnedValue = fastCosInternal(FAST_PI_DIV_2 - clampedAngle, degree);
+        returnedValue = fastCosChebyshev(FAST_PI_DIV_2 - clampedAngle, degree);
     }
 
     return negativeFactor ? -returnedValue : returnedValue;
@@ -71,7 +69,7 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
  * @return A cosine approximation of the angle
 */
 fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) {
-    // Isolate the angle in the first quandrant
+    
     // Isolate the angle in the first quandrant
     int negativeFactor = 0;
     fast_sincos_real clampedAngle = angleRadians;
@@ -95,9 +93,9 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
 
     fast_sincos_real returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
-        returnedValue = fastCosInternal(clampedAngle, degree);
+        returnedValue = fastCosChebyshev(clampedAngle, degree);
     } else {
-        returnedValue = fastSinInternal(FAST_PI_DIV_2 - clampedAngle, degree);
+        returnedValue = fastSinChebyshev(FAST_PI_DIV_2 - clampedAngle, degree);
     }
 
     return negativeFactor ? -returnedValue : returnedValue;
@@ -114,7 +112,7 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
  * Higher is more accurate, but slower
  * @return A sine approximation of the angle
 */
-static fast_sincos_real fastSinInternal(const fast_sincos_real angleRadians, const int degree) {
+static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int degree) {
     //printf("sin Internal\n");
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
     switch (degree) {
@@ -150,7 +148,7 @@ static fast_sincos_real fastSinInternal(const fast_sincos_real angleRadians, con
  * Higher is more accurate, but slower
  * @return A cosine approximation of the angle
 */
-static fast_sincos_real fastCosInternal(const fast_sincos_real angleRadians, const int degree) {
+static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int degree) {
     //printf("cos Internal\n");
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
     switch (degree) {
