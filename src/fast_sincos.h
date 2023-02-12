@@ -15,8 +15,8 @@ extern "C" {
 #endif
 
 void test();
-fast_sincos_real fastSin(fast_sincos_real angleRadians);
-fast_sincos_real fastCos(fast_sincos_real angleRadians);
+fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree);
+fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree);
 
 #ifdef __cplusplus
 }
