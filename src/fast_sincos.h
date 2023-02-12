@@ -9,7 +9,6 @@
 #define FAST_PI_DIV_2 1.57079632679489661923 // pi / 2
 #define FAST_PI_DIV_4 0.78539816339744830962 // pi / 4
 #define FAST_PI_TIMES_2 6.28318530717958647692 // pi * 2
-#define FAST_1_DIV_PI_TIMES_2 0.15915494309189533576 // 1 / (pi * 2)
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +16,7 @@ extern "C" {
 
 void test();
 fast_sincos_real fastSin(fast_sincos_real angleRadians);
+fast_sincos_real fastCos(fast_sincos_real angleRadians);
 
 #ifdef __cplusplus
 }

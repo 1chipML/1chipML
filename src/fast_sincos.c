@@ -31,12 +31,11 @@ void test() {
 fast_sincos_real fastSin(fast_sincos_real angleRadians) {
 
     int negativeFactor = 0;
-    double clampedAngle = angleRadians;
+    fast_sincos_real clampedAngle = angleRadians;
     if (clampedAngle < 0) {
         negativeFactor = 1;
         clampedAngle = -clampedAngle;
     }
-
     
     clampedAngle = fmod(clampedAngle, FAST_PI_TIMES_2);
     
@@ -51,7 +50,7 @@ fast_sincos_real fastSin(fast_sincos_real angleRadians) {
 
     //printf("clamped = %.5f\n", (double)negativeFactor * clampedAngle);
 
-    double returnedValue;
+    fast_sincos_real returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
         returnedValue = fastSinInternal(clampedAngle);
     } else {
@@ -59,6 +58,15 @@ fast_sincos_real fastSin(fast_sincos_real angleRadians) {
     }
 
     return negativeFactor ? -returnedValue : returnedValue;
+}
+
+/**
+ * The Chebyshev approximation is used to compute the cosine of the angle
+ * @param angleRadians The angle, in radians
+ * @return A cosine approximation of the angle
+*/
+fast_sincos_real fastCos(fast_sincos_real angleRadians) {
+    return fastSin(FAST_PI_DIV_2 - angleRadians);
 }
 
 
