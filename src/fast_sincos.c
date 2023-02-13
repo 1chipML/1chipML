@@ -1,26 +1,17 @@
 #include <stdio.h>
 #include <math.h>
 #include "fast_sincos.h"
-//#include <time.h>
 
 
-static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int degree);
-static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int degree);
-static fast_sincos_real lookupCosInterpolate(const fast_sincos_real x);
-static fast_sincos_real lookupSinInterpolate(const fast_sincos_real x);
-static fast_sincos_real lookupCos(const fast_sincos_real x);
-static fast_sincos_real lookupSin(const fast_sincos_real x);
+static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int sinDegree);
+static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int sinDegree);
+static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians);
+static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians);
+static fast_sincos_real lookupCos(const fast_sincos_real angleRadians);
+static fast_sincos_real lookupSin(const fast_sincos_real angleRadians);
 
 
 void test() {
-
-    //clock_t begin, end;
-    //begin = clock();
-    //end = clock();
-    //printf("time approx = %.10f\n", (fast_sincos_real)(end - begin) / CLOCKS_PER_SEC);
-    //begin = clock();
-    //end = clock();
-    //printf("time actual = %.10f\n", (fast_sincos_real)(end - begin) / CLOCKS_PER_SEC);
 
     fast_sincos_real angle = -20;
     
@@ -40,14 +31,18 @@ void test() {
 }
 
 /**
- * With degrees over 2, the Chebyshev approximation is used to compute the sine of the angle
- * @param angleRadians The angle, in radians
- * @param degree The degree of the Chebyshev approximation. 
- * Higher is more accurate, but slower
- * @return A sine approximation of the angle
+ * @brief Fast sine computation.
+ * With degrees over 2, the Chebyshev approximation is used to compute the sine of the angle.
+ * With degree = 2, the sine is computed with a lookup sine table and interpolation.
+ * With degree = 1, the sine is computed with a lookup sine table only.
+ * @param angleRadians The angle, in radians.
+ * @param degree The degree of the approximation. 
+ * Higher is more accurate, but slower.
+ * @return A sine approximation of the angle.
 */
 fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) {
 
+    // Check for lower degrees first
     switch (degree) {
       case 2:
         return lookupSinInterpolate(angleRadians);
@@ -76,6 +71,8 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
         clampedAngle = FAST_PI - clampedAngle;
     }
 
+    // Chose the appropriate approximation depending on the
+    // accepted range.
     fast_sincos_real returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
         returnedValue = fastSinChebyshev(clampedAngle, degree);
@@ -87,14 +84,18 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
 }
 
 /**
- * The Chebyshev approximation is used to compute the cosine of the angle
+ * @brief Fast cosine computation.
+ * With degrees over 2, the Chebyshev approximation is used to compute the cosine of the angle.
+ * With degree = 2, the cosine is computed with a lookup sine table and interpolation.
+ * With degree = 1, the cosine is computed with a lookup sine table only.
  * @param angleRadians The angle, in radians
- * @param degree The degree of the Chebyshev approximation. 
- * Higher is more accurate, but slower
- * @return A cosine approximation of the angle
+ * @param degree The degree of the approximation. 
+ * Higher is more accurate, but slower.
+ * @return A cosine approximation of the angle.
 */
 fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) {
     
+    // Check for lower degrees first
     switch (degree) {
       case 2:
         return lookupCosInterpolate(angleRadians);
@@ -123,8 +124,8 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
         negativeFactor ^= 1;
     }
 
-    //printf("clamped = %.5f\n", (fast_sincos_real)negativeFactor * clampedAngle);
-
+    // Chose the appropriate approximation depending on the
+    // accepted range.
     fast_sincos_real returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
         returnedValue = fastCosChebyshev(clampedAngle, degree);
@@ -137,19 +138,20 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
 
 
 /**
- * The Chebyshev approximation is used to compute the sine of the angle
- * Coefficients were obtained manually with the Remez algorithm
- * Horner's method (nested multiplication) is then used for faster calculations
- * The range for sin is [-PI / 4, PI / 4]
- * @param angleRadians The angle, in radians, within the range [-PI / 4, PI / 4]
- * @param degree The degree of the Chebyshev approximation. 
- * Higher is more accurate, but slower
- * @return A sine approximation of the angle
+ * The Chebyshev approximation is used to compute the sine of the angle.
+ * Coefficients were obtained manually with the Remez algorithm.
+ * Horner's method (nested multiplication) is then used for faster calculations.
+ * The range for sin is [-PI / 4, PI / 4].
+ * This range was chosen as some of the coefficients become negligible,
+ * reducing the total number of multiplications.
+ * @param angleRadians The angle, in radians, within the range [-PI / 4, PI / 4].
+ * @param sinDegree The degree of the Chebyshev approximation for sin. 
+ * Higher is more accurate, but slower.
+ * @return A sine approximation of the angle.
 */
-static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int degree) {
-    //printf("sin Internal\n");
+static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int sinDegree) {
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
-    switch (degree) {
+    switch (sinDegree) {
         case 7:
             return (((
                 -1.9462116998273101e-4
@@ -173,20 +175,23 @@ static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, co
 }
 
 /**
- * The Chebyshev approximation is used to compute the cosine of the angle
- * Coefficients were obtained manually with the Remez algorithm
- * Horner's method (nested multiplication) is then used for faster calculations
- * The range for cos is [-PI / 4, PI / 4]
- * @param angleRadians The angle, in radians, within the range [-PI / 4, PI / 4]
- * @param degree The degree of the Chebyshev approximation. 
- * Higher is more accurate, but slower
- * @return A cosine approximation of the angle
+ * The Chebyshev approximation is used to compute the cosine of the angle.
+ * Coefficients were obtained manually with the Remez algorithm.
+ * Horner's method (nested multiplication) is then used for faster calculations.
+ * The range for cos is [-PI / 4, PI / 4].
+ * This range was chosen as some of the coefficients become negligible,
+ * reducing the total number of multiplications.
+ * @param angleRadians The angle, in radians, within the range [-PI / 4, PI / 4].
+ * @param sinDegree The degree of the Chebyshev approximation for sin.
+ * Because this approximation is for cos, the actual degree of the approximation
+ * will be "sinDegree + 1".
+ * Higher is more accurate, but slower.
+ * @return A cosine approximation of the angle.
 */
-static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int degree) {
-    //printf("cos Internal\n");
+static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int sinDegree) {
     fast_sincos_real angleRadiansSquared = angleRadians * angleRadians;
-    switch (degree) {
-        case 7: // is 8 in reality
+    switch (sinDegree) {
+        case 7: // Actually computes for degree 8
             return (((
                 2.4379929375956876e-5
                 *angleRadiansSquared-1.3886619210252882e-3)
@@ -194,14 +199,14 @@ static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, co
                 *angleRadiansSquared-4.9999999615433476e-1)
                 *angleRadiansSquared+9.9999999995260044e-1;
         case 5:
-        default: // 5, is 6 in reality
+        default: // Actually computes for degree 5
             return ((
                 -1.3585908510113299e-3
                 *angleRadiansSquared+4.1655026884251524e-2)
                 *angleRadiansSquared-4.9999856695848848e-1)
                 *angleRadiansSquared+9.9999997242332292e-1;
         
-        case 3: // is 4 in reality
+        case 3: // Actually computes for degree 3
             return (
                 4.0398535966168857e-2
                 *angleRadiansSquared-4.9970814035466399e-1)
@@ -211,9 +216,9 @@ static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, co
 
 // 20.371832715762602978 for 128 / 2pi
 // 40.74366543152520595683424342 for 256 / 2pi
-static fast_sincos_real lookupSinInterpolate(const fast_sincos_real x) {
+static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians) {
   
-  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     negativeFactor = 1;
@@ -253,9 +258,9 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real x) {
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
-static fast_sincos_real lookupCosInterpolate(const fast_sincos_real x) {
+static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians) {
   //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
-  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     scaledAngle = -scaledAngle;
@@ -295,9 +300,9 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real x) {
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
-static fast_sincos_real lookupSin(const fast_sincos_real x) {
+static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
   
-  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     negativeFactor = 1;
@@ -323,9 +328,9 @@ static fast_sincos_real lookupSin(const fast_sincos_real x) {
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
-static fast_sincos_real lookupCos(const fast_sincos_real x) {
+static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
   //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
-  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     scaledAngle = -scaledAngle;

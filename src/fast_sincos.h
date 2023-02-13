@@ -11,11 +11,16 @@
 #define FAST_PI_DIV_2 1.57079632679489661923 // pi / 2
 #define FAST_PI_DIV_4 0.78539816339744830962 // pi / 4
 #define FAST_PI_TIMES_2 6.28318530717958647692 // pi * 2
+#define FAST_LOOKUP_SCALE_FACTOR 81.4873308630504119136684 // 128 * 4 / (2 * pi)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * Sine table used for sine and cosine approximation
+ * This sine table only contains the first quadrant
+*/
 static const uint16_t sineTable[129] = {
     0,  804, 1608, 2412, 3216, 4019, 4821, 5623,
  6424, 7223, 8022, 8820, 9616,10411,11204,11996,
