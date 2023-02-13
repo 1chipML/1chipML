@@ -198,24 +198,21 @@ static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, co
                 *angleRadiansSquared+4.1666616739207635e-2)
                 *angleRadiansSquared-4.9999999615433476e-1)
                 *angleRadiansSquared+9.9999999995260044e-1;
-        case 5:
-        default: // Actually computes for degree 5
+        case 5: // Actually computes for degree 6
+        default: 
             return ((
                 -1.3585908510113299e-3
                 *angleRadiansSquared+4.1655026884251524e-2)
                 *angleRadiansSquared-4.9999856695848848e-1)
                 *angleRadiansSquared+9.9999997242332292e-1;
         
-        case 3: // Actually computes for degree 3
+        case 3: // Actually computes for degree 4
             return (
                 4.0398535966168857e-2
                 *angleRadiansSquared-4.9970814035466399e-1)
                 *angleRadiansSquared+9.9999003495519596e-1;
     }
 }
-
-// 20.371832715762602978 for 128 / 2pi
-// 40.74366543152520595683424342 for 256 / 2pi
 
 /**
  * @brief Fast sine computation with lookup table, using interpolation
@@ -224,69 +221,81 @@ static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, co
 */
 static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians) {
   
-  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
+  fast_sincos_real scaledAngle = angleRadians * LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     negativeFactor = 1;
     scaledAngle = -scaledAngle;
   }
 
-  long roundedAngle = scaledAngle;  // This should be the _only_ line of FP code
-  uint16_t remainder = (scaledAngle - roundedAngle) * 65536.0;
+  long roundedAngle = scaledAngle;
+  // Get the remainder in fixed point, for faster calculations
+  // The function below allows for fast floating point multiplication by power of 2
+  uint16_t remainder = ldexpf(scaledAngle - roundedAngle, LOOKUP_REMAINDER_BITS); 
+  uint16_t index = roundedAngle & LOOKUP_INDEX_MASK;  // This & replaces modulus
 
-  // All following code is integer code.
-  //scaled_x += number_of_entries/4 ; // If we are doing cosine
-
-  unsigned index = roundedAngle & (128 * 4 - 1);  // This & replaces fmod
-
-  if (index >= 256) {
-    index -= 256;
+  // Isolate the angle in the first quandrant
+  if (index >= QUADRANT_SIZE_2) {
+    index -= QUADRANT_SIZE_2;
     negativeFactor ^= 1;
   }
 
-  if (index >= 128) {
-    index = 256 - index;
+  if (index >= QUADRANT_SIZE) {
+    index = QUADRANT_SIZE_2 - index;
 
     if (remainder) {
-      remainder = 65536 - remainder; // equivalent to 65536 - remainder
+      remainder = LOOKUP_REMAINDER_SIZE - remainder;
       --index;
     }
   }
 
   // extended for the multiplication that is about to occur and keep the precision
   uint32_t currentValue = sineTable[index]; 
-  if (remainder > 0) 
-  {
-    currentValue = currentValue + (((sineTable[index + 1] - currentValue) * remainder) >> 16);
+  if (remainder > 0) {
+    currentValue = currentValue + (((sineTable[index + 1] - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
   }
 
-  fast_sincos_real returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
+  // Divide the current value by the maximum value of the elements
+  // in the lookup table, plus 1,
+  // which is (2^LOOKUP_ELEMENTS_BITS_NEGATIVE)
+  // The Actual division should be by the real maximum value of the 
+  // elements in the lookup table, but it is faster to
+  // divide by a power of 2. 
+  // The error is slightly increased because of this choice
+  // e.g.: Dividing by 65536 instead of 65535
+  fast_sincos_real returnedValue = ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
+/**
+ * @brief Fast cosine computation with lookup table, using interpolation
+ * @param angleRadians The angle, in radians.
+ * @return A cosine approximation of the angle.
+*/
 static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians) {
-  //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
-  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
+  fast_sincos_real scaledAngle = angleRadians * LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     scaledAngle = -scaledAngle;
   }
 
-  long roundedAngle = scaledAngle;  // This should be the _only_ line of FP code
-  uint16_t remainder = (scaledAngle - roundedAngle) * 65536.0;
+  long roundedAngle = scaledAngle;
+  // Get the remainder in fixed point, for faster calculations
+  // The function below allows for fast floating point multiplication by power of 2
+  uint16_t remainder = ldexpf(scaledAngle - roundedAngle, LOOKUP_REMAINDER_BITS); 
+  uint16_t index = roundedAngle & LOOKUP_INDEX_MASK;  // This & replaces modulus
 
-  unsigned index = roundedAngle & (128 * 4 - 1);  // This & replaces fmod
-
-  if (index >= 256) {
-    index -= 256;
+  // Isolate the angle in the first quandrant
+  if (index >= QUADRANT_SIZE_2) {
+    index -= QUADRANT_SIZE_2;
     negativeFactor ^= 1;
   }
 
-  if (index >= 128) {
-    index = 256 - index;
+  if (index >= QUADRANT_SIZE) {
+    index = QUADRANT_SIZE_2 - index;
     negativeFactor ^= 1;
     if (remainder) {
-      remainder = -remainder; // equivalent to 65536 - remainder
+      remainder = -remainder;
       --index;
     }
   }
@@ -295,39 +304,46 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
   uint32_t currentValue;
   if (remainder > 0) 
   {
-    currentValue = sineTable[127 - index]; 
-    remainder = 65536 - remainder;
-    currentValue = currentValue + (((sineTable[128 - index] - currentValue) * remainder) >> 16);
+    currentValue = sineTable[QUADRANT_SIZE_MINUS_1 - index]; 
+    remainder = LOOKUP_REMAINDER_SIZE - remainder;
+    currentValue = currentValue + (((sineTable[QUADRANT_SIZE - index] - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
   } else {
-    currentValue = sineTable[128 - index]; 
+    currentValue = sineTable[QUADRANT_SIZE - index]; 
   }
 
-  fast_sincos_real returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
+  // Divide the current value by the maximum value of the elements
+  // in the lookup table, plus 1,
+  // which is (2^LOOKUP_ELEMENTS_BITS_NEGATIVE)
+  // The Actual division should be by the real maximum value of the 
+  // elements in the lookup table, but it is faster to
+  // divide by a power of 2. 
+  // The error is slightly increased because of this choice
+  // e.g.: Dividing by 65536 instead of 65535
+  fast_sincos_real returnedValue =  ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
 static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
   
-  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
+  fast_sincos_real scaledAngle = angleRadians * LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     negativeFactor = 1;
     scaledAngle = -scaledAngle;
   }
 
-  long roundedAngle = lroundf(scaledAngle);  // This should be the _only_ line of FP code
-  unsigned index = roundedAngle & (128 * 4 - 1);  // This & replaces fmod
+  // basic rounding
+  long roundedAngle = lroundf(scaledAngle);
+  uint16_t index = roundedAngle & (LOOKUP_INDEX_MASK);  // This & replaces fmod
 
-  // All following code is integer code.
-  //scaled_x += number_of_entries/4 ; // If we are doing cosine
-
-  if (index >= 256) {
-    index -= 256;
+  // Isolate the angle in the first quandrant
+  if (index >= QUADRANT_SIZE_2) {
+    index -= QUADRANT_SIZE_2;
     negativeFactor ^= 1;
   }
 
-  if (index >= 128) {
-    index = 256 - index;
+  if (index >= QUADRANT_SIZE) {
+    index = QUADRANT_SIZE_2 - index;
   }
 
   fast_sincos_real returnedValue = sineTable[index] * 1.525902189669642175e-5; // divide by 65535
@@ -335,27 +351,28 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
 }
 
 static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
-  //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
-  fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
+  fast_sincos_real scaledAngle = angleRadians * LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     scaledAngle = -scaledAngle;
   }
 
-  long roundedAngle = lroundf(scaledAngle);  // This should be the _only_ line of FP code
-  unsigned index = roundedAngle & (128 * 4 - 1);  // This & replaces fmod
+  // basic rounding
+  long roundedAngle = lroundf(scaledAngle);
+  uint16_t index = roundedAngle & (LOOKUP_INDEX_MASK);  // This & replaces fmod
 
-  if (index >= 256) {
-    index -= 256;
+  // Isolate the angle in the first quandrant
+  if (index >= QUADRANT_SIZE_2) {
+    index -= QUADRANT_SIZE_2;
     negativeFactor ^= 1;
   }
 
-  if (index >= 128) {
-    index = 256 - index;
+  if (index >= QUADRANT_SIZE) {
+    index = QUADRANT_SIZE_2 - index;
     negativeFactor ^= 1;
   }
 
   // extended for the multiplication that is about to occur and keep the precision
-  fast_sincos_real returnedValue = sineTable[128 - index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = sineTable[QUADRANT_SIZE - index] * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
