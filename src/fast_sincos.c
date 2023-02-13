@@ -6,10 +6,10 @@
 
 static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int degree);
 static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int degree);
-static double lookupCosInterpolate(const double x);
-static double lookupSinInterpolate(const double x);
-static double lookupCos(const double x);
-static double lookupSin(const double x);
+static fast_sincos_real lookupCosInterpolate(const fast_sincos_real x);
+static fast_sincos_real lookupSinInterpolate(const fast_sincos_real x);
+static fast_sincos_real lookupCos(const fast_sincos_real x);
+static fast_sincos_real lookupSin(const fast_sincos_real x);
 
 
 void test() {
@@ -17,12 +17,12 @@ void test() {
     //clock_t begin, end;
     //begin = clock();
     //end = clock();
-    //printf("time approx = %.10f\n", (double)(end - begin) / CLOCKS_PER_SEC);
+    //printf("time approx = %.10f\n", (fast_sincos_real)(end - begin) / CLOCKS_PER_SEC);
     //begin = clock();
     //end = clock();
-    //printf("time actual = %.10f\n", (double)(end - begin) / CLOCKS_PER_SEC);
+    //printf("time actual = %.10f\n", (fast_sincos_real)(end - begin) / CLOCKS_PER_SEC);
 
-    double angle = -20;
+    fast_sincos_real angle = -20;
     
     printf("SIN\n");
     printf("actual = %.20f\n", sin(angle));
@@ -123,7 +123,7 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
         negativeFactor ^= 1;
     }
 
-    //printf("clamped = %.5f\n", (double)negativeFactor * clampedAngle);
+    //printf("clamped = %.5f\n", (fast_sincos_real)negativeFactor * clampedAngle);
 
     fast_sincos_real returnedValue;
     if(clampedAngle < FAST_PI_DIV_4) {
@@ -211,9 +211,9 @@ static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, co
 
 // 20.371832715762602978 for 128 / 2pi
 // 40.74366543152520595683424342 for 256 / 2pi
-static double lookupSinInterpolate(const double x) {
+static fast_sincos_real lookupSinInterpolate(const fast_sincos_real x) {
   
-  double scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     negativeFactor = 1;
@@ -249,13 +249,13 @@ static double lookupSinInterpolate(const double x) {
     currentValue = currentValue + (((sineTable[index + 1] - currentValue) * remainder) >> 16);
   }
 
-  double returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
-static double lookupCosInterpolate(const double x) {
+static fast_sincos_real lookupCosInterpolate(const fast_sincos_real x) {
   //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
-  double scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     scaledAngle = -scaledAngle;
@@ -291,13 +291,13 @@ static double lookupCosInterpolate(const double x) {
     currentValue = sineTable[128 - index]; 
   }
 
-  double returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
-static double lookupSin(const double x) {
+static fast_sincos_real lookupSin(const fast_sincos_real x) {
   
-  double scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     negativeFactor = 1;
@@ -319,13 +319,13 @@ static double lookupSin(const double x) {
     index = 256 - index;
   }
 
-  double returnedValue = sineTable[index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = sineTable[index] * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
-static double lookupCos(const double x) {
+static fast_sincos_real lookupCos(const fast_sincos_real x) {
   //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
-  double scaledAngle = x * 20.371832715762602978 * 4;
+  fast_sincos_real scaledAngle = x * 20.371832715762602978 * 4;
   int negativeFactor = 0;
   if (scaledAngle < 0) {
     scaledAngle = -scaledAngle;
@@ -345,6 +345,6 @@ static double lookupCos(const double x) {
   }
 
   // extended for the multiplication that is about to occur and keep the precision
-  double returnedValue = sineTable[128 - index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = sineTable[128 - index] * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
