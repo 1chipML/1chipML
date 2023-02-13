@@ -8,6 +8,8 @@ static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, co
 static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int degree);
 static double lookupCosInterpolate(const double x);
 static double lookupSinInterpolate(const double x);
+static double lookupCos(const double x);
+static double lookupSin(const double x);
 
 
 const uint16_t sineTable[129] = {
@@ -43,15 +45,17 @@ void test() {
     double angle = -20;
     
     printf("SIN\n");
+    printf("actual = %.20f\n", sin(angle));
     printf("approx = %.20f\n", fastSin(angle, 3));
     printf("look = %.20f\n", lookupSinInterpolate(angle));
-    printf("actual = %.20f\n", sin(angle));
+    printf("look = %.20f\n", lookupSin(angle));
     printf("\n");
 
     printf("COS\n");
+    printf("actual = %.20f\n", cos(angle));
     printf("approx = %.20f\n", fastCos(angle, 3));
     printf("look = %.20f\n", lookupCosInterpolate(angle));
-    printf("actual = %.20f\n", cos(angle));
+    printf("look = %.20f\n", lookupCos(angle));
 
 }
 
@@ -67,6 +71,8 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
     switch (degree) {
       case 2:
         return lookupSinInterpolate(angleRadians);
+      case 1:
+        return lookupSin(angleRadians);
       default:
         break;
     }
@@ -112,6 +118,8 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
     switch (degree) {
       case 2:
         return lookupCosInterpolate(angleRadians);
+      case 1:
+        return lookupCos(angleRadians);
       default:
         break;
     }
@@ -302,6 +310,66 @@ static double lookupCosInterpolate(const double x) {
   } else {
     currentValue = sineTable[128 - index]; 
   }
+
+  double returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
+  return negativeFactor ? -returnedValue : returnedValue;
+}
+
+static double lookupSin(const double x) {
+  
+  double scaledAngle = x * 20.371832715762602978 * 4;
+  int negativeFactor = 0;
+  if (scaledAngle < 0) {
+    negativeFactor = 1;
+    scaledAngle = -scaledAngle;
+  }
+
+  long roundedAngle = lroundf(scaledAngle);  // This should be the _only_ line of FP code
+  unsigned index = roundedAngle & (128 * 4 - 1);  // This & replaces fmod
+
+  // All following code is integer code.
+  //scaled_x += number_of_entries/4 ; // If we are doing cosine
+
+  if (index >= 256) {
+    index -= 256;
+    negativeFactor ^= 1;
+  }
+
+  if (index >= 128) {
+    index = 256 - index;
+  }
+
+  // extended for the multiplication that is about to occur and keep the precision
+  uint32_t currentValue = sineTable[index];
+  double returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
+  return negativeFactor ? -returnedValue : returnedValue;
+}
+
+static double lookupCos(const double x) {
+  //return lookupSinInterpolate(FAST_PI_DIV_2 - x);
+  double scaledAngle = x * 20.371832715762602978 * 4;
+  int negativeFactor = 0;
+  if (scaledAngle < 0) {
+    scaledAngle = -scaledAngle;
+  }
+
+  long roundedAngle = lroundf(scaledAngle);  // This should be the _only_ line of FP code
+
+  unsigned index = roundedAngle & (128 * 4 - 1);  // This & replaces fmod
+
+  if (index >= 256) {
+    index -= 256;
+    negativeFactor ^= 1;
+  }
+
+  if (index >= 128) {
+    index = 256 - index;
+    negativeFactor ^= 1;
+  }
+
+  // extended for the multiplication that is about to occur and keep the precision
+  uint32_t currentValue;
+  currentValue = sineTable[128 - index]; 
 
   double returnedValue = currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
