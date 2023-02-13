@@ -11,6 +11,24 @@
 #define FAST_PI_DIV_2 1.57079632679489661923 // pi / 2
 #define FAST_PI_DIV_4 0.78539816339744830962 // pi / 4
 #define FAST_PI_TIMES_2 6.28318530717958647692 // pi * 2
+
+
+#define QUADRANT_SIZE 128; // target size of the lookup table
+
+/** 
+ * The scaling factor to use the lookup table.
+ * The scaling factor should be adapted to the lookup table and the incoming angle.
+ * The scaling factor is computed by taking the total size of all quadrants, divided
+ * by the expected input.
+ * e.g 1:, if the sine lookup table is of size 128, and only represents the
+ * first quandrant, then the size of all quandrants is "128 * 4".
+ * If the input is expected to be in radians, then the scaling factor would
+ * be "128 * 4 / (2 * pi)"
+ * e.g 2:, if the sine lookup table is of size 128, and represents all four
+ * quadrants, then the size of all quandrants is "128".
+ * If the input is expected to be in radians, then the scaling factor would
+ * be "128 / (2 * pi)"
+*/
 #define FAST_LOOKUP_SCALE_FACTOR 81.4873308630504119136684 // 128 * 4 / (2 * pi)
 
 #ifdef __cplusplus
@@ -20,6 +38,8 @@ extern "C" {
 /**
  * Sine table used for sine and cosine approximation
  * This sine table only contains the first quadrant
+ * The size of this table is "QUADRANT_SIZE + 1"
+ * The "+ 1" allows for interpolation
 */
 static const uint16_t sineTable[129] = {
     0,  804, 1608, 2412, 3216, 4019, 4821, 5623,

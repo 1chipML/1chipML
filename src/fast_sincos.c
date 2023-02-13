@@ -216,6 +216,12 @@ static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, co
 
 // 20.371832715762602978 for 128 / 2pi
 // 40.74366543152520595683424342 for 256 / 2pi
+
+/**
+ * @brief Fast sine computation with lookup table, using interpolation
+ * @param angleRadians The angle, in radians.
+ * @return A sine approximation of the angle.
+*/
 static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians) {
   
   fast_sincos_real scaledAngle = angleRadians * FAST_LOOKUP_SCALE_FACTOR;
