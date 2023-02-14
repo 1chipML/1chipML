@@ -13,26 +13,6 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians);
 static inline double scaleValueToRadians16(const uint16_t value);
 static inline double scaleValueToRadians32(const uint32_t value);
 
-
-void test() {
-
-    fast_sincos_real angle = -20;
-    
-    printf("SIN\n");
-    printf("actual = %.20f\n", sin(angle));
-    printf("approx = %.20f\n", fastSin(angle, 3));
-    printf("look = %.20f\n", lookupSinInterpolate(angle));
-    printf("look = %.20f\n", lookupSin(angle));
-    printf("\n");
-
-    printf("COS\n");
-    printf("actual = %.20f\n", cos(angle));
-    printf("approx = %.20f\n", fastCos(angle, 3));
-    printf("look = %.20f\n", lookupCosInterpolate(angle));
-    printf("look = %.20f\n", lookupCos(angle));
-
-}
-
 /**
  * @brief Fast sine computation.
  * With degrees over 2, the Chebyshev approximation is used to compute the sine of the angle.
@@ -258,7 +238,7 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians
     currentValue = currentValue + (((sineTable[index + 1] - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
   }
 
-  fast_sincos_real returnedValue = scaleValueToRadians32(currentValue);//ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians32(currentValue);
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
@@ -306,10 +286,15 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
     currentValue = sineTable[QUADRANT_SIZE - index]; 
   }
   
-  fast_sincos_real returnedValue =  scaleValueToRadians32(currentValue);//ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians32(currentValue);
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
+/**
+ * @brief Fast sine computation with lookup table only
+ * @param angleRadians The angle, in radians.
+ * @return A sine approximation of the angle.
+*/
 static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
   
   fast_sincos_real scaledAngle = angleRadians * LOOKUP_SCALE_FACTOR;
@@ -333,10 +318,15 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
     index = QUADRANT_SIZE_2 - index;
   }
 
-  fast_sincos_real returnedValue = scaleValueToRadians16(sineTable[index]); //ldexpf(sineTable[index], LOOKUP_ELEMENTS_BITS_NEGATIVE);//sineTable[index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians16(sineTable[index]);
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
+/**
+ * @brief Fast cosine computation with lookup table only.
+ * @param angleRadians The angle, in radians.
+ * @return A cosine approximation of the angle.
+*/
 static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
   fast_sincos_real scaledAngle = angleRadians * LOOKUP_SCALE_FACTOR;
   int negativeFactor = 0;
@@ -359,7 +349,7 @@ static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
     negativeFactor ^= 1;
   }
 
-  fast_sincos_real returnedValue = scaleValueToRadians16(sineTable[QUADRANT_SIZE - index]); //ldexpf(sineTable[QUADRANT_SIZE - index] , LOOKUP_ELEMENTS_BITS_NEGATIVE);//sineTable[QUADRANT_SIZE - index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians16(sineTable[QUADRANT_SIZE - index]);
   return negativeFactor ? -returnedValue : returnedValue;
 }
 

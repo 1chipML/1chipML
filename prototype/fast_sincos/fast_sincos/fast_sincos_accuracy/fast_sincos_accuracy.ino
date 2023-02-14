@@ -1,6 +1,6 @@
 #include "fast_sincos.h"
 
-int degree = 3;
+int degree = 2;
 uint32_t start, stop;
 volatile float x;
 volatile int y;
