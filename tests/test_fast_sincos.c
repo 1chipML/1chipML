@@ -15,12 +15,14 @@ int main() {
     double multFactor = 0.1;
 
     printf("\n");
+    //getFastSinError(lowerBound, upperBound, step, multFactor, 0);
     getFastSinError(lowerBound, upperBound, step, multFactor, 1);
     getFastSinError(lowerBound, upperBound, step, multFactor, 2);
     getFastSinError(lowerBound, upperBound, step, multFactor, 3);
     getFastSinError(lowerBound, upperBound, step, multFactor, 5);
     getFastSinError(lowerBound, upperBound, step, multFactor, 7);
     printf("\n");
+    //getFastCosError(lowerBound, upperBound, step, multFactor, 0);
     getFastCosError(lowerBound, upperBound, step, multFactor, 1);
     getFastCosError(lowerBound, upperBound, step, multFactor, 2);
     getFastCosError(lowerBound, upperBound, step, multFactor, 3);

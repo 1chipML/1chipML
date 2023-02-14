@@ -10,6 +10,9 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians
 static fast_sincos_real lookupCos(const fast_sincos_real angleRadians);
 static fast_sincos_real lookupSin(const fast_sincos_real angleRadians);
 
+static inline double scaleValueToRadians16(const uint16_t value);
+static inline double scaleValueToRadians32(const uint32_t value);
+
 
 void test() {
 
@@ -255,15 +258,7 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians
     currentValue = currentValue + (((sineTable[index + 1] - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
   }
 
-  // Divide the current value by the maximum value of the elements
-  // in the lookup table, plus 1,
-  // which is (2^LOOKUP_ELEMENTS_BITS_NEGATIVE)
-  // The Actual division should be by the real maximum value of the 
-  // elements in the lookup table, but it is faster to
-  // divide by a power of 2. 
-  // The error is slightly increased because of this choice
-  // e.g.: Dividing by 65536 instead of 65535
-  fast_sincos_real returnedValue = ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians32(currentValue);//ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
@@ -310,16 +305,8 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
   } else {
     currentValue = sineTable[QUADRANT_SIZE - index]; 
   }
-
-  // Divide the current value by the maximum value of the elements
-  // in the lookup table, plus 1,
-  // which is (2^LOOKUP_ELEMENTS_BITS_NEGATIVE)
-  // The Actual division should be by the real maximum value of the 
-  // elements in the lookup table, but it is faster to
-  // divide by a power of 2. 
-  // The error is slightly increased because of this choice
-  // e.g.: Dividing by 65536 instead of 65535
-  fast_sincos_real returnedValue =  ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
+  
+  fast_sincos_real returnedValue =  scaleValueToRadians32(currentValue);//ldexpf(currentValue, LOOKUP_ELEMENTS_BITS_NEGATIVE);//currentValue * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
@@ -346,7 +333,7 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
     index = QUADRANT_SIZE_2 - index;
   }
 
-  fast_sincos_real returnedValue = sineTable[index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians16(sineTable[index]); //ldexpf(sineTable[index], LOOKUP_ELEMENTS_BITS_NEGATIVE);//sineTable[index] * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
@@ -372,7 +359,27 @@ static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
     negativeFactor ^= 1;
   }
 
-  // extended for the multiplication that is about to occur and keep the precision
-  fast_sincos_real returnedValue = sineTable[QUADRANT_SIZE - index] * 1.525902189669642175e-5; // divide by 65535
+  fast_sincos_real returnedValue = scaleValueToRadians16(sineTable[QUADRANT_SIZE - index]); //ldexpf(sineTable[QUADRANT_SIZE - index] , LOOKUP_ELEMENTS_BITS_NEGATIVE);//sineTable[QUADRANT_SIZE - index] * 1.525902189669642175e-5; // divide by 65535
   return negativeFactor ? -returnedValue : returnedValue;
+}
+
+/** 
+ * @brief Converts a value obtained from a lookup table to radians
+ * Divide the current value by the maximum value of the elements
+ * in the lookup table, plus 1,
+ * which is (2^LOOKUP_ELEMENTS_BITS_NEGATIVE).
+ * The Actual division should be by the real maximum value of the 
+ * elements in the lookup table, but it is faster to
+ * divide by a power of 2. 
+ * The error is slightly increased because of this choice
+ * e.g.: Dividing by 65536 instead of 65535
+ * @param value The value to scale.
+ * @return The scaled value, as a real number.
+ */ 
+static inline fast_sincos_real scaleValueToRadians16(const uint16_t value) {
+  return ldexpf(value, LOOKUP_ELEMENTS_BITS_NEGATIVE);
+}
+
+static inline fast_sincos_real scaleValueToRadians32(const uint32_t value) {
+  return ldexpf(value, LOOKUP_ELEMENTS_BITS_NEGATIVE);
 }
