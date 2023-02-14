@@ -23,7 +23,7 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, c
   }
 
   for (unsigned i = 0; i < length; ++i) {
-    dft_real exponentBase = thetaFactor * 2.0 * M_PI * (dft_real)i / (dft_real)length;
+    dft_real exponentBase = thetaFactor * 2.0 * M_PI * i / length;
     for (unsigned k = 0; k < length; ++k) {
       dft_real wCos = cos(k * exponentBase); // real part
       dft_real wSin = sin(k * exponentBase); // imaginary part

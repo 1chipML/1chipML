@@ -15,6 +15,7 @@ static void bitReversal(unsigned length, fft_real* realArray, fft_real* imaginar
   unsigned j = 0;
   for (unsigned i = 0; i < length - 1; ++i) {
     if (i < j) {
+      // swap variables
       fft_real tmpReal = realArray[i];
       fft_real tmpImaginary = imaginaryArray[i];
       realArray[i] = realArray[j];
