@@ -33,7 +33,7 @@
 #define QUADRANT_SIZE 128 // The size of a quadrant.
 #define QUADRANT_SIZE_MINUS_1 127 // QUADRANT_SIZE - 1.
 #define QUADRANT_SIZE_2 256 // QUADRANT_SIZE * 2.
-#define LOOKUP_INDEX_MASK 511 // QUADRANT_SIZE * 4 - 1.
+#define LOOKUP_INDEX_MASK 511 // QUADRANT_SIZE * 4 - 1. Used for a modulus of the calculated index
 #define LOOKUP_REMAINDER_SIZE 65536 // Max size + 1 of the remainder used for interpolation.
 #define LOOKUP_REMAINDER_BITS 16 // The number of bits allocated for the remainder
 #define LOOKUP_ELEMENTS_BITS_NEGATIVE -16 // Number of bits allocated for each element in the lookup table, times -1

@@ -1,0 +1,83 @@
+FASTSIN: Error with degree 1
+Average absolute error = 2.0248668516e-03
+Average relative error = 1.0107100156e-02
+Max absolute error = 5.8568010089e-03
+Max relative error = 2.7036166191e-01
+FASTSIN: Error with degree 2
+Average absolute error = 2.5130679404e-05
+Average relative error = 6.2333735292e-05
+Max absolute error = 4.8729162954e-05
+Max relative error = 8.3108179159e-04
+FASTSIN: Error with degree 3
+Average absolute error = 5.3689658263e-05
+Average relative error = 2.2533420855e-04
+Max absolute error = 1.5169426972e-04
+Max relative error = 9.6683568515e-04
+FASTSIN: Error with degree 5
+Average absolute error = 1.9886550610e-07
+Average relative error = 9.1135916865e-07
+Max absolute error = 5.6057287870e-07
+Max relative error = 4.9842992284e-06
+FASTSIN: Error with degree 7
+Average absolute error = 4.3011548927e-10
+Average relative error = 2.0849060225e-09
+Max absolute error = 1.2049006237e-09
+Max relative error = 1.3736857985e-08
+
+FASTCOS: Error with degree 1
+Average absolute error = 1.9021063494e-03
+Average relative error = 8.2173823408e-03
+Max absolute error = 5.7380252357e-03
+Max relative error = 1.5970773222e-01
+FASTCOS: Error with degree 2
+Average absolute error = 2.6110369525e-05
+Average relative error = 5.9604530329e-05
+Max absolute error = 4.6255164423e-05
+Max relative error = 1.1127538692e-03
+FASTCOS: Error with degree 3
+Average absolute error = 4.7834544385e-05
+Average relative error = 1.9984769564e-04
+Max absolute error = 1.5164125507e-04
+Max relative error = 9.6763159330e-04
+FASTCOS: Error with degree 5
+Average absolute error = 1.7553281036e-07
+Average relative error = 8.0927476587e-07
+Max absolute error = 5.6047696512e-07
+Max relative error = 4.9925872741e-06
+FASTCOS: Error with degree 7
+Average absolute error = 3.7919003390e-10
+Average relative error = 1.8593523423e-09
+Max absolute error = 1.2027996377e-09
+Max relative error = 1.3775154934e-08
+
+
+degree 1:
+08:45:15.668 -> SIN: 		252312 us
+08:45:15.734 -> FASTSIN: 	70372 us
+08:45:15.994 -> COS: 		251704 us
+08:45:16.092 -> FASTCOS: 	69956 us
+
+degree 2:
+08:46:01.226 -> SIN: 		252312 us
+08:46:01.358 -> FASTSIN: 	125572 us
+08:46:01.619 -> COS: 		251704 us
+08:46:01.751 -> FASTCOS: 	126400 us
+
+degree 3:
+08:46:31.792 -> SIN: 		252312 us
+08:46:31.956 -> FASTSIN: 	174508 us
+08:46:32.219 -> COS: 		251712 us
+08:46:32.416 -> FASTCOS: 	174580 us
+
+degree 5:
+08:46:56.467 -> SIN: 		252312 us
+08:46:56.698 -> FASTSIN: 	210632 us
+08:46:56.959 -> COS: 		251712 us
+08:46:57.189 -> FASTCOS: 	210676 us
+
+degree 7:
+08:47:21.208 -> SIN: 		252312 us
+08:47:21.471 -> FASTSIN: 	245700 us
+08:47:21.731 -> COS: 		251712 us
+08:47:21.962 -> FASTCOS: 	245732 us
+
