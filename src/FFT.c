@@ -9,7 +9,7 @@
  * @param realArray 1D array containing the real part of the incoming vector.
  * @param imaginaryArray 1D array containing the imaginary part of the incoming vector.
  */
-static void bitReversal(unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
+static void goldRaderBitReversal(unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
   
   const unsigned N2 = length >> 1;
   unsigned j = 0;
@@ -46,20 +46,17 @@ static inline int isPowerOfTwo(const unsigned value) {
  * vector. This array will contain the end result of the imaginary part of the
  * FFT
  * @param dir Direction of the FFT. 1 for the FFT, -1 for the inverse FFT
- * @return -1 if an error occured, 0 otherwise
+ * @return 1 if an error occured, 0 otherwise
  *
  */
 int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, const int dir) {
   if (!isPowerOfTwo(length) || realArray == NULL || imaginaryArray == NULL) {
-    return -1;
+    return 1;
   }
 
-  int thetaFactor = -1;
-  if (dir < 0) {
-    thetaFactor = 1;
-  }
+  int thetaFactor = dir < 0 ? 1 : -1;
 
-  bitReversal(length, realArray, imaginaryArray);
+  goldRaderBitReversal(length, realArray, imaginaryArray);
 
   unsigned depth = 1;
   for (unsigned n = 1; n < length; n <<= 1) { // for the levels

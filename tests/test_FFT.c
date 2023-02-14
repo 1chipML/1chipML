@@ -7,19 +7,19 @@
 static int compareFT(const unsigned length, fft_real* incomingReals, 
   fft_real* incomingImgs, fft_real* expectedReals, fft_real* expectedImgs) {
 
-  const fft_real epsilon = 1e-20;
+  const fft_real epsilon = 1e-10;
 
   for (unsigned i = 0; i < length; ++i) {
-    if (abs(incomingReals[i] - expectedReals[i]) > epsilon ||
-        abs(incomingImgs[i] - expectedImgs[i]) > epsilon) {
-      return -1;
+    if (fabs(incomingReals[i] - expectedReals[i]) > epsilon ||
+        fabs(incomingImgs[i] - expectedImgs[i]) > epsilon) {
+      return 1;
     }
   }
 
   return 0;
 }
 
-static void randomTestingFFT(const unsigned maxLengthPower) {
+static int randomTestingFFT(const unsigned maxLengthPower) {
 
   const unsigned length = (unsigned)pow(2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
 
@@ -55,14 +55,19 @@ static void randomTestingFFT(const unsigned maxLengthPower) {
   int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
   
   printf("Random testing FFT: is the FFT working as intended? ");
-  if (isSimilar == 0)
+  int returnCode = 0;
+  if (isSimilar == 0) {
     printf("true\n");
-  else
+    returnCode = 0;
+  }
+  else {
     printf("false\n");
-  
+    returnCode = 1;
+  }
+  return returnCode;
 }
 
-static void randomTestingFFTI(const unsigned maxLengthPower) {
+static int randomTestingFFTI(const unsigned maxLengthPower) {
 
   const unsigned length = (unsigned)pow(2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
 
@@ -85,14 +90,20 @@ static void randomTestingFFTI(const unsigned maxLengthPower) {
   int isSimilar = compareFT(length, reals, imgs, fftReals, fftImgs);
   
   printf("Random testing inverse FFT: is the FFT working as intended? ");
-  if (isSimilar == 0)
+  int returnCode = 0;
+  if (isSimilar == 0) {
     printf("true\n");
-  else
+    returnCode = 0;
+  }
+  else {
     printf("false\n");
+    returnCode = 1;
+  }
+  return returnCode;
   
 }
 
-static void knownTestingFFT(const unsigned length,
+static int knownTestingFFT(const unsigned length,
   fft_real* inputReals,
   fft_real* inputImaginaries,
   fft_real* expectedReals, 
@@ -103,14 +114,20 @@ static void knownTestingFFT(const unsigned length,
   int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
 
   printf("Known testing FFT: is the FFT working as intended? ");
-  if (isSimilar == 0)
+  int returnCode = 0;
+  if (isSimilar == 0) {
     printf("true\n");
-  else
+    returnCode = 0;
+  }
+  else {
     printf("false\n");
+    returnCode = 1;
+  }
+  return returnCode;
 
 }
 
-static void knownTestingFFTI(const unsigned length,
+static int knownTestingFFTI(const unsigned length,
   fft_real* inputReals,
   fft_real* inputImaginaries,
   fft_real* expectedReals, 
@@ -121,10 +138,16 @@ static void knownTestingFFTI(const unsigned length,
   int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
 
   printf("Known testing inverse FFT: is the FFT working as intended? ");
-  if (isSimilar == 0)
+  int returnCode = 0;
+  if (isSimilar == 0) {
     printf("true\n");
-  else
+    returnCode = 0;
+  }
+  else {
     printf("false\n");
+    returnCode = 1;
+  }
+  return returnCode;
 
 }
 
@@ -134,22 +157,24 @@ int main() {
   printf("seed used : %d\n", seed);
   set_linear_congruential_generator_seed(seed);
 
+  int returnCode = 0;
+
   const unsigned randomLengthPower = 8;
-  randomTestingFFT(randomLengthPower);
-  randomTestingFFTI(randomLengthPower);
+  returnCode |= randomTestingFFT(randomLengthPower);
+  returnCode |= randomTestingFFTI(randomLengthPower);
 
   const unsigned length = 4;
   fft_real FFTinputReals[] = {8, 4, 8, 0};
   fft_real FFTinputImgs[] = {0, 0, 0, 0};
   fft_real FFTexpectedReals[] = {20, 0, 12, 0};
   fft_real FFTexpectedImgs[] = {0, -4, 0, 4};
-  knownTestingFFT(length, FFTinputReals, FFTinputImgs, FFTexpectedReals, FFTexpectedImgs);
+  returnCode |= knownTestingFFT(length, FFTinputReals, FFTinputImgs, FFTexpectedReals, FFTexpectedImgs);
 
   fft_real FFTIinputReals[] = {20, 0, 12, 0};
   fft_real FFTIinputImgs[] = {0, -4, 0, 4};
   fft_real FFTIexpectedReals[] = {8, 4, 8, 0};
   fft_real FFTIexpectedImgs[] = {0, 0, 0, 0};
-  knownTestingFFTI(length, FFTIinputReals, FFTIinputImgs, FFTIexpectedReals, FFTIexpectedImgs);
+  returnCode |= knownTestingFFTI(length, FFTIinputReals, FFTIinputImgs, FFTIexpectedReals, FFTIexpectedImgs);
 
-  return 0;
+  return returnCode;
 }

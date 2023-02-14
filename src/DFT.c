@@ -14,13 +14,12 @@
  */
 void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, const int dir) {
 
-  dft_real* outputReals = calloc(length, sizeof(dft_real));
-  dft_real* outputImaginaries = calloc(length, sizeof(dft_real));
+  dft_real outputReals[length];
+  dft_real outputImaginaries[length];
+  memset(outputReals, 0, length * sizeof(dft_real));
+  memset(outputImaginaries, 0, length * sizeof(dft_real));
 
-  int thetaFactor = -1;
-  if (dir < 0) {
-    thetaFactor = 1;
-  }
+  int thetaFactor = dir < 0 ? 1 : -1;
 
   for (unsigned i = 0; i < length; ++i) {
     dft_real exponentBase = thetaFactor * 2.0 * M_PI * i / length;
@@ -44,7 +43,4 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, c
   // place result in arrays
   memcpy(realArray, outputReals, length * sizeof(dft_real));
   memcpy(imaginaryArray, outputImaginaries, length * sizeof(dft_real));
-
-  free(outputReals);
-  free(outputImaginaries);
 }
