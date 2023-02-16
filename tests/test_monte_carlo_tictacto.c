@@ -159,7 +159,18 @@ int main() {
         board.values[i] = 0;
     }
     board.nPlayers = 2;
-    board = monte_carlo(board, 1, is_valid_action, play_action, get_score, get_possible_actions, get_num_possible_actions, remove_action);
+
+    Game game = {
+        is_valid_action, 
+        play_action, 
+        get_score, 
+        get_possible_actions, 
+        get_num_possible_actions, 
+        remove_action,
+    };
+
+    board = mc_game(board, 1, game);
+    printf("Board with max UCB: [%d, %d, %d], [%d, %d, %d], [%d, %d, %d]\n", board.values[0], board.values[1], board.values[2], board.values[3], board.values[4], board.values[5], board.values[6], board.values[7], board.values[8]);
 
     free(board.values);
     return 0;
