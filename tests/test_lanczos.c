@@ -32,19 +32,12 @@ static int validateEigenValue(double* tMatrix, double eigenValue) {
   return 0;
 }
 
-int testLanczos() {
-  double initialMatrix[size][size] = {
-      {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}};
-  double tMatrix[nbIter][nbIter] = {{0.0, 0.0}, {0.0, 0.0}};
-  double vMatrix[nbIter][size] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
-  double initialVector[size] = {1.0, 2.0, 3.0};
-
-  lanczos(initialMatrix[0], size, nbIter, initialVector, tMatrix[0],
-          vMatrix[0]);
+int testLanczos(double* initialMatrix, double* tMatrix, double* vMatrix,
+                double* initialVector, double expectedEigenValue) {
+  lanczos(initialMatrix, size, nbIter, initialVector, tMatrix, vMatrix);
 
   // Eigenvalues were manually calculated for this test.
-  if(validateEigenValue(&tMatrix[0][0], 3.0) != 0)
-  {
+  if (validateEigenValue(tMatrix, expectedEigenValue) != 0) {
     return 1;
   }
 
@@ -58,7 +51,7 @@ int testLanczos() {
     double eigenVector[] = {2.44949, 1};
     double output[3];
     uint_least8_t dims[] = {size, nbIter, 1};
-    matrixMultiply(&vMatrix[0][0], eigenVector, dims, output);
+    matrixMultiply(vMatrix, eigenVector, dims, output);
     // Since the vector is (1, 1, 1) it's easy to validate
     // simply make sure that all the elements are the same
     for (int i = 0; i < size - 1; ++i) {
@@ -74,4 +67,13 @@ int testLanczos() {
   return 0;
 }
 
-int main() { return testLanczos(); }
+int main() {
+  double initialMatrix[size][size] = {
+      {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}};
+  double tMatrix[nbIter][nbIter] = {{0.0, 0.0}, {0.0, 0.0}};
+  double vMatrix[nbIter][size] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+  double initialVector[size] = {1.0, 2.0, 3.0};
+  const double expectedEigenValue = 3.0;
+
+  return testLanczos(initialMatrix[0], tMatrix[0], vMatrix[0], initialVector, expectedEigenValue);
+}
