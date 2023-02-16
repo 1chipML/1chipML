@@ -83,7 +83,7 @@ int mc_episode(Node* node, int player, Game game) {
 
     // If the player is losing on a terminal node, avoid parent
     if (!(node->children) && (game.getScore(&(node->state), player) <= 0)) {
-        node->parent->score = -__INT_MAX__;
+        node->parent->score = 0;
         return 0;
     }
 
@@ -101,7 +101,6 @@ int mc_episode(Node* node, int player, Game game) {
             // Remove action from possible actions
             nPossibleActions -= 2;
             game.removeAction(random_action_idx, possibleActions, nPossibleActions);
-            // printf("Board:\n[%d, %d, %d]\n[%d, %d, %d]\n[%d, %d, %d]\n", simulationBoard.values[0], simulationBoard.values[1],simulationBoard.values[2], simulationBoard.values[3], simulationBoard.values[4], simulationBoard.values[5], simulationBoard.values[6], simulationBoard.values[7], simulationBoard.values[8]);
             int score = game.getScore(&simulationBoard, player); // TODO add switch case
             if (score > 1) { // win
                 if (player == initialPlayer) {
@@ -130,8 +129,18 @@ void backpropagate(Node *node, int score) {
     }
 }
 
-Board mc_game(Board board, int player, Game game) {
-    Node* node = malloc(sizeof(Node));
+// TODO l'appliquer! 
+void free_mc_tree(Node* node)
+{
+    if (node == NULL) return;
+    for (int i = 0; i < node->nChildren; ++i) {
+        free_mc_tree((node->children) + i);
+    }
+    free(node);
+}
+
+Board mc_game(Board board, int player, Game game, int minSim, int maxSim, mc_real goalValue) {
+    Node *node = malloc(sizeof(Node));
     node->nVisits = 0;
     node->score = 0;
     node->state = board;
@@ -141,21 +150,17 @@ Board mc_game(Board board, int player, Game game) {
     set_linear_congruential_generator_seed(time(NULL));
 
     // TODO add params for mc_game
-    while (node->nVisits <= 9 || calc_UCB(find_max_UCB(node->children, node->nChildren)) < 3) { // TODO: add param for verif
+    while ((node->nVisits < minSim || calc_UCB(find_max_UCB(node->children, node->nChildren)) < goalValue) && node->nVisits < maxSim) {
         Node* selected_node = select_node(node);
-        printf("Selected node: [%d, %d, %d], [%d, %d, %d], [%d, %d, %d]\n", selected_node->state.values[0], selected_node->state.values[1], selected_node->state.values[2], selected_node->state.values[3], selected_node->state.values[4], selected_node->state.values[5], selected_node->state.values[6], selected_node->state.values[7], selected_node->state.values[8]);
         expand_leaf(selected_node, player, game);
         int score = mc_episode(selected_node, player, game);
-        printf("Score: %d\n", score);
         backpropagate(selected_node, score);
     }
 
-    for (int i = 0; i < node->nChildren; i++) {
-        mc_real ucb = calc_UCB((node->children) + i);
-        printf("Child %d: [%d, %d, %d], [%d, %d, %d], [%d, %d, %d]\n", i, ((node->children) + i)->state.values[0], ((node->children) + i)->state.values[1], ((node->children) + i)->state.values[2], ((node->children) + i)->state.values[3], ((node->children) + i)->state.values[4], ((node->children) + i)->state.values[5], ((node->children) + i)->state.values[6], ((node->children) + i)->state.values[7], ((node->children) + i)->state.values[8]);
-        printf("UCB: %f\n", ucb);
-    }
+    Board retBoard;
+    retBoard.values = malloc(9 * sizeof(int));
+    memcpy(retBoard.values, find_max_UCB(node->children, node->nChildren)->state.values, 9 * sizeof(int));
+    free(node);
 
-    printf("Size of node children: %d\n", sizeof(node->children));
-    return find_max_UCB(node->children, node->nChildren)->state;
+    return retBoard;
 }

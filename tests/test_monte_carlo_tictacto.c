@@ -169,7 +169,7 @@ int main() {
         remove_action,
     };
 
-    board = mc_game(board, 1, game);
+    board = mc_game(board, 1, game, 200, 10000, 3);
     printf("Board with max UCB: [%d, %d, %d], [%d, %d, %d], [%d, %d, %d]\n", board.values[0], board.values[1], board.values[2], board.values[3], board.values[4], board.values[5], board.values[6], board.values[7], board.values[8]);
 
     free(board.values);

@@ -52,7 +52,7 @@ Node* select_node(Node *node);
 void expand_leaf(Node* node, int player,  Game game);
 int mc_episode(Node* node, int player, Game game);
 void backpropagate(Node *node, int score);
-Board mc_game(Board board, int player, Game game); 
+Board mc_game(Board board, int player, Game game, int minSim, int maxSim, mc_real goalValue); 
 
 #ifdef __cplusplus
 }
