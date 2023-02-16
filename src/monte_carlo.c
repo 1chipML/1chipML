@@ -8,7 +8,7 @@
 
 mc_real calc_UCB(Node *node) {
     if(node->nVisits == 0) {
-        return __INT_MAX__; 
+        return UCB_MAX; 
     }
     return node->score / node->nVisits + sqrt(2 * log10(node->parent->nVisits) / node->nVisits);
 }
@@ -27,7 +27,7 @@ Node* select_node(Node *node) {
     Node *curr_node = node;
     while (curr_node->children) { 
         curr_node = find_max_UCB(curr_node->children, curr_node->nChildren);
-        if (calc_UCB(curr_node) == __INT_MAX__) {
+        if (calc_UCB(curr_node) == UCB_MAX) {
             return curr_node;
         }
     }
@@ -57,8 +57,8 @@ void expand_leaf(Node* node, int player, Game game) {
 
             // Deep copy of board
             Board board = game.playAction(node->state, possibleActions + i);
-            ((node->children) + nValidActions)->state.values = malloc(9 * sizeof(int));
-            memcpy(((node->children) + nValidActions)->state.values, board.values, 9 * sizeof(int));
+            ((node->children) + nValidActions)->state.values = malloc(game.getBoardSize() * sizeof(int));
+            memcpy(((node->children) + nValidActions)->state.values, board.values, game.getBoardSize() * sizeof(int));
             ((node->children) + nValidActions)->state.nPlayers = board.nPlayers;
             ((node->children) + nValidActions)->parent = node;
             ((node->children) + nValidActions)->children = NULL;
@@ -73,8 +73,8 @@ int mc_episode(Node* node, int player, Game game) {
     int initialPlayer = player;
     // Deep copy of board
     Board simulationBoard;
-    simulationBoard.values = malloc(9 * sizeof(int));
-    memcpy(simulationBoard.values, node->state.values, 9 * sizeof(int));
+    simulationBoard.values = malloc(game.getBoardSize() * sizeof(int));
+    memcpy(simulationBoard.values, node->state.values, game.getBoardSize() * sizeof(int));
     simulationBoard.nPlayers = node->state.nPlayers;
     
     int nPossibleActions = game.getNumPossibleActions(simulationBoard);
@@ -95,23 +95,26 @@ int mc_episode(Node* node, int player, Game game) {
             // Play action 
             // Deep copy of board 
             Board board = game.playAction(simulationBoard, &possibleActions[random_action_idx]);
-            memcpy(simulationBoard.values, board.values, 9 * sizeof(int));
+            memcpy(simulationBoard.values, board.values, game.getBoardSize() * sizeof(int));
             simulationBoard.nPlayers = board.nPlayers;
 
             // Remove action from possible actions
-            nPossibleActions -= 2;
+            nPossibleActions -= simulationBoard.nPlayers;
             game.removeAction(random_action_idx, possibleActions, nPossibleActions);
-            int score = game.getScore(&simulationBoard, player); // TODO add switch case
+            int score = game.getScore(&simulationBoard, player);
             if (score > 1) { // win
                 if (player == initialPlayer) {
+                    free(simulationBoard.values);
                     return 2;
                 } else {
+                    free(simulationBoard.values);
                     return 0;
                 }  
             }
             player = -(player);
         }        
     }
+    free(simulationBoard.values);
     return 1; // draw
 }
 
@@ -129,14 +132,16 @@ void backpropagate(Node *node, int score) {
     }
 }
 
-// TODO l'appliquer! 
 void free_mc_tree(Node* node)
 {
     if (node == NULL) return;
     for (int i = 0; i < node->nChildren; ++i) {
-        free_mc_tree((node->children) + i);
+        if ((node->children + i)->nChildren != 0) {
+            free_mc_tree(node->children + i);
+        } 
     }
-    free(node);
+    free(node->state.values);
+    free(node->children);
 }
 
 Board mc_game(Board board, int player, Game game, int minSim, int maxSim, mc_real goalValue) {
@@ -149,7 +154,6 @@ Board mc_game(Board board, int player, Game game, int minSim, int maxSim, mc_rea
     node->parent = NULL;
     set_linear_congruential_generator_seed(time(NULL));
 
-    // TODO add params for mc_game
     while ((node->nVisits < minSim || calc_UCB(find_max_UCB(node->children, node->nChildren)) < goalValue) && node->nVisits < maxSim) {
         Node* selected_node = select_node(node);
         expand_leaf(selected_node, player, game);
@@ -158,9 +162,9 @@ Board mc_game(Board board, int player, Game game, int minSim, int maxSim, mc_rea
     }
 
     Board retBoard;
-    retBoard.values = malloc(9 * sizeof(int));
-    memcpy(retBoard.values, find_max_UCB(node->children, node->nChildren)->state.values, 9 * sizeof(int));
+    retBoard.values = malloc(game.getBoardSize() * sizeof(int));
+    memcpy(retBoard.values, find_max_UCB(node->children, node->nChildren)->state.values, game.getBoardSize() * sizeof(int));
+    free_mc_tree(node);
     free(node);
-
     return retBoard;
 }

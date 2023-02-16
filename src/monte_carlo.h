@@ -5,6 +5,10 @@
     #define mc_real float
 #endif
 
+#ifndef M_PI
+    #define UCB_MAX 1000
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,6 +32,7 @@ typedef struct {
     void (*getPossibleActions)(Board, Action*);
     int (*getNumPossibleActions)(Board);
     void (*removeAction) (int, Action*, int);
+    int (*getBoardSize) (void);
 } Game;
 
 typedef struct Node {
@@ -45,6 +50,7 @@ typedef int (*getScoreType) (Board*, int);
 typedef void (*getPossibleActionsType)(Board, Action*);
 typedef int (*getNumPossibleActionsType)(void);
 typedef void (*removeActionType) (int, Action*, int);
+typedef int (*getBoardSize) (void);
 
 mc_real calc_UCB(Node* node);
 Node* find_max_UCB(Node *children, unsigned nChildren);

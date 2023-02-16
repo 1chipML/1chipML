@@ -52,6 +52,9 @@ int get_num_possible_actions(Board board) {
     return nActions * 2;
 } 
 
+int get_board_size() {
+    return 9;
+}
 /** 
  * If there is a line of X or O's 
  * 0 = loss
@@ -167,6 +170,7 @@ int main() {
         get_possible_actions, 
         get_num_possible_actions, 
         remove_action,
+        get_board_size,
     };
 
     board = mc_game(board, 1, game, 200, 10000, 3);

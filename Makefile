@@ -14,7 +14,7 @@ poly_interpolation:
 	$(CC) ./tests/test_poly_interpolation.c ./src/poly_interpolation.c -lm -Wall -std=c99 -I./src -o test_poly_interpolation.out
 
 monte_carlo:
-	$(CC) ./tests/test_monte_carlo_basic.c ./tests/test_monte_carlo_tictacto.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c -lm -Wall -std=c99 -I./src -o test_monte_carlo.out
+	$(CC) ./tests/test_monte_carlo_basic.c ./tests/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c -lm -Wall -std=c99 -I./src -o test_monte_carlo.out
 
 run_all_tests:
 	./test_linear_congruential_random_generator.out
