@@ -16,7 +16,6 @@ extern "C" {
 typedef struct {  
     int* values;
     int nPlayers;
-    int nMoves;
 } Board;
 
 typedef struct {

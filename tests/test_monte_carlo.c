@@ -102,7 +102,6 @@ int test_mc(int minSimulation, int maxSimulation, int targetScore) {
         board.values[i] = 0;
     }
     board.nPlayers = 2;
-    board.nMoves = 0;
 
     Game game = {
         is_valid_action, 

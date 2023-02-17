@@ -9,7 +9,7 @@ mc_real calc_UCB(Node *node) {
     if(node->nVisits == 0) {
         return UCB_MAX; 
     }
-    return node->score / node->nVisits + sqrt(2 * log10(node->parent->nVisits) / node->nVisits); // add + nMoves in division!
+    return node->score / node->nVisits + sqrt(2 * log10(node->parent->nVisits) / node->nVisits); 
 }
 
 Node* find_max_UCB(Node *children, unsigned nChildren) {
@@ -59,7 +59,6 @@ void expand_leaf(Node* node, int player, Game game) {
             ((node->children) + nValidActions)->state.values = malloc(game.getBoardSize() * sizeof(int));
             memcpy(((node->children) + nValidActions)->state.values, board.values, game.getBoardSize() * sizeof(int));
             ((node->children) + nValidActions)->state.nPlayers = board.nPlayers;
-            ((node->children) + nValidActions)->state.nMoves = ++board.nMoves;
             ((node->children) + nValidActions)->parent = node;
             ((node->children) + nValidActions)->children = NULL;
             ((node->children) + nValidActions)->nChildren = 0;
