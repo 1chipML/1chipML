@@ -2,7 +2,6 @@
 #include "linear_congruential_random_generator.h"
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <time.h>
 
@@ -10,7 +9,7 @@ mc_real calc_UCB(Node *node) {
     if(node->nVisits == 0) {
         return UCB_MAX; 
     }
-    return node->score / node->nVisits + sqrt(2 * log10(node->parent->nVisits) / node->nVisits);
+    return node->score / node->nVisits + sqrt(2 * log10(node->parent->nVisits) / node->nVisits); // add + nMoves in division!
 }
 
 Node* find_max_UCB(Node *children, unsigned nChildren) {
@@ -60,6 +59,7 @@ void expand_leaf(Node* node, int player, Game game) {
             ((node->children) + nValidActions)->state.values = malloc(game.getBoardSize() * sizeof(int));
             memcpy(((node->children) + nValidActions)->state.values, board.values, game.getBoardSize() * sizeof(int));
             ((node->children) + nValidActions)->state.nPlayers = board.nPlayers;
+            ((node->children) + nValidActions)->state.nMoves = ++board.nMoves;
             ((node->children) + nValidActions)->parent = node;
             ((node->children) + nValidActions)->children = NULL;
             ((node->children) + nValidActions)->nChildren = 0;
@@ -154,11 +154,13 @@ Board mc_game(Board board, int player, Game game, int minSim, int maxSim, mc_rea
     node->parent = NULL;
     set_linear_congruential_generator_seed(time(NULL));
 
+    int iterations = 0;
     while ((node->nVisits < minSim || calc_UCB(find_max_UCB(node->children, node->nChildren)) < goalValue) && node->nVisits < maxSim) {
         Node* selected_node = select_node(node);
         expand_leaf(selected_node, player, game);
         int score = mc_episode(selected_node, player, game);
         backpropagate(selected_node, score);
+        iterations++;
     }
 
     Board retBoard;

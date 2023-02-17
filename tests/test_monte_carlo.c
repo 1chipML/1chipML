@@ -93,75 +93,16 @@ void remove_action(int randomActionIdx, Action* possibleActions, int nPossibleAc
     }
 }
 
-int test_play_action() {
-    Board board;
-    board.values = malloc(9 * sizeof(int));
-    Action action;
-    action.x_pos = 0;
-    action.y_pos = 1;
-    action.player = 1;
-    board = play_action(board, &action);
-    // TODO Assert if it is correct or not! 
-    printf("Board: %d, %d, %d, %d, %d, %d, %d, %d, %d\n", board.values[0], board.values[1], board.values[2], board.values[3], board.values[4], board.values[5],board.values[6], board.values[7], board.values[8]);
-    return 0;
-}
-
-int test_is_valid_action() {
-    Board board;
-    board.values = malloc(9 * sizeof(int));
-    Action action;
-    action.x_pos = 0;
-    action.y_pos = 1;
-    action.player = 1;
-    char valid = is_valid_action(&board, &action, 1);
-    printf("Valid?: %d\n", valid);
-    if (valid == 0) {
-        return 0;
-    }
-    return -1;
-}
-
-int test_get_possible_actions() {
-    Board board;
-    board.values = malloc(9 * sizeof(int));
-    board.nPlayers = 2;
-    int nPossibleActions = 0;
-
-    Action* actions = malloc(18 * sizeof(Action));
-    get_possible_actions(board, actions);
-
-    // TODO assert if correct or not
-    printf("Number of possible actions: %d\n", nPossibleActions);
-    for (int i = 0; i < 18; ++i) {
-        printf("Action: [%d,%d], player %d\n", actions->x_pos, actions->y_pos, actions->player);  
-        actions++; 
-    }
-    
-    return 0;
-}
-
-int test_get_score() {
+int test_mc(int minSimulation, int maxSimulation, int targetScore) {
     Board board;
     board.values = malloc(9 * sizeof(int));
     board.values[0] = 1;
     board.values[1] = 1;
-    board.values[2] = 1;
-    board.nPlayers = 2;
-    int score = get_score(&board, 1);
-
-    // TODO assert if correct or not
-    printf("Score %d\n", score);
-    free(board.values);
-    return 0;
-}
-
-int main() {
-    Board board;
-    board.values = malloc(9 * sizeof(int));
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 2; i < 9; ++i) {
         board.values[i] = 0;
     }
     board.nPlayers = 2;
+    board.nMoves = 0;
 
     Game game = {
         is_valid_action, 
@@ -173,9 +114,17 @@ int main() {
         get_board_size,
     };
 
-    board = mc_game(board, 1, game, 200, 10000, 3);
-    printf("Board with max UCB: [%d, %d, %d], [%d, %d, %d], [%d, %d, %d]\n", board.values[0], board.values[1], board.values[2], board.values[3], board.values[4], board.values[5], board.values[6], board.values[7], board.values[8]);
+    board = mc_game(board, 1, game, minSimulation, maxSimulation, targetScore);
+    if (board.values[2] == 1) {
+        free(board.values);
+        printf("Success : %s()\n", __func__);
+        return 0;
+    } else {
+        printf("Fail : %s(), expected best action to be: [%d, %d, %d] [%d, %d, %d] [%d, %d, %d]\n", __func__, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+        return 1;
+    }
+}
 
-    free(board.values);
-    return 0;
+int main() {
+    test_mc(9, 50, 4);
 }
