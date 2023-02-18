@@ -36,7 +36,8 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
                     unsigned int* secondParentIndex) {
 
   float chosenIndexes[populationSize];
-  float bestFitness, secondbestFitness = 0;
+  float bestFitness = 0;
+  float secondbestFitness = 0;
 
   for (unsigned int i = 0; i < tournamentSelectionsSize; i++) {
 
@@ -60,7 +61,7 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
 
     const float fitness = populationStrength[index];
 
-    if (!i || (isAlreadyChosen && bestFitness > fitness)) {
+    if (i == 0 || (isAlreadyChosen && bestFitness > fitness)) {
 
       *secondParentIndex = *firstParentIndex;
 
@@ -417,7 +418,7 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
   if (tournamentSelectionsSize > populationSize)
     exit(1);
 
-  float bestFit = UINT16_MAX;
+  float bestFit = FLT_MAX;
 
   const unsigned int arraySize = populationSize * dimensions;
 
@@ -428,7 +429,7 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
   uint16_t bestValues[dimensions];
 
   uint16_t secondBestValues[dimensions];
-  float secondBestFitness = UINT16_MAX;
+  float secondBestFitness = FLT_MAX;
 
   fillTable(population);
 

@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include <float.h>
 
 // This variable decides the maxixmum amount of generations that can be created
 unsigned int numberOfGenerations;
