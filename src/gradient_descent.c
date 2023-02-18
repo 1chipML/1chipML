@@ -1,14 +1,15 @@
 #include <gradient_descent.h>
 
-double linmin(double point[], double gradient[], int n, function func);
-double brent(MinBracket bracket, double (*func)(double x, struct f1DimParam), double tol, double* xmin, struct f1DimParam param);
-MinBracket mnbrak(MinBracket bracket, double (*func)(double x, struct f1DimParam), struct f1DimParam param);
-double f1dim(double x, struct f1DimParam param);
+double lineSearch(double point[], double gradient[], int n, function func, double tol);
+double brent(double* xmin, Bracket bracket, f1dimension func, function f, double initialPoint[], double direction[], int n, double tol);
+Bracket bracketMinimum(f1dimension func, function f, double initialPoint[], double direction[], int n);
+double oneDimension(function func, double x, double initialPoint[], double direction[], int n);
 
 // TODO - Calculate finite difference with 2 orders and let user specify it
 // TODO - Give option of 1st order or second order (if not in loop)
+// TODO - ITMAX parameter
 
-double gradient_descent(function func, derivative dfunc, double guess[], int n) {
+double gradient_descent(function func, derivative dfunc, double guess[], int n, double tol) {
     // Gradient of the function
     double *gradient = malloc(n * sizeof(double));
     double *nextGradient = malloc(n * sizeof(double));
@@ -30,13 +31,13 @@ double gradient_descent(function func, derivative dfunc, double guess[], int n) 
         conjugate[i] = temp;
     }
 
-    for (int its = 0; its <= ITMAX; its++) { // TODO - ITMAX parameter
+    for (int its = 0; its < ITMAX; its++) {
         // Moves the guess to the minimum along the conjugate gradient direction
         // Obtain the value of the function at that minimum
-        double min = linmin(guess, conjugate, n, func);
+        double min = lineSearch(guess, conjugate, n, func, tol);
 
         // Checks if we have reached a minimum
-        if (2.0*fabs(min - value) <= TOL*(fabs(min)+fabs(value)+EPS)) { // TODO - Tolerance defined by user EPS
+        if (2.0*fabs(min - value) <= tol*(fabs(min)+fabs(value)+EPS)) {
             return min;
         }
 
@@ -46,19 +47,22 @@ double gradient_descent(function func, derivative dfunc, double guess[], int n) 
         // Compute the gradient at the new guess point
         (*dfunc)(guess,nextGradient);
 
-        // Compute the adjustment factor gamma for the new conjugate
+        // Compute the adjustment factor for the new conjugate
         double dgg = 0.0;
         double gg = 0.0;
         for (int i = 0; i < n; i++) {
             gg += gradient[i]*gradient[i];
             dgg += (nextGradient[i]+gradient[i])*nextGradient[i];
         }
-        double gamma = dgg / (gg + EPS); // Add small epsilon to prevent division by 0
+        if (gg == 0.0) {
+            gg = EPS;  // Prevent division by 0
+        }
+        double adjustement = dgg / gg;
 
         // Set the new conjugate and gradient for the next iteration
         for (int i = 0; i < n; i++) {
             gradient[i] = -nextGradient[i];
-            conjugate[i] = gradient[i] + gamma * conjugate[i];
+            conjugate[i] = gradient[i] + adjustement * conjugate[i];
         }
     }
     
@@ -66,180 +70,250 @@ double gradient_descent(function func, derivative dfunc, double guess[], int n) 
     return 0.0;
 }
 
-double linmin(double point[], double direction[], int n, function func) {
-    double xmin,ret;
+double lineSearch(double point[], double direction[], int n, function func, double tol) {
 
-    struct f1DimParam param;
-    param.ncom = n;
-    param.xicom = malloc(n * sizeof(double));
-    param.pcom = malloc(n * sizeof(double));
-    param.nrfunc = func;
-    for (int i = 0; i <= n; i++) {
-        param.pcom[i] = point[i];
-        param.xicom[i] = direction[i];
-    }
+    // Initially bracket the minimum between 3 points
+    Bracket bracket = bracketMinimum(oneDimension, func, point, direction, n);
 
-    MinBracket bracket = {0.0, 1.0, 0.0};
-    bracket = mnbrak(bracket, f1dim, param);
-    ret = brent(bracket, f1dim, TOL, &xmin, param);
+    // Find the minimum on the line given by the direction vector
+    double xmin = 0.0;
+    double value = brent(&xmin, bracket, oneDimension, func, point, direction, n, tol);
 
+    // Move point to the minimum
     for (int i = 0; i < n; i++) {
         point[i] += direction[i] * xmin;
     }
 
-    free(param.xicom);
-    free(param.pcom);
-
-    return ret;
+    return value;
 }
 
-double brent(MinBracket bracket, double (*func)(double x, struct f1DimParam), double tol, double* xmin, struct f1DimParam param) {
-    int iter;
-    double a,b,d,etemp,fu,fv,fw,fx,p,q,r,tol1,tol2,u,v,w,x,xm;
-    double e=0.0;
+// Determines the minimum from an initial bracket
+// Uses a mix of parabolic interpolation and bisection
+double brent(double* xmin, Bracket bracket, f1dimension func, function f, double initialPoint[], double direction[], int n, double tol) {
+    double d,etemp,xm;
+    double e = 0.0;
 
-    a=(bracket.a < bracket.c ? bracket.a : bracket.c);
-    b=(bracket.a > bracket.c ? bracket.a : bracket.c);
-    x=w=v=bracket.b;
-    fw=fv=fx=(*func)(x, param);
+    double a = (bracket.a < bracket.c ? bracket.a : bracket.c);
+    double b = (bracket.a > bracket.c ? bracket.a : bracket.c);
 
-    for (iter=1;iter<=ITMAX;iter++) {
-        xm=0.5*(a+b);
-        tol2=2.0*(tol1=tol*fabs(x)+ZEPS);
+    double x, v, w;
+    x = v = w = bracket.b;
 
-        if (fabs(x-xm) <= (tol2-0.5*(b-a))) {
-            *xmin=x;
+    double fx, fv, fw;
+    fx = fv = fw = (*func)(f, x, initialPoint, direction, n);
+
+    for (int iter = 0 ; iter < ITMAX; iter++) {
+        xm = 0.5 * (a + b);
+        double tol1 = tol * fabs(x) + EPS;
+        double tol2 = 2.0 * tol1;
+        
+        // Checks if we found the minimum with enough precision
+        if (fabs(x - xm) <= (tol2 - 0.5 * (b - a))) {
+            *xmin = x;
             return fx;
         }
 
         if (fabs(e) > tol1) {
-            r=(x-w)*(fx-fv);
-            q=(x-v)*(fx-fw);
-            p=(x-v)*q-(x-w)*r;
-            q=2.0*(q-r);
-            if (q > 0.0) p = -p;
-            q=fabs(q);
-            etemp=e;
-            e=d;
-            if (fabs(p) >= fabs(0.5*q*etemp) || p <= q*(a-x) || p >= q*(b-x)) {
-                d=CGOLD*(e=(x >= xm ? a-x : b-x));
+            // Construct trial parabolic fit
+            double r = (x - w) * (fx - fv);
+            double q = (x - v) * (fx - fw);
+            double p = (x - v) * q - (x - w) * r;
+            q = 2.0 * (q - r);
+            
+            if (q > 0.0) {
+                p = -p;
+            }
+
+            q = fabs(q);
+
+            etemp = e;
+            e = d;
+            if (fabs(p) >= fabs(0.5 * q * etemp) || p <= q * (a - x) || p >= q * (b - x)) {
+                e = x >= xm ? a-x : b-x;
+                d = CGOLD * e;
             } 
             else {
-                d=p/q;
-                u=x+d;
-                if (u-a < tol2 || b-u < tol2)
-                    d=SIGN(tol1,xm-x);
+                d = p / q;
+                double u = x + d;
+                if (u - a < tol2 || b - u < tol2)
+                    d = SIGN(tol1,xm - x);
             }
         }
         else {
-            d=CGOLD*(e=(x >= xm ? a-x : b-x));
+            e = x >= xm ? a - x : b - x;
+            d = CGOLD * e;
         }
 
-        u=(fabs(d) >= tol1 ? x+d : x+SIGN(tol1,d));
-        fu=(*func)(u, param);
+        double u = fabs(d) >= tol1 ? x + d : x + SIGN(tol1,d);
+        double fu = (*func)(f, u, initialPoint, direction, n);
 
         if (fu <= fx) {
-            if (u >= x) a=x; else b=x;
-            SHFT(v,w,x,u);
-            SHFT(fv,fw,fx,fu);
+            if (u >= x) {
+                a = x;
+            } 
+            else {
+                b = x;
+            }
+
+            v = w;
+            w = x;
+            x = u;
+
+            fv = fw;
+            fw = fx;
+            fx = fu;
         }
         else {
-            if (u < x) a=u; else b=u;
+            if (u < x) {
+                a=u;
+            } 
+            else {
+                b=u;
+            }
             if (fu <= fw || w == x) {
-                v=w;
-                w=u;
-                fv=fw;
-                fw=fu;
+                v = w;
+                w = u;
+                fv = fw;
+                fw = fu;
             } else if (fu <= fv || v == x || v == w) {
-                v=u;
-                fv=fu;
+                v = u;
+                fv = fu;
             }
         }
     }
+
     // We should not reach this point to many iterations
     *xmin=x;
     return fx;
 }
 
-// Brackets the minimum between 3 points (ax, bx, cx)
-// ax and bx are the initial points
-MinBracket mnbrak(MinBracket bracket, double (*func)(double x, struct f1DimParam), struct f1DimParam param) {
-    double ulim, u, r, q, fu, dum, fa, fb, fc;
+// Initially brackets the minimum between 3 points (a, b, c)
+// Uses parabolic interpolation to find the bracket
+Bracket bracketMinimum(f1dimension func, function f, double initialPoint[], double direction[], int n) {
+    // Set a, b and c at arbitrary initial values
+    Bracket bracket = {0.0, 1.0, 0.0};
 
     // Evaluate function at initial points a and b
-    fa = (*func)(bracket.a, param);
-    fb = (*func)(bracket.b, param);
+    double fa = (*func)(f, bracket.a, initialPoint, direction, n);
+    double fb = (*func)(f, bracket.b, initialPoint, direction, n);
 
     // We want to go downhill from a to b to bracket the minimum 
-    // so if fb > fa we need to switch them
+    // so if fb > fa we need to swap them
     if (fb > fa) {
-        SHFT(dum, bracket.a, bracket.b, dum);
-        SHFT(dum, fb, fa, dum);
+        double temp = bracket.a;
+        bracket.a = bracket.b;
+        bracket.b = temp;
+
+        temp = fa;
+        fa = fb;
+        fb = fa;
     }
 
     // Initial guess for c
     bracket.c = (bracket.b) + GOLD * (bracket.b - bracket.a);
-    fc = (*func)(bracket.c, param);
+    double fc = (*func)(f, bracket.c, initialPoint, direction, n);
 
     // Loop until we bracket the minimum 
     while (fb > fc) {
-        // Parabolic interpolation for u
-        r = (bracket.b - bracket.a) * (fb - fc);
-        q = (bracket.b - bracket.c) * (fb - fa);
-        // TODO - find simpler way to prevent division by 0
-        u = (bracket.b) - ((bracket.b - bracket.c) * q - (bracket.b - bracket.a) * r) / (2.0 * SIGN(FMAX(fabs(q - r), TINY), q - r)); //TODO replace TINY by epsilon
+        // Compute u the inflexion point of the parabola defined by 
+        // points a, b and c
+        double r = (bracket.b - bracket.a) * (fb - fc);
+        double q = (bracket.b - bracket.c) * (fb - fa);
+        double diff = q - r;
+        if (diff == 0) {
+            diff = EPS; // Prevent division by 0
+        }
+        double inflexion = (bracket.b) - ((bracket.b - bracket.c) * q - (bracket.b - bracket.a) * r) / (2.0 * diff);
+            
+        // Value of function at inflexion point
+        double fInflexion;
 
-        ulim = (bracket.b) + GLIMIT * (bracket.c - bracket.b);
-        if ((bracket.b - u) * (u - bracket.c) > 0.0) {
-            fu = (*func)(u, param);
-            if (fu < fc) {
-                bracket.a = (bracket.b);
-                bracket.b = u;
-                fa = (fb);
-                fb = fu;
+        // Set a maximum distance for where we will look for a minimum
+        double ulim = (bracket.b) + GLIMIT * (bracket.c - bracket.b);
+
+        // Check if u is between b and c
+        if ((bracket.b - inflexion) * (inflexion - bracket.c) > 0.0) {
+
+            // Compute function value at u
+            fInflexion = (*func)(f, inflexion, initialPoint, direction, n);
+
+            // Check if we have a minimum between b and c
+            if (fInflexion < fc) {
+                bracket.a = bracket.b;
+                bracket.b = inflexion;
                 return bracket;
             }
-            else if (fu > fb) {
-                bracket.c = u;
-                fc = fu;
+
+            // Check if we have a minimum between a and u
+            else if (fInflexion > fb) {
+                bracket.c = inflexion;
                 return bracket;
             }
-            u = (bracket.c) + GOLD * (bracket.c - bracket.b);
-            fu = (*func)(u, param); 
+
+            // Our parabolic interpolation was not useful
+            // Magnify u and proceed to the next iteration
+            inflexion = (bracket.c) + GOLD * (bracket.c - bracket.b);
+            fInflexion = (*func)(f, inflexion, initialPoint, direction, n); 
         }
-        else if ((bracket.c - u) * (u - ulim) > 0.0) {
-            fu=(*func)(u, param);
-            if (fu < fc) {
-                SHFT(bracket.b, bracket.c, u, bracket.c + GOLD * (bracket.c - bracket.b));
-                SHFT(fb, fc, fu, (*func)(u, param));
+
+        // Check if u is between c and the limit
+        else if ((bracket.c - inflexion) * (inflexion - ulim) > 0.0) {
+
+            // Compute function value at u
+            fInflexion=(*func)(f, inflexion, initialPoint, direction, n);
+
+            // Check if we need to continue looking after u
+            if (fInflexion < fc) {
+                // Magnify u and proceed to the next iteration
+                bracket.b = bracket.c;
+                bracket.c = inflexion;
+                inflexion = bracket.c + GOLD * (bracket.c - bracket.b);
+                
+                fb = fc;
+                fc = fInflexion;
+                fInflexion = (*func)(f, inflexion, initialPoint, direction, n);
             }
         }
-        else if ((u - ulim) * (ulim - bracket.c) >= 0.0) {
-            u = ulim;
-            fu = (*func)(u, param);
+
+        // If inflexion point is further than the limit
+        else if ((inflexion - ulim) * (ulim - bracket.c) >= 0.0) {
+            inflexion = ulim;
+            fInflexion = (*func)(f, inflexion, initialPoint, direction, n);
         }
+
+        // Reject parabolic interpolation
+        // Magnify and proceed to next iteration
         else {
-            u = (bracket.c) + GOLD * (bracket.c - bracket.b);
-            fu = (*func)(u, param);
+            inflexion = (bracket.c) + GOLD * (bracket.c - bracket.b);
+            fInflexion = (*func)(f, inflexion, initialPoint, direction, n);
         }
 
-        SHFT(bracket.a, bracket.b, bracket.c, u);
-        SHFT(fa, fb, fc, fu);
+        // Eliminate oldest point and continue
+        bracket.a = bracket.b;
+        bracket.b = bracket.c;
+        bracket.c = inflexion;
+
+        fa = fb;
+        fb = fc;
+        fc = fInflexion;
     }
 
     return bracket;
 }
 
-double f1dim(double x, struct f1DimParam param) {
-    double* xt = malloc(param.ncom * sizeof(double));
+// Transforms function into a one dimentsion function from the initialPoint along the given direction
+double oneDimension(function func, double x, double initialPoint[], double direction[], int n) {
+    double* point = malloc(n * sizeof(double));
 
-    for (int i = 0; i < param.ncom; i++) {
-        xt[i] = param.pcom[i] + x * param.xicom[i];
+    // Compute new point when moving by x in the given direction
+    for (int i = 0; i < n; i++) {
+        point[i] = initialPoint[i] + x * direction[i];
     }
 
-    double f = (*(param.nrfunc))(xt);
+    // Compute function value at new point
+    double value = (*func)(point);
 
-    free(xt);
+    free(point);
     
-    return f;
+    return value;
 }

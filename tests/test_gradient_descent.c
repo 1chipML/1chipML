@@ -3,6 +3,8 @@
 
 #include "../src/1chipml.h"
 
+#define TOL 2.0e-4
+
 // Function (x)^4 + (y)^4 - x + y^3
 double func(double* p) {
     return pow(p[0], 4) + pow(p[1], 4) - p[0] + pow(p[1], 3);
@@ -18,7 +20,7 @@ int main() {
     double min = 0;
     double p[2] = {0, -0.2};
 
-    min = gradient_descent(func, dfunc, p, 2);
+    min = gradient_descent(func, dfunc, p, 2, TOL);
     
     printf("Minimizing function: (x)^4 + (y)^4 - x + y^3\n");
     printf("The minimum of the function is %f\n", min);
