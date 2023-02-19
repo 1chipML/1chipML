@@ -70,7 +70,7 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
       continue;
     }
 
-    if (isNotAlreadyChosen && bestFitness > fitness){
+    if (isNotAlreadyChosen && bestFitness > fitness) {
 
       *secondParentIndex = *firstParentIndex;
       secondbestFitness = bestFitness;
@@ -131,7 +131,7 @@ static void decodeAndAddChild(uint16_t* nextGeneration,
   char parameter[UINT16_DIGIT_COUNT + 1];
   parameter[UINT16_DIGIT_COUNT] = '\0';
 
-  unsigned int basePositionning = *(nextGenerationSize)*dimensions;
+  unsigned int basePositionning = *nextGenerationSize * dimensions;
 
   for (unsigned int i = 0; i < dimensions; i++) {
 
@@ -142,7 +142,7 @@ static void decodeAndAddChild(uint16_t* nextGeneration,
 
     dimensionIndex += UINT16_DIGIT_COUNT;
 
-    unsigned int value = atoi(parameter);
+    uint32_t value = atoi(parameter);
 
     if (value > UINT16_MAX) {
       value = UINT16_MAX;
@@ -333,7 +333,7 @@ static void calculateFitness(uint16_t* population, float* populationFitness,
     const unsigned int baseIndex = i * dimensions;
 
     for (unsigned int j = 0; j < dimensions; j++) {
-      parameters[j] = ((float)population[baseIndex + j] * UINT16_MAX_INVERSE);
+      parameters[j] = population[baseIndex + j] * UINT16_MAX_INVERSE;
     }
 
     const float fitness = evaluationFunction(parameters);
