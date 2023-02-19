@@ -185,7 +185,7 @@ static void createChildren(char* firstParent, char* secondParent,
   firstChildString[arraySize] = '\0';
   secondChildString[arraySize] = '\0';
 
-  for (unsigned int i = 0; i < (UINT16_DIGIT_COUNT * dimensions); i++) {
+  for (unsigned int i = 0; i < arraySize; i++) {
 
     if (linear_congruential_random_generator() <= 0.5) {
 
@@ -239,10 +239,8 @@ static void encode(char* combinedValue, uint16_t* parent) {
 
     sprintf(stringValue, "%hu", parent[i]);
 
-    if (otherStringLength != 0) {
-      for (unsigned int j = 0; j < otherStringLength; j++) {
-        combinedValue[j + arrIndex] = otherString[j];
-      }
+    for (unsigned int j = 0; j < otherStringLength; j++) {
+      combinedValue[j + arrIndex] = otherString[j];
     }
 
     for (unsigned int j = otherStringLength; j < UINT16_DIGIT_COUNT; j++) {
