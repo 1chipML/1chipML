@@ -44,8 +44,8 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
                     unsigned int* secondParentIndex) {
 
   float chosenIndexes[tournamentSelectionsSize];
-  float bestFitness = 0;
-  float secondbestFitness = 0;
+  float bestFitness = FLT_MAX;
+  float secondbestFitness = FLT_MAX;
 
   for (unsigned int i = 0; i < tournamentSelectionsSize; i++) {
 
@@ -70,14 +70,14 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
       continue;
     }
 
-    if (i == 0 || (isNotAlreadyChosen && bestFitness > fitness)) {
+    if (isNotAlreadyChosen && bestFitness > fitness){
 
       *secondParentIndex = *firstParentIndex;
       secondbestFitness = bestFitness;
       *firstParentIndex = index;
       bestFitness = fitness;
 
-    } else if (i == 1 || secondbestFitness > fitness) {
+    } else if (secondbestFitness > fitness) {
       *secondParentIndex = index;
       secondbestFitness = fitness;
     }
