@@ -6,6 +6,14 @@
 #define UINT16_DIGIT_COUNT 5
 
 /**
+ * Converts an unsigned integer digit to a char of the same number
+ *
+ * @param value A one digit positive integer
+ * @return char
+ */
+static inline char intDigitToChar(unsigned int value) { return value + '0'; }
+
+/**
  * This method initialises the array with random unsigned integers between 0 and
  * UINT16_MAX
  *
@@ -36,41 +44,40 @@ static void tourney(uint16_t* population, unsigned int* firstParentIndex,
                     unsigned int* secondParentIndex,
                     float (*evaluationFunction)(float*)) {
 
-  float chosenIndexes[populationSize];
+  float chosenIndexes[tournamentSelectionsSize];
   float bestFitness = 0;
   float secondbestFitness = 0;
 
   for (unsigned int i = 0; i < tournamentSelectionsSize; i++) {
 
     unsigned int index =
-        (unsigned int)(linear_congruential_random_generator() * populationSize);
-    int isAlreadyChosen = 1;
+        linear_congruential_random_generator() * populationSize;
+    uint8_t isNotAlreadyChosen = 1;
 
-    chosenIndexes[i] = index;
-    float parameters[dimensions];
+    for (unsigned int j = 0; j < i; j++) {
 
-    if (i != 0) {
-
-      for (unsigned int j = 0; j < i; j++) {
-
-        if (chosenIndexes[j] == index) {
-          i--;
-          isAlreadyChosen = 0;
-          break;
-        }
+      if (chosenIndexes[j] == index) {
+        i--;
+        isNotAlreadyChosen = 0;
+        break;
       }
     }
-    unsigned int populationIndex = index * dimensions;
-    unsigned int limit = populationIndex + dimensions;
 
-    for (unsigned int j = populationIndex; j < limit; j++) {
-      parameters[j - populationIndex] =
-          ((float)population[j] * UINT16_MAX_INVERSE);
+    if (isNotAlreadyChosen) {
+      chosenIndexes[i] = index;
+    } else {
+      continue;
+    }
+    const unsigned int populationIndex = index * dimensions;
+    float parameters[dimensions];
+
+    for (unsigned int j = 0; j < dimensions; ++j) {
+      parameters[j] = population[populationIndex + j] * UINT16_MAX_INVERSE;
     }
 
-    float fitness = evaluationFunction(parameters);
+    const float fitness = evaluationFunction(parameters);
 
-    if (i == 0 || (isAlreadyChosen && bestFitness > fitness)) {
+    if (i == 0 || (isNotAlreadyChosen && bestFitness > fitness)) {
 
       *secondParentIndex = *firstParentIndex;
 
@@ -117,7 +124,7 @@ static void mutate(char* gene, unsigned int geneLength) {
                  7;
     }
     // Converts int to char
-    gene[mutatedIndex] = newValue + '0';
+    gene[mutatedIndex] = intDigitToChar(newValue);
   }
 }
 

@@ -6,6 +6,14 @@
 #define UINT16_DIGIT_COUNT 5
 
 /**
+ * Converts an unsigned integer digit to a char of the same number
+ *
+ * @param value A one digit positive integer
+ * @return char
+ */
+static inline char intDigitToChar(unsigned int value) { return value + '0'; }
+
+/**
  * This method initialises the array with random unsigned integers between 0 and
  * UINT16_MAX
  *
@@ -35,33 +43,34 @@ static void fillTable(uint16_t* population) {
 static void tourney(float* populationStrength, unsigned int* firstParentIndex,
                     unsigned int* secondParentIndex) {
 
-  float chosenIndexes[populationSize];
+  float chosenIndexes[tournamentSelectionsSize];
   float bestFitness = 0;
   float secondbestFitness = 0;
 
   for (unsigned int i = 0; i < tournamentSelectionsSize; i++) {
 
     unsigned int index =
-        (unsigned int)(linear_congruential_random_generator() * populationSize);
-    unsigned int isAlreadyChosen = 1;
+        linear_congruential_random_generator() * populationSize;
+    uint8_t isNotAlreadyChosen = 1;
 
-    chosenIndexes[i] = index;
+    for (unsigned int j = 0; j < i; j++) {
 
-    if (i != 0) {
-
-      for (unsigned int j = 0; j < i; j++) {
-
-        if (chosenIndexes[j] == index) {
-          i--;
-          isAlreadyChosen = 0;
-          break;
-        }
+      if (chosenIndexes[j] == index) {
+        i--;
+        isNotAlreadyChosen = 0;
+        break;
       }
     }
 
     const float fitness = populationStrength[index];
 
-    if (i == 0 || (isAlreadyChosen && bestFitness > fitness)) {
+    if (isNotAlreadyChosen) {
+      chosenIndexes[i] = index;
+    } else {
+      continue;
+    }
+
+    if (i == 0 || (isNotAlreadyChosen && bestFitness > fitness)) {
 
       *secondParentIndex = *firstParentIndex;
 
@@ -108,7 +117,7 @@ static void mutate(char* gene, unsigned int geneLength) {
                  7;
     }
     // Converts int to char
-    gene[mutatedIndex] = newValue + '0';
+    gene[mutatedIndex] = intDigitToChar(newValue);
   }
 }
 
