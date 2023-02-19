@@ -100,28 +100,21 @@ static void tourney(uint16_t* population, unsigned int* firstParentIndex,
  */
 static void mutate(char* gene, unsigned int geneLength) {
 
-  float mutation =
+  const float mutation =
       (unsigned int)(linear_congruential_random_generator() * populationSize) %
       geneLength;
 
   if (mutation <= mutationRate) {
 
-    unsigned int mutatedIndex =
-        (unsigned int)(linear_congruential_random_generator() *
-                       populationSize) %
-        geneLength;
+    const unsigned int mutatedIndex =
+        linear_congruential_random_generator() * geneLength;
 
     // We then generate a number between 0 and 9 to replace the chosen digit
-    unsigned int newValue =
-        (unsigned int)(linear_congruential_random_generator() *
-                       populationSize) %
-        10;
+    unsigned int newValue = linear_congruential_random_generator() * 9;
 
     // We handle the last digit
     if (mutatedIndex % UINT16_DIGIT_COUNT == 0) {
-      newValue = (unsigned int)(linear_congruential_random_generator() *
-                                populationSize) %
-                 7;
+      newValue = linear_congruential_random_generator() * 6;
     }
     // Converts int to char
     gene[mutatedIndex] = intDigitToChar(newValue);
