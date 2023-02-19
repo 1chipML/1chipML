@@ -2,7 +2,7 @@
 #include "genetic.h"
 
 // We declare these constants to accelerate the execution of the algorithm
-#define UINT16_MAX_INVERSE 1 / UINT16_MAX
+#define UINT16_MAX_INVERSE (1.0 / UINT16_MAX)
 #define UINT16_DIGIT_COUNT 5
 
 /**
@@ -53,6 +53,10 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
         linear_congruential_random_generator() * populationSize;
     uint8_t isNotAlreadyChosen = 1;
 
+    while (index == populationSize) {
+      index = linear_congruential_random_generator() * populationSize;
+    }
+
     for (unsigned int j = 0; j < i; j++) {
 
       if (chosenIndexes[j] == index) {
@@ -70,7 +74,7 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
       continue;
     }
 
-    if (isNotAlreadyChosen && bestFitness > fitness) {
+    if (bestFitness > fitness) {
 
       *secondParentIndex = *firstParentIndex;
       secondbestFitness = bestFitness;
@@ -93,14 +97,12 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
  */
 static void mutate(char* gene, unsigned int geneLength) {
 
-  const float mutation =
-      (unsigned int)(linear_congruential_random_generator() * populationSize) %
-      geneLength;
+  const float mutation = linear_congruential_random_generator();
 
   if (mutation <= mutationRate) {
 
     const unsigned int mutatedIndex =
-        linear_congruential_random_generator() * geneLength;
+        linear_congruential_random_generator() * (geneLength - 1);
 
     // We then generate a number between 0 and 9 to replace the chosen digit
     unsigned int newValue = linear_congruential_random_generator() * 9;
