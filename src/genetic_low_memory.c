@@ -80,7 +80,7 @@ static void tourney(uint16_t* population, unsigned int* firstParentIndex,
     if (i == 0 || (isNotAlreadyChosen && bestFitness > fitness)) {
 
       *secondParentIndex = *firstParentIndex;
-
+      secondbestFitness = bestFitness;
       *firstParentIndex = index;
       bestFitness = fitness;
 
