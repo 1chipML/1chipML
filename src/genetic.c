@@ -128,8 +128,6 @@ static void mutate(char* gene, unsigned int geneLength) {
 static void decodeAndAddChild(uint16_t* nextGeneration,
                               unsigned int* nextGenerationSize, char* child) {
 
-  unsigned int dimensionIndex = 0;
-
   char parameter[UINT16_DIGIT_COUNT + 1];
   parameter[UINT16_DIGIT_COUNT] = '\0';
 
@@ -137,12 +135,8 @@ static void decodeAndAddChild(uint16_t* nextGeneration,
 
   for (unsigned int i = 0; i < dimensions; i++) {
 
-    for (unsigned int j = 0; j < UINT16_DIGIT_COUNT; j++) {
-
-      parameter[j] = child[j + dimensionIndex];
-    }
-
-    dimensionIndex += UINT16_DIGIT_COUNT;
+    memcpy(parameter, child + (i * UINT16_DIGIT_COUNT),
+           UINT16_DIGIT_COUNT * sizeof(char));
 
     uint32_t value = atoi(parameter);
 
@@ -266,7 +260,7 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
       (dimensions * UINT16_DIGIT_COUNT) + 1;
   while (currentNextGenerationSize < nextGenerationMaxSize) {
 
-    unsigned int parent1Index, parent2Index = 0;
+    unsigned int parent1Index, parent2Index;
     tourney(populationFitness, &parent1Index, &parent2Index);
     uint16_t parent1[dimensions];
     uint16_t parent2[dimensions];
@@ -284,28 +278,6 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
 
     createChildren(mergedParents1, mergedParents2, nextGeneration,
                    &currentNextGenerationSize);
-  }
-}
-/**
- * This algorithm uses the elitism principal and this function helps us keep
- * track of the current most optimal solution
- *
- *
- * @param population this array stores all the values of the population
- * @param bestValuesCoordinates this array stores the parameters of the current
- * best solution
- * @param index  this represents the index of the new best solution
- * @param storedValue this represents the current most optimal fitness
- * @param newValue this represents the new superior fitness
- */
-static void replaceEliteValue(uint16_t* population,
-                              uint16_t* bestValuesCoordinates,
-                              unsigned int index, float* storedValue,
-                              float newValue) {
-
-  *storedValue = newValue;
-  for (unsigned int i = 0; i < dimensions; i++) {
-    bestValuesCoordinates[i] = population[index + i];
   }
 }
 
@@ -328,6 +300,8 @@ static void calculateFitness(uint16_t* population, float* populationFitness,
                              uint16_t* secondBestValues,
                              float* secondBestFitness) {
 
+  const unsigned int coordArrayByteSize = dimensions * sizeof(uint16_t);
+
   for (unsigned int i = 0; i < populationSize; i++) {
 
     float parameters[dimensions];
@@ -343,15 +317,18 @@ static void calculateFitness(uint16_t* population, float* populationFitness,
     if (fitness < *(bestFit)) {
 
       *secondBestFitness = *bestFit;
-      memcpy(secondBestValues, bestFitCoord, dimensions * sizeof(uint16_t));
+      *bestFit = fitness;
 
-      replaceEliteValue(population, bestFitCoord, (i * dimensions), bestFit,
-                        populationFitness[i]);
+      memcpy(secondBestValues, bestFitCoord, coordArrayByteSize);
+      memcpy(bestFitCoord, population + (i * dimensions), coordArrayByteSize);
+
     }
 
     else if (fitness < *(secondBestFitness)) {
-      replaceEliteValue(population, secondBestValues, (i * dimensions),
-                        secondBestFitness, populationFitness[i]);
+
+      *secondBestFitness = fitness;
+      memcpy(secondBestValues, population + (i * dimensions),
+             dimensions * sizeof(uint16_t));
     }
   }
 }
