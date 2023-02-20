@@ -267,10 +267,12 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
 
                                  float (*evaluationFunction)(float*)) {
 
-  unsigned int currentNextGenerationSize = 2;
+  unsigned int currentNextGenerationSize = 0;
+  const unsigned int nextGenerationMaxSize = populationSize - 2;
   const unsigned int mergedParentsLength =
       (dimensions * UINT16_DIGIT_COUNT) + 1;
-  while (currentNextGenerationSize < (populationSize)) {
+
+  while (currentNextGenerationSize < nextGenerationMaxSize) {
 
     unsigned int parent1Index, parent2Index = 0;
     tourney(population, &parent1Index, &parent2Index, evaluationFunction);
@@ -379,14 +381,13 @@ static void replacePopulation(uint16_t* population, uint16_t* newGeneration,
                               uint16_t* secondBestValues,
                               unsigned int arraySize) {
 
-  unsigned int secondEliteValueIndex = dimensions;
+  const unsigned int nextGenerationStartingIndex = 2 * dimensions;
 
-  for (unsigned int i = 0; i < dimensions; i++) {
-    newGeneration[i] = bestFitValues[i];
-    newGeneration[secondEliteValueIndex + i] = secondBestValues[i];
-  }
-
-  memcpy(population, newGeneration, arraySize * sizeof(uint16_t));
+  memcpy(population, bestFitValues, dimensions * sizeof(uint16_t));
+  memcpy(population + dimensions, secondBestValues,
+         dimensions * sizeof(uint16_t));
+  memcpy(population + nextGenerationStartingIndex, newGeneration,
+         arraySize * sizeof(uint16_t));
 }
 
 /**
@@ -429,9 +430,12 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
   float bestFit = FLT_MAX;
 
   const unsigned int arraySize = populationSize * dimensions;
+  // We created a seperate size because the child array will be two smaller than
+  // the population because of the two elite values that are reinjected
+  const unsigned int childArraySize = arraySize - 2;
 
   uint16_t population[arraySize];
-  uint16_t nextGeneration[arraySize];
+  uint16_t nextGeneration[childArraySize];
 
   uint16_t bestValues[dimensions];
   uint16_t secondBestValues[dimensions];
@@ -447,7 +451,7 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
     createNextGeneration(population, nextGeneration, evaluationFunction);
 
     replacePopulation(population, nextGeneration, bestValues, secondBestValues,
-                      arraySize);
+                      childArraySize);
 
     if (bestFit <= epsilon) {
       break;
