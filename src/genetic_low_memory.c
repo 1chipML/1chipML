@@ -5,6 +5,22 @@
 #define UINT16_MAX_INVERSE (1.0 / UINT16_MAX)
 #define UINT16_DIGIT_COUNT 5
 
+// This variable decides the maxixmum amount of generations that can be created
+static unsigned int numberOfGenerations;
+
+// This controls the quantity of solutions per generation. This value greatly
+// controls the memory used by this algorithm
+static unsigned int populationSize;
+
+// This value controls the chance that a child will have a mutation
+static float mutationRate;
+
+// The amount of parameters that each solution need
+static unsigned int dimensions;
+
+// The amount of solutions chosen for each parent-selection tourney
+static unsigned int tournamentSelectionsSize;
+
 /**
  * Converts an unsigned integer digit to a char of the same number
  *
@@ -307,8 +323,7 @@ static void calculateFitness(uint16_t* population, float* bestFit,
                              uint16_t* secondBestValues,
                              float* secondBestFitness) {
 
-  const unsigned int coordArrayByteSize = dimensions * sizeof(uint16_t);
-
+  const unsigned int coordArrayByteSize = dimensions * sizeof(*population);
   for (unsigned int i = 0; i < populationSize; i++) {
 
     float parameters[dimensions];
@@ -318,21 +333,21 @@ static void calculateFitness(uint16_t* population, float* bestFit,
       parameters[j] = population[baseIndex + j] * UINT16_MAX_INVERSE;
     }
 
-    const float strength = evaluationFunction(parameters);
+    const float fitness = evaluationFunction(parameters);
 
-    if (strength < *(bestFit)) {
+    if (fitness < *(bestFit)) {
 
       *secondBestFitness = *bestFit;
-      *bestFit = strength;
+      *bestFit = fitness;
 
       memcpy(secondBestValues, bestFitCoord, coordArrayByteSize);
       memcpy(bestFitCoord, population + (i * dimensions), coordArrayByteSize);
 
     }
 
-    else if (strength < *(secondBestFitness)) {
+    else if (fitness < *(secondBestFitness)) {
 
-      *secondBestFitness = strength;
+      *secondBestFitness = fitness;
       memcpy(secondBestValues, population + (i * dimensions),
              dimensions * sizeof(uint16_t));
     }
