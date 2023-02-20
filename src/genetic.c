@@ -123,7 +123,9 @@ static void mutate(char* gene, unsigned int geneLength) {
     // We then generate a number between 0 and 9 to replace the chosen digit
     unsigned int newValue = linear_congruential_random_generator() * 9;
 
-    // We handle the last digit
+    // We handle the last digits of each parameter
+    // The values are stored as uint16_t so the largest number of the last digit
+    // of each parameter is 6
     if (mutatedIndex % UINT16_DIGIT_COUNT == 0) {
       newValue = linear_congruential_random_generator() * 6;
     }
@@ -219,40 +221,9 @@ static void createChildren(char* firstParent, char* secondParent,
  */
 static void encode(char* combinedValue, uint16_t* parent) {
 
-  unsigned int arrIndex = 0;
-  unsigned int encodedParameterSize = UINT16_DIGIT_COUNT + 1;
-
   for (int i = 0; i < dimensions; i++) {
 
-    char stringValue[encodedParameterSize];
-    char otherString[encodedParameterSize];
-
-    stringValue[UINT16_DIGIT_COUNT] = '\0';
-    otherString[UINT16_DIGIT_COUNT] = '\0';
-
-    unsigned int otherStringLength = 0;
-    for (int j = (UINT16_DIGIT_COUNT - 1); j >= 0; j--) {
-
-      if (parent[i] < pow(10, j)) {
-
-        otherString[otherStringLength] = '0';
-        otherStringLength++;
-      } else {
-        break;
-      }
-    }
-
-    sprintf(stringValue, "%hu", parent[i]);
-
-    for (unsigned int j = 0; j < otherStringLength; j++) {
-      combinedValue[j + arrIndex] = otherString[j];
-    }
-
-    for (unsigned int j = otherStringLength; j < UINT16_DIGIT_COUNT; j++) {
-
-      combinedValue[j + arrIndex] = stringValue[j - otherStringLength];
-    }
-    arrIndex += UINT16_DIGIT_COUNT;
+    sprintf(combinedValue + (i * UINT16_DIGIT_COUNT), "%.5hu", parent[i]);
   }
 }
 /**
@@ -274,18 +245,21 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
   const unsigned int nextGenerationMaxSize = populationSize - 2;
   const unsigned int mergedParentsLength =
       (dimensions * UINT16_DIGIT_COUNT) + 1;
+
+  const unsigned int parentArrayByteSize = dimensions * sizeof(*population);
+
   while (currentNextGenerationSize < nextGenerationMaxSize) {
 
-    unsigned int parent1Index, parent2Index;
-    tourney(populationFitness, &parent1Index, &parent2Index);
+    unsigned int parent1Number, parent2Number;
+    tourney(populationFitness, &parent1Number, &parent2Number);
     uint16_t parent1[dimensions];
     uint16_t parent2[dimensions];
 
-    for (unsigned int i = 0; i < dimensions; i++) {
+    const uint16_t parent1Index = parent1Number * dimensions;
+    const uint16_t parent2Index = parent2Number * dimensions;
 
-      parent1[i] = population[(parent1Index * dimensions) + i];
-      parent2[i] = population[(parent2Index * dimensions) + i];
-    }
+    memcpy(parent1, population + parent1Index, parentArrayByteSize);
+    memcpy(parent2, population + parent2Index, parentArrayByteSize);
 
     char mergedParents1[mergedParentsLength];
     encode(mergedParents1, parent1);
