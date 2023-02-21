@@ -402,7 +402,38 @@ Work in progress.
 \section{The Fast Fourier Transform}
 
 
-Work in progress.
+The Fast Fourier Transform (FFT) is an algorithm that computes the discrete fourier transform (DFT) of a set of complex values. More specifically, the FFT is often used to convert a set of values from its original domain to a representation in the frequency domain.
+
+The DFT equation can be seen in \ref{eqn:DFT}:
+\begin{equation}
+	X_k = \sum_{n=0}^{N-1} x_n \exp \biggl(- \frac{2 \pi i}{N} nk \biggr)
+	\label{eqn:DFT}
+\end{equation}
+where N is the size of set of values, k ranges from 0 to $N-1$ and $i$ is the imaginary part. The equation shown in \ref{eqn:FFTTwiddle} represents the twiddle factor.
+\begin{equation}
+	\exp \biggl( - \frac{2 \pi i k}{N} \biggr)
+	\label{eqn:FFTTwiddle}
+\end{equation}
+
+The Cooley–Tukey FFT algorithm is used to find the FFT of a set of values. This algorithm uses a strategy similar to divide-and-conquer, allowing it to have a time complexity of O(n log n). \\
+
+The algorithm is implemented in a function that takes in two separate arrays to represent complex values. The first array consists of real numbers, while the second array holds imaginary numbers. This algorithm overrides the arrays passed as arguments and replaces them for the result of the FFT. Furthermore, the radix-2 decimation-in-time (DIT) method was used, meaning the arrays must have a length equal to a power of 2. If this is not the case, an error code will be returned by the function. 
+
+The first step of the algorithm is to execute bit-reversal permutation on the incoming arrays, as it uses the iterative approach. Then, the divide-and-conquer strategy starts. For the first set, the algorithm iterates over the elements that require the same twiddle factor. It then iterates over each group and uses the same twiddle factor for each one. After that, the twiddle factor is updated using the trigonometric recurrence formula and the next elements are selected. The same steps are repeated for the second set and so forth. By using this strategy, we end up with the result of the FFT.\\
+
+
+Given the context of microcontrollers and their lack of memory, multiple design choices were made, which are summarized here:
+\begin{itemize}
+	\item The FFT takes in two arrays of the same size (real and imaginary)
+	\item The FFT only takes in arrays that have a length equal to a power of 2
+	\item The FFT overrides the incoming arrays with the result
+	\item The FFT returns 1 in case of an error, 0 otherwise
+	\item The FFT has a space complexity of O(1) and a time complexity of O(nlogn)
+	\item The FFT uses the iterative approach
+	\item The FFT uses bit-reversal for the iterative approach
+	\item The FFT does not calculate the twiddle factors in advance
+	\item The FFT uses the trigonometric recurrence formula to reduce the number of sin and cos calculated
+\end{itemize}
 
 
 \chapter{Machine learning}
