@@ -1,11 +1,11 @@
 #ifndef ONECHIPML_MONTE_CARLO_RL
 #define ONECHIPML_MONTE_CARLO_RL
 
-#ifndef dft_real
+#ifndef mc_real
 #define mc_real float
 #endif
 
-#ifndef M_PI
+#ifndef UCB_MAX
 #define UCB_MAX 1000
 #endif
 
@@ -19,8 +19,8 @@ typedef struct {
 } Board;
 
 typedef struct {
-  unsigned x_pos;
-  unsigned y_pos;
+  unsigned xPos;
+  unsigned yPos;
   int player;
 } Action;
 
@@ -50,15 +50,15 @@ typedef int (*getScoreType)(Board*, int);
 typedef void (*getPossibleActionsType)(Board, Action*);
 typedef int (*getNumPossibleActionsType)(void);
 typedef void (*removeActionType)(int, Action*, int);
-typedef int (*getBoardSize)(void);
+typedef int (*getBoardSizeType)(void);
 
-mc_real calc_UCB(Node* node);
-Node* find_max_UCB(Node* children, unsigned nChildren);
-Node* select_node(Node* node);
-void expand_leaf(Node* node, int player, Game game);
-int mc_episode(Node* node, int player, Game game);
+mc_real calcUCB(Node* node);
+Node* findMaxUCB(Node* children, unsigned nChildren);
+Node* selectNode(Node* node);
+void expandLeaf(Node* node, int player, Game game);
+int mcEpisode(Node* node, int player, Game game);
 void backpropagate(Node* node, int score);
-Board mc_game(Board board, int player, Game game, int minSim, int maxSim,
+Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
               mc_real goalValue);
 
 #ifdef __cplusplus

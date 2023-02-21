@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-mc_real calc_UCB(Node* node) {
+mc_real calcUCB(Node* node) {
   if (node->nVisits == 0) {
     return UCB_MAX;
   }
@@ -13,28 +13,28 @@ mc_real calc_UCB(Node* node) {
          sqrt(2 * log10(node->parent->nVisits) / node->nVisits);
 }
 
-Node* find_max_UCB(Node* children, unsigned nChildren) {
-  Node* max_ucb_node = children;
+Node* findMaxUCB(Node* children, unsigned nChildren) {
+  Node* maxUCBNode = children;
   for (int i = 0; i < nChildren; i++) {
-    if (calc_UCB(children + i) > calc_UCB(max_ucb_node)) {
-      max_ucb_node = children + i;
+    if (calcUCB(children + i) > calcUCB(maxUCBNode)) {
+      maxUCBNode = children + i;
     }
   }
-  return max_ucb_node;
+  return maxUCBNode;
 }
 
-Node* select_node(Node* node) {
-  Node* curr_node = node;
-  while (curr_node->children) {
-    curr_node = find_max_UCB(curr_node->children, curr_node->nChildren);
-    if (calc_UCB(curr_node) == UCB_MAX) {
-      return curr_node;
+Node* selectNode(Node* node) {
+  Node* currNode = node;
+  while (currNode->children) {
+    currNode = findMaxUCB(currNode->children, currNode->nChildren);
+    if (calcUCB(currNode) == UCB_MAX) {
+      return currNode;
     }
   }
-  return curr_node;
+  return currNode;
 }
 
-void expand_leaf(Node* node, int player, Game game) {
+void expandLeaf(Node* node, int player, Game game) {
   int nPossibleActions = game.getNumPossibleActions(node->state);
   Action possibleActions[nPossibleActions];
   game.getPossibleActions(node->state, possibleActions);
@@ -71,7 +71,7 @@ void expand_leaf(Node* node, int player, Game game) {
   }
 }
 
-int mc_episode(Node* node, int player, Game game) {
+int mcEpisode(Node* node, int player, Game game) {
   int initialPlayer = player;
   // Deep copy of board
   Board simulationBoard;
@@ -93,21 +93,21 @@ int mc_episode(Node* node, int player, Game game) {
   // Random playout
   while (nPossibleActions > 0) {
     // Pick random action
-    int random_action_idx =
+    int randomActionIdx =
         linear_congruential_random_generator() * (nPossibleActions);
-    if (!game.isValidAction(&(node->state), &possibleActions[random_action_idx],
+    if (!game.isValidAction(&(node->state), &possibleActions[randomActionIdx],
                             player)) {
       // Play action
       // Deep copy of board
       Board board =
-          game.playAction(simulationBoard, &possibleActions[random_action_idx]);
+          game.playAction(simulationBoard, &possibleActions[randomActionIdx]);
       memcpy(simulationBoard.values, board.values,
              game.getBoardSize() * sizeof(int));
       simulationBoard.nPlayers = board.nPlayers;
 
       // Remove action from possible actions
       nPossibleActions -= simulationBoard.nPlayers;
-      game.removeAction(random_action_idx, possibleActions, nPossibleActions);
+      game.removeAction(randomActionIdx, possibleActions, nPossibleActions);
       int score = game.getScore(&simulationBoard, player);
       if (score > 1) { // win
         if (player == initialPlayer) {
@@ -139,19 +139,19 @@ void backpropagate(Node* node, int score) {
   }
 }
 
-void free_mc_tree(Node* node) {
+void freeMCTree(Node* node) {
   if (node == NULL)
     return;
   for (int i = 0; i < node->nChildren; ++i) {
     if ((node->children + i)->nChildren != 0) {
-      free_mc_tree(node->children + i);
+      freeMCTree(node->children + i);
     }
   }
   free(node->state.values);
   free(node->children);
 }
 
-Board mc_game(Board board, int player, Game game, int minSim, int maxSim,
+Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
               mc_real goalValue) {
   Node* node = malloc(sizeof(Node));
   node->nVisits = 0;
@@ -165,21 +165,21 @@ Board mc_game(Board board, int player, Game game, int minSim, int maxSim,
   int iterations = 0;
   while (
       (node->nVisits < minSim ||
-       calc_UCB(find_max_UCB(node->children, node->nChildren)) < goalValue) &&
+       calcUCB(findMaxUCB(node->children, node->nChildren)) < goalValue) &&
       node->nVisits < maxSim) {
-    Node* selected_node = select_node(node);
-    expand_leaf(selected_node, player, game);
-    int score = mc_episode(selected_node, player, game);
-    backpropagate(selected_node, score);
+    Node* selectedNode = selectNode(node);
+    expandLeaf(selectedNode, player, game);
+    int score = mcEpisode(selectedNode, player, game);
+    backpropagate(selectedNode, score);
     iterations++;
   }
 
   Board retBoard;
   retBoard.values = malloc(game.getBoardSize() * sizeof(int));
   memcpy(retBoard.values,
-         find_max_UCB(node->children, node->nChildren)->state.values,
+         findMaxUCB(node->children, node->nChildren)->state.values,
          game.getBoardSize() * sizeof(int));
-  free_mc_tree(node);
+  freeMCTree(node);
   free(node);
   return retBoard;
 }

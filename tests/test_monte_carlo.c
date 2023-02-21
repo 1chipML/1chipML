@@ -3,24 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-Board play_action(Board board, Action* action) {
+Board playAction(Board board, Action* action) {
   Board childBoard;
   childBoard.values = malloc(9 * sizeof(int));
   memcpy(childBoard.values, board.values, 9 * sizeof(int));
-  childBoard.values[action->x_pos * 3 + action->y_pos] = action->player;
+  childBoard.values[action->xPos * 3 + action->yPos] = action->player;
   childBoard.nPlayers = 2;
   return childBoard;
 }
 
-char is_valid_action(Board* board, Action* action, int player) {
+char isValidAction(Board* board, Action* action, int player) {
   if (action->player == player &&
-      board->values[action->x_pos * 3 + action->y_pos] == 0) {
+      board->values[action->xPos * 3 + action->yPos] == 0) {
     return 0;
   }
   return -1;
 }
 
-void get_possible_actions(Board board, Action possibleActions[]) {
+void getPossibleActions(Board board, Action possibleActions[]) {
   int nActions = 0;
   int player = 1;
   for (int x = 0; x < 3; ++x) {
@@ -29,8 +29,8 @@ void get_possible_actions(Board board, Action possibleActions[]) {
         for (int i = 0; i < board.nPlayers; ++i) {
           Action action;
           action.player = player;
-          action.x_pos = x;
-          action.y_pos = y;
+          action.xPos = x;
+          action.yPos = y;
           possibleActions[nActions] = action;
           nActions++;
           player = -player;
@@ -40,7 +40,7 @@ void get_possible_actions(Board board, Action possibleActions[]) {
   }
 }
 
-int get_num_possible_actions(Board board) {
+int getNumPossibleActions(Board board) {
   int nActions = 0;
   for (int x = 0; x < 3; ++x) {
     for (int y = 0; y < 3; ++y) {
@@ -52,14 +52,16 @@ int get_num_possible_actions(Board board) {
   return nActions * 2;
 }
 
-int get_board_size() { return 9; }
+int getBoardSize() { 
+  return 9; 
+}
 /**
  * If there is a line of X or O's
  * 0 = loss
  * 1 = draw
  * 2 = win
  */
-int get_score(Board* board, int player) {
+int getScore(Board* board, int player) {
   // Check rows
   for (int i = 0; i < 9; i += 3) {
     if (board->values[i] == player && board->values[i + 1] == player &&
@@ -84,7 +86,7 @@ int get_score(Board* board, int player) {
   return 1;
 }
 
-void remove_action(int randomActionIdx, Action* possibleActions,
+void removeAction(int randomActionIdx, Action* possibleActions,
                    int nPossibleActions) {
   if (randomActionIdx != nPossibleActions + 1) {
     int secondAction = 0;
@@ -97,7 +99,7 @@ void remove_action(int randomActionIdx, Action* possibleActions,
   }
 }
 
-int test_mc(int minSimulation, int maxSimulation, int targetScore) {
+int testMC(int minSimulation, int maxSimulation, int targetScore) {
   Board board;
   board.values = malloc(9 * sizeof(int));
   board.values[0] = 1;
@@ -108,16 +110,16 @@ int test_mc(int minSimulation, int maxSimulation, int targetScore) {
   board.nPlayers = 2;
 
   Game game = {
-      is_valid_action,
-      play_action,
-      get_score,
-      get_possible_actions,
-      get_num_possible_actions,
-      remove_action,
-      get_board_size,
+      isValidAction,
+      playAction,
+      getScore,
+      getPossibleActions,
+      getNumPossibleActions,
+      removeAction,
+      getBoardSize,
   };
 
-  board = mc_game(board, 1, game, minSimulation, maxSimulation, targetScore);
+  board = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
   if (board.values[2] == 1) {
     free(board.values);
     printf("Success : %s()\n", __func__);
@@ -130,4 +132,4 @@ int test_mc(int minSimulation, int maxSimulation, int targetScore) {
   }
 }
 
-int main() { test_mc(9, 50, 4); }
+int main() { testMC(9, 50, 4); }
