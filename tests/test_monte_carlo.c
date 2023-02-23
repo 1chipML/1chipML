@@ -1,4 +1,4 @@
-#include "../src/monte_carlo.h"
+#include <monte_carlo.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +15,9 @@ Board playAction(Board board, Action* action) {
 char isValidAction(Board* board, Action* action, int player) {
   if (action->player == player &&
       board->values[action->xPos * 3 + action->yPos] == 0) {
-    return 0;
+    return 1;
   }
-  return -1;
+  return 0;
 }
 
 void getPossibleActions(Board board, Action possibleActions[]) {
@@ -27,11 +27,9 @@ void getPossibleActions(Board board, Action possibleActions[]) {
     for (int y = 0; y < 3; ++y) {
       if (board.values[x * 3 + y] == 0) {
         for (int i = 0; i < board.nPlayers; ++i) {
-          Action action;
-          action.player = player;
-          action.xPos = x;
-          action.yPos = y;
-          possibleActions[nActions] = action;
+          possibleActions[nActions].player = player;
+          possibleActions[nActions].xPos = x;
+          possibleActions[nActions].yPos = y;
           nActions++;
           player = -player;
         }
@@ -44,20 +42,17 @@ int getNumPossibleActions(Board board) {
   int nActions = 0;
   for (int x = 0; x < 3; ++x) {
     for (int y = 0; y < 3; ++y) {
-      if (board.values[x * 3 + y] != -1 && board.values[x * 3 + y] != 1) {
+      if (board.values[x * 3 + y] == 0) {
         nActions++;
       }
     }
   }
-  return nActions * 2;
+  return nActions * board.nPlayers;
 }
 
-int getBoardSize() { 
-  return 9; 
-}
+int getBoardSize() { return 9; }
 /**
  * If there is a line of X or O's
- * 0 = loss
  * 1 = draw
  * 2 = win
  */
@@ -87,7 +82,7 @@ int getScore(Board* board, int player) {
 }
 
 void removeAction(int randomActionIdx, Action* possibleActions,
-                   int nPossibleActions) {
+                  int nPossibleActions) {
   if (randomActionIdx != nPossibleActions + 1) {
     int secondAction = 0;
     if (possibleActions[randomActionIdx].player == -1) {
@@ -101,22 +96,14 @@ void removeAction(int randomActionIdx, Action* possibleActions,
 
 int testMC(int minSimulation, int maxSimulation, int targetScore) {
   Board board;
-  board.values = malloc(9 * sizeof(int));
+  board.values = calloc(9, sizeof(int));
   board.values[0] = 1;
   board.values[1] = 1;
-  for (int i = 2; i < 9; ++i) {
-    board.values[i] = 0;
-  }
   board.nPlayers = 2;
 
   Game game = {
-      isValidAction,
-      playAction,
-      getScore,
-      getPossibleActions,
-      getNumPossibleActions,
-      removeAction,
-      getBoardSize,
+      isValidAction,         playAction,   getScore,     getPossibleActions,
+      getNumPossibleActions, removeAction, getBoardSize,
   };
 
   board = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
@@ -125,6 +112,7 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
     printf("Success : %s()\n", __func__);
     return 0;
   } else {
+    free(board.values);
     printf("Fail : %s(), expected best action to be: [%d, %d, %d] [%d, %d, %d] "
            "[%d, %d, %d]\n",
            __func__, 1, 1, 1, 0, 0, 0, 0, 0, 0);
@@ -132,4 +120,9 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
   }
 }
 
-int main() { testMC(9, 50, 4); }
+int main() {
+  const int minSimul = 9;
+  const int maxSimul = 50;
+  const int targetScore = 4;
+  testMC(minSimul, maxSimul, targetScore);
+}

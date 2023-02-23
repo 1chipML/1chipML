@@ -56,10 +56,10 @@ mc_real calcUCB(Node* node);
 Node* findMaxUCB(Node* children, unsigned nChildren);
 Node* selectNode(Node* node);
 void expandLeaf(Node* node, int player, Game game);
-int mcEpisode(Node* node, int player, Game game);
+int mcEpisode(Node* node, int player, Game* game);
 void backpropagate(Node* node, int score);
 Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
-              mc_real goalValue);
+             mc_real goalValue);
 
 #ifdef __cplusplus
 }

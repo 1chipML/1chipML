@@ -5,6 +5,16 @@
 #include <string.h>
 #include <time.h>
 
+#ifndef WIN
+#define WIN 2
+#endif
+#ifndef DRAW
+#define DRAW 1
+#endif
+#ifndef LOSS
+#define LOSS 0
+#endif
+
 mc_real calcUCB(Node* node) {
   if (node->nVisits == 0) {
     return UCB_MAX;
@@ -15,15 +25,15 @@ mc_real calcUCB(Node* node) {
 
 Node* findMaxUCB(Node* children, unsigned nChildren) {
   Node* maxUCBNode = children;
-  for (int i = 0; i < nChildren; i++) {
-    if (calcUCB(children + i) > calcUCB(maxUCBNode)) {
-      maxUCBNode = children + i;
+  for (unsigned i = 0; i < nChildren; i++) {
+    if (calcUCB(&children[i]) > calcUCB(maxUCBNode)) {
+      maxUCBNode = &children[i];
     }
   }
   return maxUCBNode;
 }
 
-Node* selectNode(Node* node) {
+Node* selectChildren(Node* node) {
   Node* currNode = node;
   while (currNode->children) {
     currNode = findMaxUCB(currNode->children, currNode->nChildren);
@@ -40,8 +50,8 @@ void expandLeaf(Node* node, int player, Game game) {
   game.getPossibleActions(node->state, possibleActions);
 
   int nValidActions = 0;
-  for (int i = 0; i < nPossibleActions; i++) {
-    if (!game.isValidAction(&(node->state), possibleActions + i, player)) {
+  for (unsigned i = 0; i < nPossibleActions; i++) {
+    if (game.isValidAction(&(node->state), &possibleActions[i], player)) {
       nValidActions++;
     }
   }
@@ -50,42 +60,43 @@ void expandLeaf(Node* node, int player, Game game) {
   node->children = (struct Node*)malloc(nValidActions * sizeof(struct Node));
 
   nValidActions = 0;
-  for (int i = 0; i < nPossibleActions; ++i) {
-    if (!game.isValidAction(&(node->state), possibleActions + i, player)) {
+  for (unsigned i = 0; i < nPossibleActions; ++i) {
+    if (game.isValidAction(&(node->state), &possibleActions[i], player)) {
       ((node->children) + nValidActions)->nVisits = 0;
       ((node->children) + nValidActions)->score = 0;
 
       // Deep copy of board
-      Board board = game.playAction(node->state, possibleActions + i);
-      ((node->children) + nValidActions)->state.values =
+      Board board = game.playAction(node->state, &possibleActions[i]);
+      (&node->children[nValidActions])->state.values =
           malloc(game.getBoardSize() * sizeof(int));
-      memcpy(((node->children) + nValidActions)->state.values, board.values,
+      Node* child = &node->children[nValidActions];
+      memcpy(child->state.values, board.values,
              game.getBoardSize() * sizeof(int));
-      ((node->children) + nValidActions)->state.nPlayers = board.nPlayers;
-      ((node->children) + nValidActions)->parent = node;
-      ((node->children) + nValidActions)->children = NULL;
-      ((node->children) + nValidActions)->nChildren = 0;
+      child->state.nPlayers = board.nPlayers;
+      child->parent = node;
+      child->children = NULL;
+      child->nChildren = 0;
       nValidActions++;
       node->nChildren++;
     }
   }
 }
 
-int mcEpisode(Node* node, int player, Game game) {
+int mcEpisode(Node* node, int player, Game* game) {
   int initialPlayer = player;
   // Deep copy of board
   Board simulationBoard;
-  simulationBoard.values = malloc(game.getBoardSize() * sizeof(int));
+  simulationBoard.values = malloc(game->getBoardSize() * sizeof(int));
   memcpy(simulationBoard.values, node->state.values,
-         game.getBoardSize() * sizeof(int));
+         game->getBoardSize() * sizeof(int));
   simulationBoard.nPlayers = node->state.nPlayers;
 
-  int nPossibleActions = game.getNumPossibleActions(simulationBoard);
+  int nPossibleActions = game->getNumPossibleActions(simulationBoard);
   Action possibleActions[nPossibleActions];
-  game.getPossibleActions(simulationBoard, possibleActions);
+  game->getPossibleActions(simulationBoard, possibleActions);
 
   // If the player is losing on a terminal node, avoid parent
-  if (!(node->children) && (game.getScore(&(node->state), player) <= 0)) {
+  if (!node->children && (game->getScore(&node->state, player) <= 0)) {
     node->parent->score = 0;
     return 0;
   }
@@ -94,35 +105,30 @@ int mcEpisode(Node* node, int player, Game game) {
   while (nPossibleActions > 0) {
     // Pick random action
     int randomActionIdx =
-        linear_congruential_random_generator() * (nPossibleActions);
-    if (!game.isValidAction(&(node->state), &possibleActions[randomActionIdx],
+        linear_congruential_random_generator() * nPossibleActions;
+    if (game->isValidAction(&node->state, &possibleActions[randomActionIdx],
                             player)) {
       // Play action
-      // Deep copy of board
-      Board board =
-          game.playAction(simulationBoard, &possibleActions[randomActionIdx]);
-      memcpy(simulationBoard.values, board.values,
-             game.getBoardSize() * sizeof(int));
-      simulationBoard.nPlayers = board.nPlayers;
+      simulationBoard =
+          game->playAction(simulationBoard, &possibleActions[randomActionIdx]);
 
       // Remove action from possible actions
       nPossibleActions -= simulationBoard.nPlayers;
-      game.removeAction(randomActionIdx, possibleActions, nPossibleActions);
-      int score = game.getScore(&simulationBoard, player);
-      if (score > 1) { // win
+      game->removeAction(randomActionIdx, possibleActions, nPossibleActions);
+      int score = game->getScore(&simulationBoard, player);
+      if (score > 1) {
+        free(simulationBoard.values);
         if (player == initialPlayer) {
-          free(simulationBoard.values);
-          return 2;
+          return WIN;
         } else {
-          free(simulationBoard.values);
-          return 0;
+          return LOSS;
         }
       }
       player = -(player);
     }
   }
   free(simulationBoard.values);
-  return 1; // draw
+  return DRAW;
 }
 
 void backpropagate(Node* node, int score) {
@@ -140,11 +146,9 @@ void backpropagate(Node* node, int score) {
 }
 
 void freeMCTree(Node* node) {
-  if (node == NULL)
-    return;
-  for (int i = 0; i < node->nChildren; ++i) {
-    if ((node->children + i)->nChildren != 0) {
-      freeMCTree(node->children + i);
+  for (unsigned i = 0; i < node->nChildren; ++i) {
+    if ((&node->children[i])->nChildren != 0) {
+      freeMCTree(&node->children[i]);
     }
   }
   free(node->state.values);
@@ -152,7 +156,7 @@ void freeMCTree(Node* node) {
 }
 
 Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
-              mc_real goalValue) {
+             mc_real goalValue) {
   Node* node = malloc(sizeof(Node));
   node->nVisits = 0;
   node->score = 0;
@@ -163,13 +167,12 @@ Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
   set_linear_congruential_generator_seed(time(NULL));
 
   int iterations = 0;
-  while (
-      (node->nVisits < minSim ||
-       calcUCB(findMaxUCB(node->children, node->nChildren)) < goalValue) &&
-      node->nVisits < maxSim) {
-    Node* selectedNode = selectNode(node);
+  while ((node->nVisits < minSim ||
+          calcUCB(findMaxUCB(node->children, node->nChildren)) < goalValue) &&
+         node->nVisits < maxSim) {
+    Node* selectedNode = selectChildren(node);
     expandLeaf(selectedNode, player, game);
-    int score = mcEpisode(selectedNode, player, game);
+    int score = mcEpisode(selectedNode, player, &game);
     backpropagate(selectedNode, score);
     iterations++;
   }
