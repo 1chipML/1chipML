@@ -15,6 +15,11 @@
 #define LOSS 0
 #endif
 
+/**
+ * This method calculates the UCB value for a node.
+ * @param node The node for which the UCB is calculated.
+ * @return The UCB value of the node.
+ */
 mc_real calcUCB(Node* node) {
   if (node->nVisits == 0) {
     return UCB_MAX;
@@ -23,6 +28,12 @@ mc_real calcUCB(Node* node) {
          sqrt(2 * log10(node->parent->nVisits) / node->nVisits);
 }
 
+/**
+ * This method finds the node with the maximum UCB value among all children.
+ * @param children The array of children from which the max UCB value is determined.
+ * @param nChildren The number of children.
+ * @return The node with the maximum UCB.
+ */
 Node* findMaxUCB(Node* children, unsigned nChildren) {
   Node* maxUCBNode = children;
   for (unsigned i = 0; i < nChildren; i++) {
@@ -33,6 +44,11 @@ Node* findMaxUCB(Node* children, unsigned nChildren) {
   return maxUCBNode;
 }
 
+/**
+ * This method selects the next node to expand from the current nodes' children.
+ * @param node The current node from which the next node is selected.
+ * @return The selected node.
+ */
 Node* selectChildren(Node* node) {
   Node* currNode = node;
   while (currNode->children) {
@@ -44,6 +60,12 @@ Node* selectChildren(Node* node) {
   return currNode;
 }
 
+/**
+ * This method expands the leaf of the current action tree
+ * @param node The current leaf to expand.
+ * @param player The current player.
+ * @param game The definition of the game played, the environment in which the the machine learns.
+ */
 void expandLeaf(Node* node, int player, Game game) {
   int nPossibleActions = game.getNumPossibleActions(node->state);
   Action possibleActions[nPossibleActions];
@@ -82,6 +104,13 @@ void expandLeaf(Node* node, int player, Game game) {
   }
 }
 
+/**
+ * This method executes a complete random playout of actions. 
+ * @param node The root node from which the episode is played out.
+ * @param player The current player.
+ * @param game The definition of the game played, the environment in which the the machine learns.
+ * @return The result of the random playout, LOSS, WIN or DRAW.
+ */
 int mcEpisode(Node* node, int player, Game* game) {
   int initialPlayer = player;
   // Deep copy of board
@@ -131,6 +160,11 @@ int mcEpisode(Node* node, int player, Game* game) {
   return DRAW;
 }
 
+/**
+ * This method backpropagates the result of the playout to the root of the action tree. 
+ * @param node The leaf node from which the backpropagation begins.
+ * @param score The score to backpropagate.
+ */
 void backpropagate(Node* node, int score) {
   node->nVisits++;
   node->score += score;
@@ -145,6 +179,10 @@ void backpropagate(Node* node, int score) {
   }
 }
 
+/**
+ * This method frees the memory used during the Monte Carlo algorithm.
+ * @param node The root node from which the function starts freeing the memory.
+ */
 void freeMCTree(Node* node) {
   for (unsigned i = 0; i < node->nChildren; ++i) {
     if ((&node->children[i])->nChildren != 0) {
@@ -155,6 +193,15 @@ void freeMCTree(Node* node) {
   free(node->children);
 }
 
+/**
+ * This method executes the Monte Carlo algorithm.
+ * @param board The board used for the game.
+ * @param player The current player.
+ * @param game The definition of the game played, the environment in which the the machine learns.
+ * @param minSim Minimum number of simulations to run.
+ * @param maxSim Maximum number of simulations to run.
+ * @return The board with the best action to play after the execution of the Monte Carlo algorithm.
+ */
 Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
              mc_real goalValue) {
   Node* node = malloc(sizeof(Node));
