@@ -1,10 +1,6 @@
 
 #include "genetic.h"
 
-// We declare these constants to accelerate the execution of the algorithm
-#define UINT16_MAX_INVERSE (1.0 / UINT16_MAX)
-#define UINT16_DIGIT_COUNT 5
-
 // This variable decides the maxixmum amount of generations that can be created
 static unsigned int numberOfGenerations;
 
@@ -13,7 +9,7 @@ static unsigned int numberOfGenerations;
 static unsigned int populationSize;
 
 // This value controls the chance that a child will have a mutation
-static float mutationRate;
+static genetic_real mutationRate;
 
 // The amount of parameters that each solution need
 static unsigned int dimensions;
@@ -36,7 +32,7 @@ static inline char intDigitToChar(unsigned int value) { return value + '0'; }
  * @param population This array stores all the values of the population and will
  * be filled
  */
-static void fillTable(uint16_t* population) {
+static void fillTable(genetic_int *population) {
 
   const unsigned int populationArraySize = populationSize * dimensions;
 
@@ -56,12 +52,13 @@ static void fillTable(uint16_t* population) {
  * @param secondParentIndex a return parameter for storing the index of the
  * second chosen parent
  */
-static void tourney(float* populationStrength, unsigned int* firstParentIndex,
-                    unsigned int* secondParentIndex) {
+static void tourney(genetic_real *populationStrength,
+                    unsigned int *firstParentIndex,
+                    unsigned int *secondParentIndex) {
 
-  float chosenIndexes[tournamentSelectionsSize];
-  float bestFitness = FLT_MAX;
-  float secondbestFitness = FLT_MAX;
+  genetic_real chosenIndexes[tournamentSelectionsSize];
+  genetic_real bestFitness = FLT_MAX;
+  genetic_real secondbestFitness = FLT_MAX;
 
   for (unsigned int i = 0; i < tournamentSelectionsSize; i++) {
 
@@ -69,7 +66,7 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
         linear_congruential_random_generator() * populationSize;
     uint8_t isNotAlreadyChosen = 1;
 
-    // We generate a float between 0 and populationSize and then convert it to
+    // We generate a real between 0 and populationSize and then convert it to
     // an int. On the slight chance that the generated number by
     // linear_congruential_generator = 1.00 we loop again.
     // This solution lets us have exactly the same amount of odds to get each
@@ -87,7 +84,7 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
       }
     }
 
-    const float fitness = populationStrength[index];
+    const genetic_real fitness = populationStrength[index];
 
     if (isNotAlreadyChosen) {
       chosenIndexes[i] = index;
@@ -116,9 +113,9 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
  * is a digit
  * @param geneLength the length of the created child
  */
-static void mutate(char* gene, unsigned int geneLength) {
+static void mutate(char *gene, unsigned int geneLength) {
 
-  const float mutation = linear_congruential_random_generator();
+  const genetic_real mutation = linear_congruential_random_generator();
 
   if (mutation <= mutationRate) {
 
@@ -131,7 +128,7 @@ static void mutate(char* gene, unsigned int geneLength) {
     // We handle the last digits of each parameter
     // The values are stored as uint16_t so the largest number of the last digit
     // of each parameter is 6
-    if (mutatedIndex % UINT16_DIGIT_COUNT == 0) {
+    if (mutatedIndex % INT_MAX_DIGIT_COUNT == 0) {
       newValue = linear_congruential_random_generator() * 6;
     }
     // Converts int to char
@@ -148,24 +145,20 @@ static void mutate(char* gene, unsigned int geneLength) {
  * children
  * @param child the encoded string of the new child
  */
-static void decodeAndAddChild(uint16_t* nextGeneration,
-                              unsigned int* nextGenerationSize, char* child) {
+static void decodeAndAddChild(genetic_int *nextGeneration,
+                              unsigned int *nextGenerationSize, char *child) {
 
-  char parameter[UINT16_DIGIT_COUNT + 1];
-  parameter[UINT16_DIGIT_COUNT] = '\0';
+  char parameter[INT_MAX_DIGIT_COUNT + 1];
+  parameter[INT_MAX_DIGIT_COUNT] = '\0';
 
   unsigned int basePositionning = *nextGenerationSize * dimensions;
 
   for (unsigned int i = 0; i < dimensions; i++) {
 
-    memcpy(parameter, child + (i * UINT16_DIGIT_COUNT),
-           UINT16_DIGIT_COUNT * sizeof(char));
+    memcpy(parameter, child + (i * INT_MAX_DIGIT_COUNT),
+           INT_MAX_DIGIT_COUNT * sizeof(char));
 
-    uint32_t value = atoi(parameter);
-
-    if (value > UINT16_MAX) {
-      value = UINT16_MAX;
-    }
+    genetic_int value = atoi(parameter);
 
     nextGeneration[basePositionning + i] = value;
   }
@@ -184,11 +177,11 @@ static void decodeAndAddChild(uint16_t* nextGeneration,
  * @param nextGenerationSize the amount of values in the array of created
  * children
  */
-static void createChildren(char* firstParent, char* secondParent,
-                           uint16_t* nextGeneration,
-                           unsigned int* nextGenerationSize) {
+static void createChildren(char *firstParent, char *secondParent,
+                           genetic_int *nextGeneration,
+                           unsigned int *nextGenerationSize) {
 
-  const unsigned int arraySize = UINT16_DIGIT_COUNT * dimensions;
+  const unsigned int arraySize = INT_MAX_DIGIT_COUNT * dimensions;
   const unsigned int encodedChildStringSize = arraySize + 1;
 
   char firstChildString[encodedChildStringSize];
@@ -224,11 +217,11 @@ static void createChildren(char* firstParent, char* secondParent,
  * @param combinedValue the created string containing the encoded parent
  * @param parent an array containing the parameters of the parent
  */
-static void encode(char* combinedValue, uint16_t* parent) {
+static void encode(char *combinedValue, genetic_int *parent) {
 
   for (int i = 0; i < dimensions; i++) {
 
-    sprintf(combinedValue + (i * UINT16_DIGIT_COUNT), "%.5hu", parent[i]);
+    sprintf(combinedValue + (i * INT_MAX_DIGIT_COUNT), "%.5hu", parent[i]);
   }
 }
 /**
@@ -241,15 +234,16 @@ static void encode(char* combinedValue, uint16_t* parent) {
  * @param populationFitness this array is used to store the fitness of each
  * solution of the population
  */
-static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
+static void createNextGeneration(genetic_int *population,
+                                 genetic_int *nextGeneration,
 
-                                 float* populationFitness) {
+                                 genetic_real *populationFitness) {
 
   unsigned int currentNextGenerationSize = 0;
 
   const unsigned int nextGenerationMaxSize = populationSize - 2;
   const unsigned int mergedParentsLength =
-      (dimensions * UINT16_DIGIT_COUNT) + 1;
+      (dimensions * INT_MAX_DIGIT_COUNT) + 1;
 
   const unsigned int parentArrayByteSize = dimensions * sizeof(*population);
 
@@ -257,11 +251,11 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
 
     unsigned int parent1Number, parent2Number;
     tourney(populationFitness, &parent1Number, &parent2Number);
-    uint16_t parent1[dimensions];
-    uint16_t parent2[dimensions];
+    genetic_int parent1[dimensions];
+    genetic_int parent2[dimensions];
 
-    const uint16_t parent1Index = parent1Number * dimensions;
-    const uint16_t parent2Index = parent2Number * dimensions;
+    const genetic_int parent1Index = parent1Number * dimensions;
+    const genetic_int parent2Index = parent2Number * dimensions;
 
     memcpy(parent1, population + parent1Index, parentArrayByteSize);
     memcpy(parent2, population + parent2Index, parentArrayByteSize);
@@ -289,24 +283,25 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
  * @param secondBestValues  this is the second best fitness that was calculated
  * @param secondBestFitness  these are the parameters of the second solution
  */
-static void calculateFitness(uint16_t* population, float* populationFitness,
-                             float* bestFit, uint16_t* bestFitCoord,
+static void calculateFitness(genetic_int *population,
+                             genetic_real *populationFitness,
+                             genetic_real *bestFit, genetic_int *bestFitCoord,
                              fitness_evaluation_function evaluationFunction,
-                             uint16_t* secondBestValues,
-                             float* secondBestFitness) {
+                             genetic_int *secondBestValues,
+                             genetic_real *secondBestFitness) {
 
   const unsigned int coordArrayByteSize = dimensions * sizeof(*population);
 
   for (unsigned int i = 0; i < populationSize; i++) {
 
-    float parameters[dimensions];
+    genetic_real parameters[dimensions];
     const unsigned int baseIndex = i * dimensions;
 
     for (unsigned int j = 0; j < dimensions; j++) {
-      parameters[j] = population[baseIndex + j] * UINT16_MAX_INVERSE;
+      parameters[j] = population[baseIndex + j] * INT_MAX_INVERSE;
     }
 
-    const float fitness = evaluationFunction(parameters);
+    const genetic_real fitness = evaluationFunction(parameters);
     populationFitness[i] = fitness;
 
     if (fitness < *(bestFit)) {
@@ -340,9 +335,10 @@ static void calculateFitness(uint16_t* population, float* populationFitness,
  * second best solution
  * @param arraySize this indicates the size of the population
  */
-static void replacePopulation(uint16_t* population, uint16_t* newGeneration,
-                              uint16_t* bestFitValues,
-                              uint16_t* secondBestValues,
+static void replacePopulation(genetic_int *population,
+                              genetic_int *newGeneration,
+                              genetic_int *bestFitValues,
+                              genetic_int *secondBestValues,
                               unsigned int arraySize) {
 
   const unsigned int nextGenerationStartingIndex = 2 * dimensions;
@@ -350,11 +346,11 @@ static void replacePopulation(uint16_t* population, uint16_t* newGeneration,
   // We copy the elite values before copying the rest of the values from the
   // next generation
 
-  memcpy(population, bestFitValues, dimensions * sizeof(uint16_t));
+  memcpy(population, bestFitValues, dimensions * sizeof(genetic_int));
   memcpy(population + dimensions, secondBestValues,
-         dimensions * sizeof(uint16_t));
+         dimensions * sizeof(genetic_int));
   memcpy(population + nextGenerationStartingIndex, newGeneration,
-         arraySize * sizeof(uint16_t));
+         arraySize * sizeof(genetic_int));
 }
 
 /**
@@ -374,14 +370,16 @@ static void replacePopulation(uint16_t* population, uint16_t* newGeneration,
  * @param tourneySize the number of solutions that are chosen in the tourney ,
  * must be smallere than the population size
  * @param evaluationFunction the function that is used to
- * @return float the fitness of the best solution
+ * @return real the fitness of the best solution
  */
-float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
-                       const float epsilon, const float mutationChance,
-                       const unsigned int generationSize,
-                       const unsigned int maximumIterationCount,
-                       const unsigned int tourneySize,
-                       fitness_evaluation_function evaluationFunction) {
+genetic_real geneticAlgorithm(genetic_real *bestFitValues,
+                              const unsigned int parameterCount,
+                              const genetic_real epsilon,
+                              const genetic_real mutationChance,
+                              const unsigned int generationSize,
+                              const unsigned int maximumIterationCount,
+                              const unsigned int tourneySize,
+                              fitness_evaluation_function evaluationFunction) {
 
   mutationRate = mutationChance;
   populationSize = generationSize;
@@ -395,21 +393,21 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
   if (tournamentSelectionsSize > populationSize)
     exit(1);
 
-  float bestFit = FLT_MAX;
+  genetic_real bestFit = FLT_MAX;
 
   const unsigned int arraySize = populationSize * dimensions;
   // We created a seperate size because the child array will be two smaller than
   // the population because of the two elite values that are reinjected
   const unsigned int childArraySize = arraySize - 2;
 
-  uint16_t population[arraySize];
-  uint16_t nextGeneration[childArraySize];
-  float populationFitness[populationSize];
+  genetic_int population[arraySize];
+  genetic_int nextGeneration[childArraySize];
+  genetic_real populationFitness[populationSize];
 
-  uint16_t bestValues[dimensions];
+  genetic_int bestValues[dimensions];
 
-  uint16_t secondBestValues[dimensions];
-  float secondBestFitness = FLT_MAX;
+  genetic_int secondBestValues[dimensions];
+  genetic_real secondBestFitness = FLT_MAX;
 
   fillTable(population);
 
@@ -429,7 +427,7 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
   }
 
   for (unsigned int j = 0; j < dimensions; j++) {
-    bestFitValues[j] = bestValues[j] * UINT16_MAX_INVERSE;
+    bestFitValues[j] = bestValues[j] * INT_MAX_INVERSE;
   }
   return bestFit;
 }
