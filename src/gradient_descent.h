@@ -38,16 +38,6 @@ typedef gradient_real (*f1dimension)(function func, gradient_real x,
                                      gradient_real initialPoint[],
                                      gradient_real direction[], int n);
 
-/// @brief Applies the conjugate gradient descent method to find the minimum of
-/// a provided function
-/// @param func Function to minimize
-/// @param dfunc Derivative of the function to minimize
-/// @param guess Initial guess from which to start the search
-/// @param n Number of dimensions of the function
-/// @param tol Tolerance for the estimate of the minimum. Should be no smaller
-/// then the square-root of the machine floating point precision
-/// @param itMax Maximum number of iterations before stoping the search
-/// @return Value of the function at the minimum
 gradient_real gradient_descent(function func, derivative dfunc,
                                gradient_real guess[], int n, gradient_real tol,
                                int itMax);

@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "../src/1chipml.h"
+#include <gradient_descent.h>
 
 #define TOL 2.0e-4
 #define ITMAX 10
