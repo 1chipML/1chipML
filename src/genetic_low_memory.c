@@ -58,7 +58,7 @@ static void fillTable(uint16_t* population) {
  */
 static void tourney(uint16_t* population, unsigned int* firstParentIndex,
                     unsigned int* secondParentIndex,
-                    float (*evaluationFunction)(float*)) {
+                    fitness_evaluation_function evaluationFunction) {
 
   float chosenIndexes[tournamentSelectionsSize];
   float bestFitness = FLT_MAX;
@@ -202,12 +202,11 @@ static void createChildren(char* firstParent, char* secondParent,
   for (unsigned int i = 0; i < arraySize; i++) {
 
     if (linear_congruential_random_generator() <= 0.5) {
-
-      firstChildString[i] = firstParent[i];
-      secondChildString[i] = secondParent[i];
+      memcpy(firstChildString + i, firstParent + i, sizeof(char));
+      memcpy(secondChildString + i, secondParent + i, sizeof(char));
     } else {
-      firstChildString[i] = secondParent[i];
-      secondChildString[i] = firstParent[i];
+      memcpy(firstChildString + i, secondParent + i, sizeof(char));
+      memcpy(secondChildString + i, firstParent + i, sizeof(char));
     }
   }
 
@@ -245,9 +244,10 @@ static void encode(char* combinedValue, uint16_t* parent) {
  * @param evaluationFunction the function that is used to evaluate each solution
  * in the population
  */
-static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
+static void
+createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
 
-                                 float (*evaluationFunction)(float*)) {
+                     fitness_evaluation_function evaluationFunction) {
 
   unsigned int currentNextGenerationSize = 0;
   const unsigned int nextGenerationMaxSize = populationSize - 2;
@@ -292,7 +292,7 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
  */
 static void calculateFitness(uint16_t* population, float* bestFit,
                              uint16_t* bestFitCoord,
-                             float (*evaluationFunction)(float*),
+                             fitness_evaluation_function evaluationFunction,
                              uint16_t* secondBestValues,
                              float* secondBestFitness) {
 
@@ -322,7 +322,7 @@ static void calculateFitness(uint16_t* population, float* bestFit,
 
       *secondBestFitness = fitness;
       memcpy(secondBestValues, population + (i * dimensions),
-             dimensions * sizeof(uint16_t));
+             coordArrayByteSize);
     }
   }
 }
@@ -378,7 +378,7 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
                        const unsigned int generationSize,
                        const unsigned int generations,
                        const unsigned int tourneySize,
-                       float (*evaluationFunction)(float*)) {
+                       fitness_evaluation_function evaluationFunction) {
 
   mutationRate = mutationChance;
   populationSize = generationSize;

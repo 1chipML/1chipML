@@ -195,11 +195,11 @@ static void createChildren(char* firstParent, char* secondParent,
   for (unsigned int i = 0; i < arraySize; i++) {
 
     if (linear_congruential_random_generator() <= 0.5) {
-      firstChildString[i] = firstParent[i];
-      secondChildString[i] = secondParent[i];
+      memcpy(firstChildString + i, firstParent + i, sizeof(char));
+      memcpy(secondChildString + i, secondParent + i, sizeof(char));
     } else {
-      firstChildString[i] = secondParent[i];
-      secondChildString[i] = firstParent[i];
+      memcpy(firstChildString + i, secondParent + i, sizeof(char));
+      memcpy(secondChildString + i, firstParent + i, sizeof(char));
     }
   }
 
@@ -286,7 +286,7 @@ static void createNextGeneration(uint16_t* population, uint16_t* nextGeneration,
  */
 static void calculateFitness(uint16_t* population, float* populationFitness,
                              float* bestFit, uint16_t* bestFitCoord,
-                             float (*evaluationFunction)(float*),
+                             fitness_evaluation_function evaluationFunction,
                              uint16_t* secondBestValues,
                              float* secondBestFitness) {
 
@@ -376,7 +376,7 @@ float geneticAlgorithm(float* bestFitValues, const unsigned int parameterCount,
                        const unsigned int generationSize,
                        const unsigned int maximumIterationCount,
                        const unsigned int tourneySize,
-                       float (*evaluationFunction)(float*)) {
+                       fitness_evaluation_function evaluationFunction) {
 
   mutationRate = mutationChance;
   populationSize = generationSize;
