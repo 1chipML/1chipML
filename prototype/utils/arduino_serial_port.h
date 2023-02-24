@@ -19,4 +19,8 @@ void writeElement(void* element,
                   const uint32_t sizeOfElement);
 
 
+<<<<<<< HEAD
 #endif // ARDUINO_SERIAL_PORT_H
+=======
+#endif // ARDUINO_SERIAL_PORT_H
+>>>>>>> c6c0a1f... Anomaly detection prototype

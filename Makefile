@@ -44,11 +44,7 @@ gradient_descent: ./$(TEST_FOLDER)/test_gradient_descent.c ./src/gradient_descen
 fast_sincos: ./$(TEST_FOLDER)/test_fast_sincos.c ./src/fast_sincos.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-gradient_descent: ./tests/test_gradient_descent.c ./src/gradient_descent.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
-
 run_all_tests:
-<<<<<<< HEAD
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out
 	./$(BUILD_FOLDER)/test_poly_interpolation.out
@@ -62,12 +58,6 @@ run_all_tests:
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)
-=======
-	./test_linear_congruential_random_generator.out
-	./test_gauss_elimination.out
-	./test_poly_interpolation.out
-	./test_gradient_descent.out
->>>>>>> dc9a1d0... gradient descent prototype
 
 clean:
 	rm -rf $(BUILD_FOLDER)
