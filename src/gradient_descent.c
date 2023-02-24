@@ -1,4 +1,4 @@
-#include <gradient_descent.h>
+#include "gradient_descent.h"
 
 /**
  * @brief Transforms an N dimension function into a 1 dimension function from the initialPoint along the given direction
@@ -50,7 +50,7 @@ static gradient_real brent(gradient_real *xMin, Bracket bracket,
 
   // Minimum is bracketed between a and b
   gradient_real a = fmin(bracket.a, bracket.c);
-  gradient_real b = fax(bracket.a, bracket.c);
+  gradient_real b = fmax(bracket.a, bracket.c);
 
   // x : Point with the smallest function value found so far
   // secondXMin : Point with the second smallest function value found so far
