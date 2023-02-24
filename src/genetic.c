@@ -69,6 +69,11 @@ static void tourney(float* populationStrength, unsigned int* firstParentIndex,
         linear_congruential_random_generator() * populationSize;
     uint8_t isNotAlreadyChosen = 1;
 
+    // We generate a float between 0 and populationSize and then convert it to
+    // an int. On the slight chance that the generated number by
+    // linear_congruential_generator = 1.00 we loop again.
+    // This solution lets us have exactly the same amount of odds to get each
+    // number
     while (index == populationSize) {
       index = linear_congruential_random_generator() * populationSize;
     }
