@@ -1,4 +1,5 @@
 
+
 <html>
 <p align="center">
   <img src="https://github.com/1chipML/artwork/blob/main/1chipML%2BLFAI%26Data.png" alt="1chipML logo and LF AI & Data Logo" width="300">
@@ -8,6 +9,7 @@
   1chipML
 </h1>
 
+![Build and Tests](https://github.com/felix642/1chipML/actions/workflows/make.yml/badge.svg?style=flat)
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5704/badge)](https://bestpractices.coreinfrastructure.org/projects/5704)
 
