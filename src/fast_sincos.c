@@ -15,7 +15,7 @@ static inline double scaleValueToRadians32(const uint32_t value);
 
 /**
  * @brief Fast sine computation.
- * With degrees over 2, the Chebyshev approximation is used to compute the sine of the angle.
+ * With degrees over 3, 5 and 7, the Chebyshev approximation is used to compute the sine of the angle.
  * With degree = 2, the sine is computed with a lookup sine table and interpolation.
  * With degree = 1, the sine is computed with a lookup sine table only.
  * @param angleRadians The angle, in radians.
@@ -68,7 +68,7 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
 
 /**
  * @brief Fast cosine computation.
- * With degrees over 2, the Chebyshev approximation is used to compute the cosine of the angle.
+ * With degrees over 3, 5 and 7, the Chebyshev approximation is used to compute the cosine of the angle.
  * With degree = 2, the cosine is computed with a lookup sine table and interpolation.
  * With degree = 1, the cosine is computed with a lookup sine table only.
  * @param angleRadians The angle, in radians
