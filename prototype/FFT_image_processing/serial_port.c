@@ -11,7 +11,6 @@
 #include <unistd.h> // write(), read(), close()
 
 static int setupSerialPort(int serialPort);
-static int readElement(void* element, const unsigned sizeOfElement);
 static int fileDescriptor = -1;
 
 
@@ -128,8 +127,8 @@ static int setupSerialPort(int serialPort) {
     tty.c_cc[VMIN] = 1; // Wait until one byte is received
     tty.c_cc[VTIME] = 0; // Wait for up to 0s (Blocking at 0)
     
-    cfsetospeed (&tty, B9600); // Output baud rate 
-    cfsetispeed (&tty, B9600); // Input baud rate 
+    cfsetospeed(&tty, B9600); // Output baud rate 
+    cfsetispeed(&tty, B9600); // Input baud rate 
 
     // Save tty settings
     tcflush(serialPort, TCIOFLUSH);
@@ -146,7 +145,7 @@ static int setupSerialPort(int serialPort) {
     return 0;
 }
 
-int writeFloatArray(const uint32_t size, float* array) {
+int writeFloatArray(uint32_t size, float* array) {
     if (fileDescriptor < 0) {
         return -1;
     }
@@ -155,7 +154,7 @@ int writeFloatArray(const uint32_t size, float* array) {
     int returnValue = -1;
 
     // Send array size first
-    returnValue = write(fileDescriptor, &size, sizeof(size));
+    returnValue = writeElement(&size, sizeof(size));
     if (returnValue == -1) {
         printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
         return returnValue;
@@ -164,7 +163,7 @@ int writeFloatArray(const uint32_t size, float* array) {
 
     // Send individual floats
     for (uint32_t i = 0; i < size; ++i) {
-        returnValue = write(fileDescriptor, &array[i], sizeof(array[i]));
+        returnValue = writeElement(&array[i], sizeof(array[i]));
 
         if (returnValue == -1) {
             printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
@@ -253,11 +252,14 @@ int readUnkownFloatArray(uint32_t* outSize, float** outArray) {
  * @brief According to the current tty.c_cc[VMIN] setting,
  * read one byte at a time
 */
-static int readElement(void* element, const unsigned sizeOfElement) {
+int readElement(void* element, const unsigned sizeOfElement) {
+    if (fileDescriptor < 0) {
+        return -1;
+    }
+    
     unsigned char* readElement = (unsigned char*) element;
-
-    int returnValue = 0;
     int numBytesRead = 0;
+    int returnValue = -1;
 
     for(unsigned i = 0; i < sizeOfElement; i++) {
         returnValue = read(fileDescriptor, &readElement[i], sizeof(unsigned char));
@@ -269,4 +271,22 @@ static int readElement(void* element, const unsigned sizeOfElement) {
     }
 
     return numBytesRead;
+}
+
+int writeElement(void* element, const unsigned sizeOfElement) {
+    if (fileDescriptor < 0) {
+        return -1;
+    }
+    
+    int numBytesWritten = 0;
+    int returnValue = -1;
+
+    returnValue = write(fileDescriptor, element, sizeOfElement);
+    if (returnValue == -1) {
+        printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
+        return returnValue;
+    }
+    numBytesWritten += returnValue;
+
+    return numBytesWritten;
 }

@@ -3,10 +3,29 @@
 #include <stdio.h>
 #include <time.h>
 
+#define fft_real float
 // project includes
 #include <1chipml.h>
 #include "bitmap.h"
 #include "serial_port.h"
+
+static void FFTOverSerial(uint32_t length, fft_real* reals, fft_real* imgs, int32_t dir) {
+  // Writing
+  // write length
+  writeElement(&length, sizeof(length));
+  // write reals
+  writeFloatArray(length, reals);
+  // write imaginaries
+  writeFloatArray(length, imgs);
+  // write direction
+  writeElement(&dir, sizeof(dir));
+
+  // Reading
+  // read reals
+  readFloatArray(length, reals);
+  // read imaginaries
+  readFloatArray(length, imgs);
+}
 
 static inline unsigned int nextPowerOf2(const unsigned int value) {
   unsigned int k = 1;
