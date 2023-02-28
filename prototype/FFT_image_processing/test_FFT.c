@@ -89,7 +89,7 @@ int main() {
   float* array = malloc(size * sizeof(float));
 
   for(uint32_t i = 0; i < size; ++i) {
-    array[i] = i + 1;
+    array[i] = i + 1.0 * 0.1;
   }
 
   writeFloatArray(size, array);
@@ -98,7 +98,7 @@ int main() {
   free(array);
   array = NULL;
 
-  readFloatArray(&size, &array);
+  readUnkownFloatArray(&size, &array);
 
   printf("size = %d\n", size);
   for(uint32_t i = 0; i < size; ++i) {

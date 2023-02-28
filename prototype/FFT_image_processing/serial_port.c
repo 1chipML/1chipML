@@ -11,6 +11,7 @@
 #include <unistd.h> // write(), read(), close()
 
 static int setupSerialPort(int serialPort);
+static int readElement(void* element, const unsigned sizeOfElement);
 static int fileDescriptor = -1;
 
 
@@ -123,7 +124,8 @@ static int setupSerialPort(int serialPort) {
     tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
     tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
 
-    tty.c_cc[VMIN] = 4; // Wait until one byte is received
+    // VMIN and VTIME have no effect in canonical mode
+    tty.c_cc[VMIN] = 1; // Wait until one byte is received
     tty.c_cc[VTIME] = 0; // Wait for up to 0s (Blocking at 0)
     
     cfsetospeed (&tty, B9600); // Output baud rate 
@@ -156,7 +158,7 @@ int writeFloatArray(const uint32_t size, float* array) {
     returnValue = write(fileDescriptor, &size, sizeof(size));
     if (returnValue == -1) {
         printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
-        return -1;
+        return returnValue;
     }
     numBytesWritten += returnValue;
 
@@ -166,7 +168,7 @@ int writeFloatArray(const uint32_t size, float* array) {
 
         if (returnValue == -1) {
             printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
-            return -1;
+            return returnValue;
         }
         numBytesWritten += returnValue;
     }
@@ -174,11 +176,39 @@ int writeFloatArray(const uint32_t size, float* array) {
     return numBytesWritten;
 }
 
+int readFloatArray(const uint32_t readSize, float* outArray) {
+    if (fileDescriptor < 0) {
+        return -1;
+    }
+
+    uint32_t arraySize = 0;
+    int numBytesRead = 0;
+    int returnValue = -1;
+
+    // Read array size first
+    returnValue = readElement(&arraySize, sizeof(arraySize));
+    if (returnValue == -1) {
+        return returnValue;
+    }
+    numBytesRead += returnValue;
+
+    // Read individual floats
+    for (uint32_t i = 0; i < arraySize; ++i) {
+        returnValue = readElement(&outArray[i], sizeof(outArray[i]));
+        if (returnValue == -1) {
+            return returnValue;
+        }
+        numBytesRead += returnValue;
+    }
+
+    return numBytesRead;
+}
+
 /**
  * 
  * 1D array reference
 */
-int readFloatArray(uint32_t* outSize, float** outArray) {
+int readUnkownFloatArray(uint32_t* outSize, float** outArray) {
     if (fileDescriptor < 0) {
         return -1;
     }
@@ -186,17 +216,17 @@ int readFloatArray(uint32_t* outSize, float** outArray) {
     uint32_t arraySize = 0; 
     float* readArray = NULL; 
     int numBytesRead = 0;
-    int returnValue = 1;
+    int returnValue = -1;
 
     // Read array size first
-    returnValue = read(fileDescriptor, &arraySize, sizeof(arraySize));
+    returnValue = readElement(&arraySize, sizeof(arraySize));
     if (returnValue == -1) {
-        printf("Error %i from reading to serial port: %s\n", errno, strerror(errno));
-        return -1;
+        return returnValue;
     }
     numBytesRead += returnValue;
 
     if (arraySize == 0) {
+        *outSize = arraySize;
         return numBytesRead;
     }
 
@@ -205,10 +235,8 @@ int readFloatArray(uint32_t* outSize, float** outArray) {
 
     // Read individual floats
     for (uint32_t i = 0; i < arraySize; ++i) {
-        returnValue = read(fileDescriptor, &readArray[i], sizeof(readArray[i]));
-
+        returnValue = readElement(&readArray[i], sizeof(readArray[i]));
         if (returnValue == -1) {
-            printf("Error %i from reading to serial port: %s\n", errno, strerror(errno));
             free(readArray);
             return returnValue;
         }
@@ -217,6 +245,28 @@ int readFloatArray(uint32_t* outSize, float** outArray) {
 
     *outSize = arraySize;
     *outArray = readArray;
+
+    return numBytesRead;
+}
+
+/**
+ * @brief According to the current tty.c_cc[VMIN] setting,
+ * read one byte at a time
+*/
+static int readElement(void* element, const unsigned sizeOfElement) {
+    unsigned char* readElement = (unsigned char*) element;
+
+    int returnValue = 0;
+    int numBytesRead = 0;
+
+    for(unsigned i = 0; i < sizeOfElement; i++) {
+        returnValue = read(fileDescriptor, &readElement[i], sizeof(unsigned char));
+        if (returnValue == -1) {
+            printf("Error %i from reading to serial port: %s\n", errno, strerror(errno));
+            return -1;
+        }
+        numBytesRead += returnValue;
+    }
 
     return numBytesRead;
 }
