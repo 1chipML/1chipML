@@ -5,11 +5,10 @@
 
 #define fft_real float
 // project includes
-#include <1chipml.h>
 #include "bitmap.h"
 #include "serial_port.h"
 
-static void FFTOverSerial(uint32_t length, fft_real* reals, fft_real* imgs, int32_t dir) {
+static int FFTOverSerial(uint16_t length, fft_real* reals, fft_real* imgs, int16_t dir) {
   // Writing
   // write length
   writeElement(&length, sizeof(length));
@@ -25,6 +24,8 @@ static void FFTOverSerial(uint32_t length, fft_real* reals, fft_real* imgs, int3
   readArray(length, reals, sizeof(fft_real));
   // read imaginaries
   readArray(length, imgs, sizeof(fft_real));
+
+  return 1;
 }
 
 static inline unsigned int nextPowerOf2(const unsigned int value) {
@@ -66,7 +67,7 @@ static int fft2D(unsigned int height, unsigned int width, fft_real** reals, fft_
   
   // start with the rows
   for (int i = 0; i < height; i++) {
-    int success = FFT(width, reals[i], imgs[i], dir);
+    int success = FFTOverSerial(width, reals[i], imgs[i], dir);
     if (success == -1) {
       return success;
     }
@@ -81,7 +82,7 @@ static int fft2D(unsigned int height, unsigned int width, fft_real** reals, fft_
       nextImgs[j] = imgs[j][i];
     }
 
-    int success = FFT(height, nextReals, nextImgs, dir);
+    int success = FFTOverSerial(height, nextReals, nextImgs, dir);
     if (success == -1) {
       return success;
     }
@@ -104,28 +105,16 @@ int main() {
     return exitCode;
   }
 
-  uint32_t size = 5;
-  float* array = malloc(size * sizeof(float));
+  uint16_t size = 4;
+  fft_real FFTinputReals[] = {8, 4, 8, 0};
+  fft_real FFTinputImgs[] = {0, 0, 0, 0};
 
-  for(uint32_t i = 0; i < size; ++i) {
-    array[i] = i + 1.0 * 0.1;
-  }
-
-  writeElement(&size, sizeof(size));
-  writeArray(size, array, sizeof(float));
-
-  for(uint32_t i = 0; i < size; ++i) {
-    array[i] = 0;
-  }
-
-  readArray(size, array, sizeof(float));
+  FFTOverSerial(size, FFTinputReals, FFTinputImgs, 1);
 
   printf("size = %d\n", size);
-  for(uint32_t i = 0; i < size; ++i) {
-    printf("%f\n", array[i]);
+  for(int16_t i = 0; i < size; ++i) {
+    printf("real = %f, img = %f\n", FFTinputReals[i], FFTinputImgs[i]);
   }
-
-  free(array);
 
   closeSerialPort();
 

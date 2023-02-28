@@ -4,30 +4,64 @@
 #include "FFT.h"
 
 void setup() {
-  // put your setup code here, to run once:
   // initialize serial:
   Serial.begin(9600, SERIAL_8N1);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 }
 
+unsigned lastFFTLength = 0;
+unsigned FFTLength = 0;
+float* FFTreals = NULL;
+float* FFTimgs = NULL;
+int dir = 0;
+
 void loop() {
-  // put your main code here, to run repeatedly:
   if (Serial.available()) {
 
-    uint32_t size = 0;
-    float* array = NULL;
-    readElement(&size, sizeof(size));
 
-    if (size > 0) {
-      array = malloc(size * sizeof(float));
+    // FFT over serial
+
+    // Reading
+    // read length
+    readElement(&FFTLength, sizeof(FFTLength));
+
+    // init arrays
+    if (FFTLength != lastFFTLength && FFTLength > 0) {
+      free(FFTreals);
+      free(FFTimgs);
+      FFTreals = malloc(FFTLength * sizeof(fft_real));
+      FFTimgs = malloc(FFTLength * sizeof(fft_real));
+
+      lastFFTLength = FFTLength;
     }
 
-    readArray(size, array, sizeof(float));
-    writeArray(size, array, sizeof(float));
+    // read reals
+    readArray(FFTLength, FFTreals, sizeof(fft_real));
+    // read imaginaries
+    readArray(FFTLength, FFTimgs, sizeof(fft_real));
+    // read direction
+    readElement(&dir, sizeof(dir));
 
-    free(array);
-    array = NULL;
+    //Execute FFT
+    FFT(FFTLength, FFTreals, FFTimgs, dir);
+
+    // Writing
+    // write reals
+    writeArray(FFTLength, FFTreals, sizeof(fft_real));
+    // write imaginaries
+    writeArray(FFTLength, FFTimgs, sizeof(fft_real));
+
+    //uint32_t size = 0;
+    //float* array = NULL;
+    //readElement(&size, sizeof(size));
+    //if (size > 0) {
+    //  array = malloc(size * sizeof(float));
+    //}
+    //readArray(size, array, sizeof(float));
+    //writeArray(size, array, sizeof(float));
+    //free(array);
+    //array = NULL;
 
     //char buffer[] = "     ";
     //Serial.readBytes(buffer, 6);
