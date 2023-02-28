@@ -94,11 +94,11 @@ int main() {
 
   writeFloatArray(size, array);
 
-  size = 0;
-  free(array);
-  array = NULL;
+  for(uint32_t i = 0; i < size; ++i) {
+    array[i] = 0;
+  }
 
-  readUnkownFloatArray(&size, &array);
+  readFloatArray(size, array);
 
   printf("size = %d\n", size);
   for(uint32_t i = 0; i < size; ++i) {
