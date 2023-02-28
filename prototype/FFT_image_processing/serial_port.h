@@ -3,9 +3,9 @@
 void closeSerialPort();
 int openSerialPort(char* portName);
 
-int writeFloatArray(const uint32_t size, float* array);
+int readArray(const unsigned arraySize, void* outArray, const unsigned sizeOfElement);
+int readElement(void* element, const unsigned sizeOfElement);
+
+int writeArray(const unsigned arraySize, void* array, const unsigned sizeOfElement);
 int writeElement(void* element, const unsigned sizeOfElement);
 
-int readFloatArray(const uint32_t readSize, float* outArray);
-int readUnkownFloatArray(uint32_t* outSize, float** outArray);
-int readElement(void* element, const unsigned sizeOfElement);

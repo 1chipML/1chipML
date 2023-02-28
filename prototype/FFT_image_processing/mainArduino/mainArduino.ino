@@ -17,11 +17,17 @@ void loop() {
 
     uint32_t size = 0;
     float* array = NULL;
-    readFloatArray(&size, &array);
-    
-    writeFloatArray(size, array);
+    readElement(&size, sizeof(size));
+
+    if (size > 0) {
+      array = malloc(size * sizeof(float));
+    }
+
+    readArray(size, array, sizeof(float));
+    writeArray(size, array, sizeof(float));
 
     free(array);
+    array = NULL;
 
     //char buffer[] = "     ";
     //Serial.readBytes(buffer, 6);
@@ -43,44 +49,25 @@ void loop() {
   
 }
 
-void writeFloatArray(const uint32_t size, float* array) {
-  // Send array size first
-  while(!Serial.availableForWrite()); // wait for write
-  Serial.write((unsigned char*) &size, sizeof(size));
-
-  // Send individual floats
-  for (uint32_t i = 0; i < size; ++i) {
-    while(!Serial.availableForWrite()); // wait for write
-    Serial.write((unsigned char*) &array[i], sizeof(array[i]));
-  }
-
+int readArray(const uint32_t arraySize, void* outArray, const uint32_t sizeOfElement) {
+  readElement(outArray, arraySize * sizeOfElement);
 }
 
-// blocking serial read
-void readFloatArray(uint32_t* outSize, float** outArray) {
+void writeArray(const uint32_t arraySize, void* array, const uint32_t sizeOfElement) {
+  writeElement(array, arraySize * sizeOfElement);
+}
 
-  uint32_t arraySize = 0; 
-  float* readArray = NULL;
+void readElement(void* element, const uint32_t sizeOfElement) {
 
-  // Read array size first
-  while(Serial.available() < 4); // Wait for element
+  unsigned char* readElement = (unsigned char*) element;
+  for(uint32_t i = 0; i < sizeOfElement; ++i) {
+    while(Serial.available() < 1); // Wait for element
+    Serial.readBytes(&readElement[i], sizeof(unsigned char));
+  }
   
-  Serial.readBytes((unsigned char*) &arraySize, sizeof(arraySize));
-
-  // Allocate memory for reading
-  if (arraySize == 0) {
-    return;
-  }
-
-  readArray = malloc(arraySize * sizeof(float));
-
-  // Read individual floats
-  for (uint32_t i = 0; i < arraySize; ++i) {
-    while(Serial.available() < 4); // Wait for element
-    Serial.readBytes((unsigned char*) &readArray[i], sizeof(readArray[i]));
-  }
-
-  *outSize = arraySize;
-  *outArray = readArray;
 }
 
+void writeElement(void* element, const uint32_t sizeOfElement) {
+  while(!Serial.availableForWrite()); // wait for write
+  Serial.write((unsigned char*) element, sizeOfElement);
+}

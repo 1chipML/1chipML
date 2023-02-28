@@ -145,107 +145,14 @@ static int setupSerialPort(int serialPort) {
     return 0;
 }
 
-int writeFloatArray(uint32_t size, float* array) {
-    if (fileDescriptor < 0) {
-        return -1;
-    }
-
-    int numBytesWritten = 0;
-    int returnValue = -1;
-
-    // Send array size first
-    returnValue = writeElement(&size, sizeof(size));
-    if (returnValue == -1) {
-        printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
-        return returnValue;
-    }
-    numBytesWritten += returnValue;
-
-    // Send individual floats
-    for (uint32_t i = 0; i < size; ++i) {
-        returnValue = writeElement(&array[i], sizeof(array[i]));
-
-        if (returnValue == -1) {
-            printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
-            return returnValue;
-        }
-        numBytesWritten += returnValue;
-    }
-
+int readArray(const unsigned arraySize, void* outArray, const unsigned sizeOfElement) {
+    int numBytesWritten = readElement(outArray, arraySize * sizeOfElement);
     return numBytesWritten;
 }
 
-int readFloatArray(const uint32_t readSize, float* outArray) {
-    if (fileDescriptor < 0) {
-        return -1;
-    }
-
-    uint32_t arraySize = 0;
-    int numBytesRead = 0;
-    int returnValue = -1;
-
-    // Read array size first
-    returnValue = readElement(&arraySize, sizeof(arraySize));
-    if (returnValue == -1) {
-        return returnValue;
-    }
-    numBytesRead += returnValue;
-
-    // Read individual floats
-    for (uint32_t i = 0; i < arraySize; ++i) {
-        returnValue = readElement(&outArray[i], sizeof(outArray[i]));
-        if (returnValue == -1) {
-            return returnValue;
-        }
-        numBytesRead += returnValue;
-    }
-
-    return numBytesRead;
-}
-
-/**
- * 
- * 1D array reference
-*/
-int readUnkownFloatArray(uint32_t* outSize, float** outArray) {
-    if (fileDescriptor < 0) {
-        return -1;
-    }
-
-    uint32_t arraySize = 0; 
-    float* readArray = NULL; 
-    int numBytesRead = 0;
-    int returnValue = -1;
-
-    // Read array size first
-    returnValue = readElement(&arraySize, sizeof(arraySize));
-    if (returnValue == -1) {
-        return returnValue;
-    }
-    numBytesRead += returnValue;
-
-    if (arraySize == 0) {
-        *outSize = arraySize;
-        return numBytesRead;
-    }
-
-    // Allocate memory for reading
-    readArray = malloc(arraySize * sizeof(float));
-
-    // Read individual floats
-    for (uint32_t i = 0; i < arraySize; ++i) {
-        returnValue = readElement(&readArray[i], sizeof(readArray[i]));
-        if (returnValue == -1) {
-            free(readArray);
-            return returnValue;
-        }
-        numBytesRead += returnValue;
-    }
-
-    *outSize = arraySize;
-    *outArray = readArray;
-
-    return numBytesRead;
+int writeArray(const unsigned arraySize, void* array, const unsigned sizeOfElement) {
+    int numBytesWritten = writeElement(array, arraySize * sizeOfElement);
+    return numBytesWritten;
 }
 
 /**

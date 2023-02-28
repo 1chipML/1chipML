@@ -14,17 +14,17 @@ static void FFTOverSerial(uint32_t length, fft_real* reals, fft_real* imgs, int3
   // write length
   writeElement(&length, sizeof(length));
   // write reals
-  writeFloatArray(length, reals);
+  writeArray(length, reals, sizeof(fft_real));
   // write imaginaries
-  writeFloatArray(length, imgs);
+  writeArray(length, imgs, sizeof(fft_real));
   // write direction
   writeElement(&dir, sizeof(dir));
 
   // Reading
   // read reals
-  readFloatArray(length, reals);
+  readArray(length, reals, sizeof(fft_real));
   // read imaginaries
-  readFloatArray(length, imgs);
+  readArray(length, imgs, sizeof(fft_real));
 }
 
 static inline unsigned int nextPowerOf2(const unsigned int value) {
@@ -111,13 +111,14 @@ int main() {
     array[i] = i + 1.0 * 0.1;
   }
 
-  writeFloatArray(size, array);
+  writeElement(&size, sizeof(size));
+  writeArray(size, array, sizeof(float));
 
   for(uint32_t i = 0; i < size; ++i) {
     array[i] = 0;
   }
 
-  readFloatArray(size, array);
+  readArray(size, array, sizeof(float));
 
   printf("size = %d\n", size);
   for(uint32_t i = 0; i < size; ++i) {
