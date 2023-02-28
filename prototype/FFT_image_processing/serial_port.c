@@ -127,8 +127,8 @@ static int setupSerialPort(int serialPort) {
     tty.c_cc[VMIN] = 1; // Wait until one byte is received
     tty.c_cc[VTIME] = 0; // Wait for up to 0s (Blocking at 0)
     
-    cfsetospeed(&tty, B9600); // Output baud rate 
-    cfsetispeed(&tty, B9600); // Input baud rate 
+    cfsetospeed(&tty, B115200); // Output baud rate 
+    cfsetispeed(&tty, B115200); // Input baud rate 
 
     // Save tty settings
     tcflush(serialPort, TCIOFLUSH);

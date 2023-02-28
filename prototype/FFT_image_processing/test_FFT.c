@@ -4,41 +4,79 @@
 #include <time.h>
 
 #define fft_real float
+
 // project includes
 #include "bitmap.h"
 #include "serial_port.h"
 
+/**
+ * @brief Sends an FFT over serial communication. 
+ * The serial communication must be opened beforehand for the data to be sent.
+ * @param length The length of the FFT array. Must be a power of 2.
+ * @param reals The real part of the FFT array.
+ * This array will contain the end result of the real part of the FFT
+ * @param reals The imaginary part of the FFT array.
+ * This array will contain the end result of the imaginary part of the FFT
+ * @param dir The direction of the FFT. 1 for the FFT, -1 for the inverse FFT.
+ * @return 0 if everything went correctly, 1 otherwise
+*/
 static int FFTOverSerial(uint16_t length, fft_real* reals, fft_real* imgs, int16_t dir) {
   // Writing
   // write length
-  writeElement(&length, sizeof(length));
+  int returncode = writeElement(&length, sizeof(length));
   // write reals
-  writeArray(length, reals, sizeof(fft_real));
+  if (returncode >= 0) {
+    int writeCode = writeArray(length, reals, sizeof(fft_real));
+    returncode = writeCode < 0 ? writeCode : returncode + writeCode;
+  }
   // write imaginaries
-  writeArray(length, imgs, sizeof(fft_real));
+  if (returncode >= 0) {
+    int writeCode = writeArray(length, imgs, sizeof(fft_real));
+    returncode = writeCode < 0 ? writeCode : returncode + writeCode;
+  }
   // write direction
-  writeElement(&dir, sizeof(dir));
+  if (returncode >= 0) {
+    int writeCode = writeElement(&dir, sizeof(dir));
+    returncode = writeCode < 0 ? writeCode : returncode + writeCode;
+  }
 
   // Reading
   // read reals
-  readArray(length, reals, sizeof(fft_real));
+  if (returncode >= 0) {
+    int writeCode = readArray(length, reals, sizeof(fft_real));
+    returncode = writeCode < 0 ? writeCode : returncode + writeCode;
+  }
   // read imaginaries
-  readArray(length, imgs, sizeof(fft_real));
+  if (returncode >= 0) {
+    int writeCode = readArray(length, imgs, sizeof(fft_real));
+    returncode = writeCode < 0 ? writeCode : returncode + writeCode;
+  }
 
-  return 1;
+  return returncode >= 0 ? 0 : 1;
 }
 
-static inline unsigned int nextPowerOf2(const unsigned int value) {
-  unsigned int k = 1;
+/**
+ * @brief Finds the next power of 2 of the incoming value.
+ * @param value The value to find the next power of 2.
+ * @return The next power of 2 of the incoming value
+*/
+static inline unsigned int nextPowerOf2(const unsigned value) {
+  unsigned k = 1;
   while (k < value) {
     k <<= 1;
   }
   return k;
 }
 
+/**
+ * @brief Shift FFT matrix. Only works for even sized matrix.
+ * @param height The height of the matrix.
+ * @param width The width of the matrix.
+ * @param reals The real part of the FFT matrix.
+ * @param imgs The imaginary part of the FFT matrix.
+*/
 static void fftShift(unsigned int height, unsigned int width, fft_real** reals, fft_real** imgs) {
-  // shift fft matrix
-  // Move horizontally
+  // Shift the matrix horizontally first
   for (int i = 0; i < height; ++i) {
     for (int j = 0; j < width / 2; ++j) {
       fft_real tmpReal = reals[i][j];
@@ -50,7 +88,7 @@ static void fftShift(unsigned int height, unsigned int width, fft_real** reals, 
     }
   }
 
-  // Move vertically
+  // Shift the matrix vertically
   for (int i = 0; i < height / 2; ++i) {
     for (int j = 0; j < width; ++j) {
       fft_real tmpReal = reals[i][j];
@@ -63,31 +101,46 @@ static void fftShift(unsigned int height, unsigned int width, fft_real** reals, 
   }
 }
 
-static int fft2D(unsigned int height, unsigned int width, fft_real** reals, fft_real** imgs, int dir) {
+/**
+ * @brief Computes the 2D FFT on a matrix of reals and imaginary numbers.
+ * @param height The height of the matrix. Must be a power of 2.
+ * @param width The width of the matrix. Must be a power of 2.
+ * @param reals The real part of the FFT matrix.
+ * This matrix will contain the end result of the real part of the FFT.
+ * @param imgs The imaginary part of the FFT matrix.
+ * This matrix will contain the end result of the imaginary part of the FFT.
+ * @param dir The direction of the FFT. 1 for the FFT, -1 for the inverse FFT.
+ * @return 0 if everything went correctly
+*/
+static int fft2D(unsigned height, unsigned int width, fft_real** reals, fft_real** imgs, int dir) {
   
-  // start with the rows
-  for (int i = 0; i < height; i++) {
+  // Start with the rows
+  for (unsigned i = 0; i < height; i++) {
     int success = FFTOverSerial(width, reals[i], imgs[i], dir);
-    if (success == -1) {
+    if (success != 0) {
       return success;
     }
   }
 
-  // end with columns
-  for (int i = 0; i < width; i++) {
+  // End with columns
+  for (unsigned i = 0; i < width; i++) {
     fft_real nextReals[height];
     fft_real nextImgs[height];
-    for (int j = 0; j < height; j++) {
+
+    // Prepare the FFT array
+    for (unsigned j = 0; j < height; j++) {
       nextReals[j] = reals[j][i];
       nextImgs[j] = imgs[j][i];
     }
 
+    // Compute the FFT
     int success = FFTOverSerial(height, nextReals, nextImgs, dir);
-    if (success == -1) {
+    if (success != 0) {
       return success;
     }
 
-    for (int j = 0; j < height; j++) {
+    // Copy the result back
+    for (unsigned j = 0; j < height; j++) {
       reals[j][i] = nextReals[j];
       imgs[j][i] = nextImgs[j];
     }
@@ -99,62 +152,60 @@ static int fft2D(unsigned int height, unsigned int width, fft_real** reals, fft_
 int main() {
 
   int exitCode = 0;
+  char* serialPortName = "/dev/ttyACM0";
+  char* imageName = "1chipML_color.bmp";
 
-  exitCode = openSerialPort("/dev/ttyACM0");
+  // Open the serial port
+  exitCode = openSerialPort(serialPortName);
   if (exitCode != 0) {
     return exitCode;
   }
 
-  uint16_t size = 4;
-  fft_real FFTinputReals[] = {8, 4, 8, 0};
-  fft_real FFTinputImgs[] = {0, 0, 0, 0};
-
-  FFTOverSerial(size, FFTinputReals, FFTinputImgs, 1);
-
-  printf("size = %d\n", size);
-  for(int16_t i = 0; i < size; ++i) {
-    printf("real = %f, img = %f\n", FFTinputReals[i], FFTinputImgs[i]);
-  }
-
-  closeSerialPort();
-
-  return 0;
   BITMAPINFOHEADER bitmapInfoHeader;
 
+  // Open the image
   // The origin of the image (0,0) is at the bottom left
-  unsigned char* originalImageData = readBitmapImage("cameraman400x400.bmp", &bitmapInfoHeader);
-
+  unsigned char* originalImageData = readBitmapImage(imageName, &bitmapInfoHeader);
   if (originalImageData == NULL) {
-    return -1;
+    printf("Could not load the image\n");
+    return 1;
   }
 
-  unsigned int kernelHeight = 9;
-  unsigned int kernelWidth = 9;
+  // Kernel matrix definition and initialization
+  unsigned kernelHeight = 9;
+  unsigned kernelWidth = 9;
+  fft_real kernelMatrix[kernelHeight][kernelWidth];
+  for (unsigned i = 0; i < kernelHeight; ++i) {
+    for (unsigned j = 0; j < kernelWidth; ++j) {
+      kernelMatrix[i][j] = 1.0 / 9.0;
+    }
+  }
 
-  // pad the image with 0, depending on the kernel size
+
+  // Prepare padding, depending on the kernel size
   // padding occurs on the top and on the right
-  const unsigned int pixelByteSize = bitmapInfoHeader.biBitCount >> 3;
-  unsigned int height = bitmapInfoHeader.biHeight + kernelHeight - 1;
-  unsigned int width = bitmapInfoHeader.biWidth + kernelWidth - 1;
-
+  const unsigned pixelByteSize = bitmapInfoHeader.biBitCount >> 3;
+  unsigned height = bitmapInfoHeader.biHeight + kernelHeight - 1;
+  unsigned width = bitmapInfoHeader.biWidth + kernelWidth - 1;
 
   // Get the next power of 2 for the future FFT
   height = nextPowerOf2(height);
   width = nextPowerOf2(width);
 
-  
+  // Pad the image with 0 to the calculated width and height
   unsigned char* imageData = calloc(height * width * pixelByteSize, sizeof(unsigned char));
 
-  for (unsigned int i = 0; i < bitmapInfoHeader.biHeight; ++i) {
-    for (unsigned int j = 0; j < bitmapInfoHeader.biWidth; ++j) {
-      for (unsigned int k = 0; k < pixelByteSize; ++k) {
-        const unsigned int targetH = i * width * pixelByteSize;
-        const unsigned int targetW = j * pixelByteSize;
-        const unsigned int targetIdx = targetH + targetW + k;
+  // Copy the image data to the padded image
+  for (unsigned i = 0; i < bitmapInfoHeader.biHeight; ++i) {
+    for (unsigned j = 0; j < bitmapInfoHeader.biWidth; ++j) {
+      for (unsigned k = 0; k < pixelByteSize; ++k) {
+        const unsigned targetH = i * width * pixelByteSize;
+        const unsigned targetW = j * pixelByteSize;
+        const unsigned targetIdx = targetH + targetW + k;
 
-        const unsigned int sourceH = i * bitmapInfoHeader.biWidth * pixelByteSize;
-        const unsigned int sourceW = j * pixelByteSize;
-        const unsigned int sourceIdx = sourceH + sourceW + k;
+        const unsigned sourceH = i * bitmapInfoHeader.biWidth * pixelByteSize;
+        const unsigned sourceW = j * pixelByteSize;
+        const unsigned sourceIdx = sourceH + sourceW + k;
         imageData[targetIdx] = originalImageData[sourceIdx];
       }
     }
@@ -164,9 +215,10 @@ int main() {
   free(originalImageData);
   originalImageData = NULL;
 
-  // Convert to Greyscale
+  // Convert the image data to Greyscale
   unsigned char* imageDataG = convertRGBtoGrey(imageData, width * height);
 
+  // Matrix initialization
   fft_real** imageReals = malloc(height * sizeof(fft_real*));
   fft_real** imageImgs = malloc(height * sizeof(fft_real*));
   fft_real** kernelReals = malloc(height * sizeof(fft_real*));
@@ -186,22 +238,24 @@ int main() {
     }
   }
 
-  // show resulting images
-  generateBitmapImageRGB((unsigned char*) imageData, height, width, "bitmapImageRGB.bmp");
+  // show resulting image
   generateBitmapImageGrey((unsigned char*) imageDataG, height, width, "bitmapImageGrey.bmp");
 
+  // Free the initial image data
   free(imageData);
   free(imageDataG);
   imageData = NULL;
   imageDataG = NULL;
 
-  // Compute 2D fft
-  int success = fft2D(height, width, imageReals, imageImgs, 1);
-  //success = fft2D(height, width, imageReals, imageImgs, -1);
-  printf("FFT result %d\n", success);
+  // Compute the first 2D fft
+  exitCode = fft2D(height, width, imageReals, imageImgs, 1);
+  printf("Image FFT result %d\n", exitCode);
+  if (exitCode != 0 ) {
+    closeSerialPort();
+    return exitCode;
+  }
 
-
-  // convolution matrix generation and padding
+  // convolution matrix padding
   unsigned int totalPaddingVertical = height - kernelHeight;
   unsigned int totalPaddingHorizontal = width - kernelWidth;
   unsigned int startVertical = (totalPaddingVertical + 1) / 2;
@@ -220,9 +274,9 @@ int main() {
     }
   }
 
-  // inverse fft shift the kernel
-  // here, because the kernel is even, the inverse
-  // fft shift is the same as a normal fft shift
+  // Compute the inverse FFT shift the padded kernel.
+  // here, because the padded kernel is even, the inverse
+  // FFT shift is the same as a normal fft shift
   fftShift(height, width, kernelReals, kernelImgs);
 
   // display the kernel
@@ -322,6 +376,7 @@ int main() {
   free(kernelReals);
   free(kernelImgs);
 
+  closeSerialPort();
 
   return 0;
 }
