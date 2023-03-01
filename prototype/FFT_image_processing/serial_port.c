@@ -12,9 +12,15 @@
 
 static int setupSerialPort(int serialPort);
 static int fileDescriptor = -1;
+static unsigned serialWriteBufferSize = -1;
 
 
-int openSerialPort(char* portName) {
+int openSerialPort(char* portName, const unsigned serialBufferSize) {
+    if (serialBufferSize == 0) {
+        printf("Serial buffer size must be greater than 0\n");
+        return 1;
+    }
+
     fileDescriptor = open(portName, O_RDWR | O_NOCTTY);
     if (fileDescriptor < 0) {
         printf("Error %i from open: %s\n", errno, strerror(errno));
@@ -27,6 +33,8 @@ int openSerialPort(char* portName) {
         return setupReturnCode;
     }
 
+    serialWriteBufferSize = serialBufferSize;
+
     // The Arduino resets when the first connection is created.
     // This prevents from directly sending data to the arduino when
     // the serial connection is initiated, as it is resetting.
@@ -36,7 +44,11 @@ int openSerialPort(char* portName) {
     // In order to bypass this behavior and remove the sleep(), 
     // it is possible to attach a 10 uF electrolytic capacitor between 
     // the Reset and the Ground on the arduino UNO board.
-    sleep(2);
+    printf("Waiting for connection...\n");
+    const unsigned messageLength = 6;
+    char readyBuffer[messageLength];
+    readElement(readyBuffer, messageLength);
+    printf("Successfully connected! Connection message: %s\n", readyBuffer);
 
     return 0;
 }
@@ -47,6 +59,7 @@ void closeSerialPort() {
     }
     close(fileDescriptor);
     fileDescriptor = -1;
+    serialWriteBufferSize = -1;
 }
 
 /*
@@ -136,12 +149,15 @@ static int setupSerialPort(int serialPort) {
     cfsetispeed(&tty, B115200); // Input baud rate 
 
     // Save tty settings
-    tcflush(serialPort, TCIOFLUSH);
+    //tcflush(serialPort, TCIOFLUSH);
+    // Make the change immediatly
     if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
         printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
         return 1;
     }
 
+    // Must set as flush for first connexion to work properly
+    // after board implementation
     if (tcsetattr(serialPort, TCSAFLUSH, &tty) != 0) {
         printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
         return 1;
@@ -192,13 +208,30 @@ int writeElement(void* element, const unsigned sizeOfElement) {
     
     int numBytesWritten = 0;
     int returnValue = -1;
+    
+    for (unsigned i = 0; i < sizeOfElement; i += serialWriteBufferSize) {
 
-    returnValue = write(fileDescriptor, element, sizeOfElement);
-    if (returnValue == -1) {
-        printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
-        return returnValue;
+        void* elementStartAddress = element + i;
+
+        unsigned sizeToWrite = serialWriteBufferSize;
+        if (i + serialWriteBufferSize > sizeOfElement) {
+            sizeToWrite = sizeOfElement - i;
+        }
+
+        returnValue = write(fileDescriptor, elementStartAddress, sizeToWrite);
+
+        // Wait until all output has actually been sent to the terminal device.
+        int drainCode = tcdrain(fileDescriptor);
+        if (returnValue == -1) {
+            printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
+            return returnValue;
+        }
+        if (drainCode == -1) {
+            printf("tcdrain error %i during writing to serial port: %s\n", errno, strerror(errno));
+            return drainCode;
+        }
+        numBytesWritten += returnValue;
     }
-    numBytesWritten += returnValue;
 
     return numBytesWritten;
 }

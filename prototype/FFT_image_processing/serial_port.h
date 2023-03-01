@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 void closeSerialPort();
-int openSerialPort(char* portName);
+int openSerialPort(char* portName, const unsigned serialBufferSize);
 
 int readArray(const unsigned arraySize, void* outArray, const unsigned sizeOfElement);
 int readElement(void* element, const unsigned sizeOfElement);

@@ -149,6 +149,15 @@ static int fft2D(unsigned height, unsigned int width, fft_real** reals, fft_real
   return 0;
 }
 
+/**
+ * @brief Computes the magnitude image of a 2D matrix. The magnitude is scaled with log.
+ * The magnitude is saved as an image.
+ * @param height The height of the matrix. Must be a power of 2.
+ * @param width The width of the matrix. Must be a power of 2.
+ * @param reals The real part of the FFT matrix.
+ * @param imgs The imaginary part of the FFT matrix.
+ * @param magnitudeImageName The name of the image to save the magnitude to.
+*/
 static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real** reals, fft_real** imgs, char* magnitudeImageName) {
   
   // Shift 2D fft center for magnitude
@@ -196,7 +205,9 @@ static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real
 
 int main() {
 
-  char* serialPortName = "/dev/ttyACM1";
+  const unsigned SERIAL_BUFFER_SIZE = 32;
+  char* serialPortName = "/dev/ttyACM0";
+
   char* openedImageName = "1chipML_color.bmp";
   char* greyImageName = "bitmapImageGrey.bmp";
   char* magnitudeImageName = "magnitude.bmp";
@@ -217,7 +228,7 @@ int main() {
   int exitCode = 0;
   
   // Open the serial port
-  exitCode = openSerialPort(serialPortName);
+  exitCode = openSerialPort(serialPortName, SERIAL_BUFFER_SIZE);
   if (exitCode != 0) {
     return exitCode;
   }

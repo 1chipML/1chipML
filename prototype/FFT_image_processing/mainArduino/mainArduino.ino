@@ -8,19 +8,22 @@ void setup() {
   Serial.begin(115200, SERIAL_8N1);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
+
+  // Tell we are ready
+  const unsigned messageLength = 6;
+  const char readyBuffer[messageLength] = "Ready";
+  while(Serial.availableForWrite() < messageLength); // wait for write
+  Serial.write(readyBuffer, messageLength);
 }
 
-unsigned lastFFTLength = 0;
 unsigned FFTLength = 0;
-float* FFTreals = NULL;
-float* FFTimgs = NULL;
 int dir = 0;
-
 int fftCode = 0;
 
 void loop() {
   if (Serial.available() && fftCode == 0) {
 
+    digitalWrite(LED_BUILTIN, HIGH);
 
     // FFT over serial
 
@@ -29,14 +32,11 @@ void loop() {
     readElement(&FFTLength, sizeof(FFTLength));
 
     // init arrays
-    if (FFTLength != lastFFTLength && FFTLength > 0) {
-      free(FFTreals);
-      free(FFTimgs);
-      FFTreals = malloc(FFTLength * sizeof(fft_real));
-      FFTimgs = malloc(FFTLength * sizeof(fft_real));
+    fft_real FFTreals[FFTLength];
+    fft_real FFTimgs[FFTLength];
+    memset(FFTreals, 0, FFTLength * sizeof(fft_real));
+    memset(FFTimgs, 0, FFTLength * sizeof(fft_real));
 
-      lastFFTLength = FFTLength;
-    }
 
     // read reals
     readArray(FFTLength, FFTreals, sizeof(fft_real));
@@ -85,6 +85,8 @@ void loop() {
     //// Reminder: Float has a 6 decimal preicision display
     //Serial.println(receivedFloat, 6);
     
+  } else {
+    digitalWrite(LED_BUILTIN, LOW);
   }
   
 }
@@ -93,10 +95,8 @@ int readArray(const uint32_t arraySize, void* outArray, const uint32_t sizeOfEle
   readElement(outArray, arraySize * sizeOfElement);
 }
 
-void writeArray(const uint32_t arraySize, float* array, const uint32_t sizeOfElement) {
-  for(uint32_t i = 0; i < arraySize; ++i) {
-    writeElement(&array[i], sizeOfElement);
-  }
+void writeArray(const uint32_t arraySize, void* array, const uint32_t sizeOfElement) {
+  writeElement(array, arraySize * sizeOfElement);
 }
 
 void readElement(void* element, const uint32_t sizeOfElement) {
@@ -110,6 +110,7 @@ void readElement(void* element, const uint32_t sizeOfElement) {
 }
 
 void writeElement(void* element, const uint32_t sizeOfElement) {
-  while(Serial.availableForWrite() < sizeOfElement); // wait for write
+  // As of Arduino IDE 1.0, serial transmission is asynchronous.
+  // Serial.write() will block until there is enough space in the buffer.
   Serial.write((unsigned char*) element, sizeOfElement);
 }
