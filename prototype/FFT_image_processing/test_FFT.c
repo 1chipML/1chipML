@@ -178,9 +178,6 @@ static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real
     imageAbs[i] = greyColor * log10(1 + imageAbs[i]);
   }
 
-  // Shift 2D fft to get original placement
-  fftShift(height, width, reals, imgs);
-
   // Prepare magnitude image generation
   unsigned char imageGreyScaleMag[height][width][GREY_BYTES];
   for (int i = 0; i < height; i++) {
@@ -192,12 +189,14 @@ static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real
 
   // Generate magnitude image
   generateBitmapImageGrey((unsigned char*) imageGreyScaleMag, height, width, magnitudeImageName);
+
+  // Shift 2D fft to get original placement
+  fftShift(height, width, reals, imgs);
 }
 
 int main() {
 
-  int exitCode = 0;
-  char* serialPortName = "/dev/ttyACM0";
+  char* serialPortName = "/dev/ttyACM1";
   char* openedImageName = "1chipML_color.bmp";
   char* greyImageName = "bitmapImageGrey.bmp";
   char* magnitudeImageName = "magnitude.bmp";
@@ -205,6 +204,18 @@ int main() {
   char* imaginariesImageName = "imaginary.bmp";
   char* resultImageName = "result.bmp";
 
+  // Kernel matrix definition and initialization
+  unsigned kernelHeight = 9;
+  unsigned kernelWidth = 9;
+  fft_real kernelMatrix[kernelHeight][kernelWidth];
+  for (unsigned i = 0; i < kernelHeight; ++i) {
+    for (unsigned j = 0; j < kernelWidth; ++j) {
+      kernelMatrix[i][j] = 1.0 / (kernelHeight * kernelWidth);
+    }
+  }
+
+  int exitCode = 0;
+  
   // Open the serial port
   exitCode = openSerialPort(serialPortName);
   if (exitCode != 0) {
@@ -220,17 +231,6 @@ int main() {
     printf("Could not load the image\n");
     return 1;
   }
-
-  // Kernel matrix definition and initialization
-  unsigned kernelHeight = 9;
-  unsigned kernelWidth = 9;
-  fft_real kernelMatrix[kernelHeight][kernelWidth];
-  for (unsigned i = 0; i < kernelHeight; ++i) {
-    for (unsigned j = 0; j < kernelWidth; ++j) {
-      kernelMatrix[i][j] = 1.0 / 9.0;
-    }
-  }
-
 
   // Prepare padding, depending on the kernel size
   // padding occurs on the top and on the right
@@ -284,7 +284,7 @@ int main() {
   for (int i = 0; i < height; ++i) {
     for (int j = 0; j < width; ++j) {
       imageReals[i][j] = imageDataG[i * width + j]; 
-      imageImgs[i][j] = 0; 
+      imageImgs[i][j] = 0.0; 
     }
   }
 

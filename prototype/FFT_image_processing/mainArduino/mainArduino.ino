@@ -16,8 +16,10 @@ float* FFTreals = NULL;
 float* FFTimgs = NULL;
 int dir = 0;
 
+int fftCode = 0;
+
 void loop() {
-  if (Serial.available()) {
+  if (Serial.available() && fftCode == 0) {
 
 
     // FFT over serial
@@ -44,7 +46,11 @@ void loop() {
     readElement(&dir, sizeof(dir));
 
     //Execute FFT
-    FFT(FFTLength, FFTreals, FFTimgs, dir);
+    fftCode = FFT(FFTLength, FFTreals, FFTimgs, dir);
+    if (fftCode != 0) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      return;
+    }
 
     // Writing
     // write reals
@@ -87,8 +93,10 @@ int readArray(const uint32_t arraySize, void* outArray, const uint32_t sizeOfEle
   readElement(outArray, arraySize * sizeOfElement);
 }
 
-void writeArray(const uint32_t arraySize, void* array, const uint32_t sizeOfElement) {
-  writeElement(array, arraySize * sizeOfElement);
+void writeArray(const uint32_t arraySize, float* array, const uint32_t sizeOfElement) {
+  for(uint32_t i = 0; i < arraySize; ++i) {
+    writeElement(&array[i], sizeOfElement);
+  }
 }
 
 void readElement(void* element, const uint32_t sizeOfElement) {
@@ -102,6 +110,6 @@ void readElement(void* element, const uint32_t sizeOfElement) {
 }
 
 void writeElement(void* element, const uint32_t sizeOfElement) {
-  while(!Serial.availableForWrite()); // wait for write
+  while(Serial.availableForWrite() < sizeOfElement); // wait for write
   Serial.write((unsigned char*) element, sizeOfElement);
 }

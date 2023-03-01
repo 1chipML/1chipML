@@ -102,6 +102,7 @@ static int setupSerialPort(int serialPort) {
     // set up tty
     // Control modes
     tty.c_cflag &= ~(PARENB | PARODD); // Disable parity
+    //tty.c_cflag |= PARENB; // Enable parity even
     tty.c_cflag &= ~CSTOPB; // Only one stop bit
     tty.c_cflag &= ~CSIZE; // Clear current byte size
     tty.c_cflag |= CS8; // 8 bits per byte
@@ -118,6 +119,10 @@ static int setupSerialPort(int serialPort) {
     // Input modes
     tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Disable software flow control
     tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL); // Disable any special handling
+    // tty.c_iflag |= PARMRK; // Mark parity and framing errors
+    // tty.c_iflag |= INPCK;          // Enable parity checking
+    // tty.c_iflag |= PARMRK;         // Enable in-band marking 
+    // tty.c_iflag &= ~IGNPAR;         // Make sure input parity errors are not ignored
 
     // Output modes
     tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
@@ -172,7 +177,7 @@ int readElement(void* element, const unsigned sizeOfElement) {
         returnValue = read(fileDescriptor, &readElement[i], sizeof(unsigned char));
         if (returnValue == -1) {
             printf("Error %i from reading to serial port: %s\n", errno, strerror(errno));
-            return -1;
+            return returnValue;
         }
         numBytesRead += returnValue;
     }
