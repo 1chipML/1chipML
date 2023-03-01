@@ -95,8 +95,10 @@ int readArray(const uint32_t arraySize, void* outArray, const uint32_t sizeOfEle
   readElement(outArray, arraySize * sizeOfElement);
 }
 
-void writeArray(const uint32_t arraySize, void* array, const uint32_t sizeOfElement) {
-  writeElement(array, arraySize * sizeOfElement);
+void writeArray(const uint32_t arraySize, float* array, const uint32_t sizeOfElement) {
+  for(uint32_t i = 0; i < arraySize; ++i) {
+    writeElement(&array[i], sizeOfElement);
+  }
 }
 
 void readElement(void* element, const uint32_t sizeOfElement) {
@@ -110,7 +112,7 @@ void readElement(void* element, const uint32_t sizeOfElement) {
 }
 
 void writeElement(void* element, const uint32_t sizeOfElement) {
-  // As of Arduino IDE 1.0, serial transmission is asynchronous.
-  // Serial.write() will block until there is enough space in the buffer.
+  while(Serial.availableForWrite() < sizeOfElement); // wait for write
   Serial.write((unsigned char*) element, sizeOfElement);
+  Serial.flush(); // wait until data is sent
 }

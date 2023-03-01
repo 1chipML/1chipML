@@ -129,13 +129,6 @@ static int setupSerialPort(int serialPort, const speed_t baudRate) {
 
   // Save tty settings
   // Make the change immediatly
-  if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
-    printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
-    return 1;
-  }
-
-  // Must set as flush for first connection to work properly
-  // right after board implementation
   if (tcsetattr(serialPort, TCSAFLUSH, &tty) != 0) {
     printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
     return 1;
