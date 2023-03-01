@@ -149,11 +149,61 @@ static int fft2D(unsigned height, unsigned int width, fft_real** reals, fft_real
   return 0;
 }
 
+static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real** reals, fft_real** imgs, char* magnitudeImageName) {
+  
+  // Shift 2D fft center for magnitude
+  fftShift(height, width, reals, imgs);
+
+  // get magnitude
+  fft_real* imageAbs = malloc(height * width * sizeof(fft_real));
+  for (int i = 0; i < height; i++) {
+      for (int j = 0; j < width; j++) {
+          fft_real abs = sqrt(pow(reals[i][j], 2) + pow(imgs[i][j], 2));
+          imageAbs[i * width + j] = abs;
+      }
+  }
+
+  // get maximum magnitude
+  fft_real max = imageAbs[0];
+  for (int i = 1; i < height * width; ++i) {
+    if (imageAbs[i] > max) {
+      max = imageAbs[i];
+    }
+  }
+
+  // log scalling magnitude and color coding
+  const fft_real WHITE = 255.0;
+  fft_real greyColor = WHITE / log10(1 + max);
+  for (int i = 0; i < height * width; ++i) {
+    imageAbs[i] = greyColor * log10(1 + imageAbs[i]);
+  }
+
+  // Shift 2D fft to get original placement
+  fftShift(height, width, reals, imgs);
+
+  // Prepare magnitude image generation
+  unsigned char imageGreyScaleMag[height][width][GREY_BYTES];
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      imageGreyScaleMag[i][j][0] = (unsigned char) (imageAbs[i * width + j]);
+    }
+  }
+  free(imageAbs);
+
+  // Generate magnitude image
+  generateBitmapImageGrey((unsigned char*) imageGreyScaleMag, height, width, magnitudeImageName);
+}
+
 int main() {
 
   int exitCode = 0;
   char* serialPortName = "/dev/ttyACM0";
-  char* imageName = "1chipML_color.bmp";
+  char* openedImageName = "1chipML_color.bmp";
+  char* greyImageName = "bitmapImageGrey.bmp";
+  char* magnitudeImageName = "magnitude.bmp";
+  char* realsImageName = "real.bmp";
+  char* imaginariesImageName = "imaginary.bmp";
+  char* resultImageName = "result.bmp";
 
   // Open the serial port
   exitCode = openSerialPort(serialPortName);
@@ -165,7 +215,7 @@ int main() {
 
   // Open the image
   // The origin of the image (0,0) is at the bottom left
-  unsigned char* originalImageData = readBitmapImage(imageName, &bitmapInfoHeader);
+  unsigned char* originalImageData = readBitmapImage(openedImageName, &bitmapInfoHeader);
   if (originalImageData == NULL) {
     printf("Could not load the image\n");
     return 1;
@@ -239,7 +289,7 @@ int main() {
   }
 
   // show resulting image
-  generateBitmapImageGrey((unsigned char*) imageDataG, height, width, "bitmapImageGrey.bmp");
+  generateBitmapImageGrey((unsigned char*) imageDataG, height, width, greyImageName);
 
   // Free the initial image data
   free(imageData);
@@ -247,15 +297,14 @@ int main() {
   imageData = NULL;
   imageDataG = NULL;
 
-  // Compute the first 2D fft
+  // Compute the first 2D fft of the image
   exitCode = fft2D(height, width, imageReals, imageImgs, 1);
   printf("Image FFT result %d\n", exitCode);
-  if (exitCode != 0 ) {
-    closeSerialPort();
-    return exitCode;
-  }
 
-  // convolution matrix padding
+  // Generate magnitude image
+  generateMagnitudeImage(height, width, imageReals, imageImgs, magnitudeImageName);
+
+  // Convolution matrix padding
   unsigned int totalPaddingVertical = height - kernelHeight;
   unsigned int totalPaddingHorizontal = width - kernelWidth;
   unsigned int startVertical = (totalPaddingVertical + 1) / 2;
@@ -266,7 +315,7 @@ int main() {
       kernelImgs[i][j] = 0;
       if (i >= startVertical && i < startVertical + kernelHeight 
       && j >= startHorizontal && j < startHorizontal + kernelWidth) {
-        kernelReals[i][j] = 1.0 / (kernelHeight * kernelWidth);
+        kernelReals[i][j] = kernelMatrix[i - startVertical][j - startHorizontal];
       }
       else {
         kernelReals[i][j] = 0;
@@ -275,11 +324,16 @@ int main() {
   }
 
   // Compute the inverse FFT shift the padded kernel.
-  // here, because the padded kernel is even, the inverse
-  // FFT shift is the same as a normal fft shift
+  // Here, because the padded kernel is even, the inverse
+  // FFT shift is the same as a traditionnal FFT shift
   fftShift(height, width, kernelReals, kernelImgs);
 
-  // display the kernel
+  // 2D FFT of the kernel
+  if (exitCode == 0) {
+    exitCode = fft2D(height, width, kernelReals, kernelImgs, 1);
+    printf("Convolution matrix FFT result %d\n", exitCode);
+  }
+
   unsigned char* kernelRealsImage = malloc(height * width);
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
@@ -289,41 +343,7 @@ int main() {
   generateBitmapImageGrey((unsigned char*) kernelRealsImage, height, width, "kernel.bmp");
   free(kernelRealsImage);
 
-  /*****Start of magnitude*****/
-  // Shift 2D fft center for magnitude
-  fftShift(height, width, imageReals, imageImgs);
-
-  // get magnitude
-  fft_real* imageAbs = malloc(height * width *sizeof(fft_real));
-  for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-          fft_real abs = sqrt(pow(imageReals[i][j], 2) + pow(imageImgs[i][j], 2));
-          imageAbs[i * width + j] = abs;
-      }
-  }
-
-  // get maximum magnitude
-  fft_real max = imageAbs[0];
-  for (int i = 1; i < height * width; ++i) {
-    if (imageAbs[i] > max) {
-      max = imageAbs[i];
-    }
-  }
-
-  // log scalling magnitude and color coding
-  fft_real greyColor = 255 / log10(1 + max);
-  for (int i = 1; i < height * width; ++i) {
-    imageAbs[i] = greyColor * log10(1 + imageAbs[i]);
-  }
-
-  // Shift 2D fft to get original placement
-  fftShift(height, width, imageReals, imageImgs);
-  /*****End of magnitude*****/
-
-  // 2d fft of the kernel
-  fft2D(height, width, kernelReals, kernelImgs, 1);
-
-  // element-wise multiplication between the kernel and the image
+  // Element-wise multiplication between the kernel and the image
   for(int i = 0; i < height; ++i) {
     for(int j = 0; j < width; ++j) {
       fft_real tmpImageReal = imageReals[i][j];
@@ -332,39 +352,38 @@ int main() {
     }
   }
 
-  // inverse fft on element-wise multiplication
-  fft2D(height, width, imageReals, imageImgs, -1);
-  // Then the result is obtained!
+  // Inverse 2D FFT of the result of the element-wise multiplication
+  if (exitCode == 0) {
+    exitCode = fft2D(height, width, imageReals, imageImgs, -1);
+    printf("Inverse matrix FFT result %d\n", exitCode);
+  }
 
-
+  // At this point, the result is obtained
+  // Prepare arrays for image saving
   unsigned char imageGreyScaleR[height][width][GREY_BYTES];
   unsigned char imageGreyScaleI[height][width][GREY_BYTES];
-  unsigned char imageGreyScaleMag[height][width][GREY_BYTES];
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
       imageGreyScaleR[i][j][0] = (unsigned char) abs(imageReals[i][j]);
       imageGreyScaleI[i][j][0] = (unsigned char) abs(imageImgs[i][j]);
-      imageGreyScaleMag[i][j][0] = (unsigned char) (imageAbs[i * width + j]);
     }
   }
 
-  generateBitmapImageGrey((unsigned char*) imageGreyScaleR, height, width, "real.bmp");
-  generateBitmapImageGrey((unsigned char*) imageGreyScaleI, height, width, "imaginary.bmp");
-  generateBitmapImageGrey((unsigned char*) imageGreyScaleMag, height, width, "magnitudelog.bmp");
+  generateBitmapImageGrey((unsigned char*) imageGreyScaleR, height, width, realsImageName);
+  generateBitmapImageGrey((unsigned char*) imageGreyScaleI, height, width, imaginariesImageName);
 
-  // trim the image of its padding for the final result
+  // Trim the image of its padding for the final result
   unsigned char imageResult[bitmapInfoHeader.biHeight][bitmapInfoHeader.biWidth];
   for (unsigned int i = 0; i < bitmapInfoHeader.biHeight; ++i) {
     for (unsigned int j = 0; j < bitmapInfoHeader.biWidth; ++j) {
       imageResult[i][j] = imageReals[i][j];
     }
   }
-  generateBitmapImageGrey((unsigned char*) imageResult, bitmapInfoHeader.biHeight, bitmapInfoHeader.biWidth, "result.bmp");
+
+  generateBitmapImageGrey((unsigned char*) imageResult, bitmapInfoHeader.biHeight, bitmapInfoHeader.biWidth, resultImageName);
   printf("Image generated!!\n");
 
   // free all
-  free(imageAbs);
-
   for (int i = 0; i < height; ++i) {
     free(imageReals[i]);
     free(imageImgs[i]);
@@ -378,5 +397,5 @@ int main() {
 
   closeSerialPort();
 
-  return 0;
+  return exitCode;
 }
