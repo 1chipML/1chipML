@@ -205,6 +205,7 @@ static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real
 
 int main() {
 
+  const unsigned BAUD_RATE = 115200;
   const unsigned SERIAL_BUFFER_SIZE = 32;
   char* serialPortName = "/dev/ttyACM0";
 
@@ -228,7 +229,7 @@ int main() {
   int exitCode = 0;
   
   // Open the serial port
-  exitCode = openSerialPort(serialPortName, SERIAL_BUFFER_SIZE);
+  exitCode = openSerialPort(serialPortName, SERIAL_BUFFER_SIZE, BAUD_RATE);
   if (exitCode != 0) {
     return exitCode;
   }
