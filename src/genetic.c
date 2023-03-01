@@ -223,7 +223,7 @@ static void decodeAndAddChild(genetic_int *nextGeneration,
   for (unsigned int i = 0; i < dimensions; i++) {
 
     memcpy(parameter, child + (i * INT_MAX_DIGIT_COUNT),
-           INT_MAX_DIGIT_COUNT * sizeof(char));
+           INT_MAX_DIGIT_COUNT);
 
     genetic_int value = atoi(parameter);
 
