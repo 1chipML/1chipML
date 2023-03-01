@@ -45,11 +45,78 @@ static void fillTable(genetic_int *population,
  * selected for a tournament
  * @param populationSize the number of solutions in the population
  */
-static void tourney(genetic_real *populationStrength,
-                    unsigned int *firstParentIndex,
+static void tourney(void *populationStrength, unsigned int *firstParentIndex,
                     unsigned int *secondParentIndex,
                     const unsigned int tournamentSelectionsSize,
                     const unsigned int populationSize) {
+  genetic_real chosenIndexes[tournamentSelectionsSize];
+  genetic_real bestFitness = FLT_MAX;
+  genetic_real secondbestFitness = FLT_MAX;
+
+  for (unsigned int i = 0; i < tournamentSelectionsSize; i++) {
+
+    unsigned int index =
+        linear_congruential_random_generator() * populationSize;
+    uint8_t isNotAlreadyChosen = 1;
+
+    // We generate a real between 0 and populationSize and then convert it to
+    // an int. On the slight chance that the generated number by
+    // linear_congruential_generator = 1.00 we loop again.
+    // This solution lets us have exactly the same amount of odds to get each
+    // number
+    while (index == populationSize) {
+      index = linear_congruential_random_generator() * populationSize;
+    }
+
+    for (unsigned int j = 0; j < i; j++) {
+
+      if (chosenIndexes[j] == index) {
+        i--;
+        isNotAlreadyChosen = 0;
+        break;
+      }
+    }
+
+    const genetic_real fitness = ((genetic_real *)populationStrength)[index];
+
+    if (isNotAlreadyChosen) {
+      chosenIndexes[i] = index;
+    } else {
+      continue;
+    }
+
+    if (bestFitness > fitness) {
+
+      *secondParentIndex = *firstParentIndex;
+      secondbestFitness = bestFitness;
+      *firstParentIndex = index;
+      bestFitness = fitness;
+
+    } else if (secondbestFitness > fitness) {
+      *secondParentIndex = index;
+      secondbestFitness = fitness;
+    }
+  }
+}
+
+/**
+ * This function is used to choose two parents based off of a tourney approach
+ * for the low memory version of the algorithm
+ *
+ * @param population  an array that stores all of the current solutions
+ * @param firstParentIndex a return parameter for storing the index of the first
+ * chosen parent
+ * @param secondParentIndex a return parameter for storing the index of the
+ * second chosen parent
+ * @param evaluationFunction the function that is used to evaluate each solution
+ */
+static void tourneyLowMemory(genetic_int *population,
+                             unsigned int *firstParentIndex,
+                             unsigned int *secondParentIndex,
+                             fitness_evaluation_function evaluationFunction,
+                             unsigned int tournamentSelectionsSize,
+                             unsigned int populationSize,
+                             unsigned int dimensions) {
 
   genetic_real chosenIndexes[tournamentSelectionsSize];
   genetic_real bestFitness = FLT_MAX;
@@ -79,13 +146,19 @@ static void tourney(genetic_real *populationStrength,
       }
     }
 
-    const genetic_real fitness = populationStrength[index];
-
     if (isNotAlreadyChosen) {
       chosenIndexes[i] = index;
     } else {
       continue;
     }
+    const unsigned int populationIndex = index * dimensions;
+    genetic_real parameters[dimensions];
+
+    for (unsigned int j = 0; j < dimensions; ++j) {
+      parameters[j] = population[populationIndex + j] * INT_MAX_INVERSE;
+    }
+
+    const genetic_real fitness = evaluationFunction(parameters);
 
     if (bestFitness > fitness) {
 
@@ -281,6 +354,80 @@ static void createNextGeneration(genetic_int *population,
 }
 
 /**
+ * This function takes care of creating the next generation and selecting the
+ * parents for the low_memory version of the algorithm
+ *
+ * @param population  this array stores all the values of the population
+ * @param nextGeneration this array is used to store the parametres of the
+ * created children
+ * @param evaluationFunction this array is used to store the fitness of each
+ * solution of the population
+ * @param dimensions the number of parameters in the function to minimize
+ * @param tournamentSelectionsSize the number of solutions that are selected to
+ * be part of the tournament
+ * @param mutationRate = the chance that a child will have a mutation on one of
+ * its genes
+ */
+static void createNextGenerationLowMemory(
+    genetic_int *population, genetic_int *nextGeneration,
+    fitness_evaluation_function evaluationFunction,
+    const unsigned int populationSize, const unsigned int dimensions,
+    const unsigned int tournamentSelectionsSize,
+    const genetic_real mutationRate) {
+
+  unsigned int currentNextGenerationSize = 0;
+
+  const unsigned int nextGenerationMaxSize = populationSize - 2;
+  const unsigned int mergedParentsLength = dimensions * INT_MAX_DIGIT_COUNT + 1;
+
+  const unsigned int mergedParentsLastIndex = mergedParentsLength - 1;
+
+  const unsigned int parentArrayByteSize = dimensions * sizeof(*population);
+
+  while (currentNextGenerationSize < nextGenerationMaxSize) {
+
+    unsigned int parent1Number, parent2Number;
+    tourneyLowMemory(population, &parent1Number, &parent2Number,
+                     evaluationFunction, tournamentSelectionsSize,
+                     populationSize, dimensions);
+
+    genetic_int parent1[dimensions];
+    genetic_int parent2[dimensions];
+
+    const genetic_int parent1Index = parent1Number * dimensions;
+    const genetic_int parent2Index = parent2Number * dimensions;
+
+    memcpy(parent1, population + parent1Index, parentArrayByteSize);
+    memcpy(parent2, population + parent2Index, parentArrayByteSize);
+
+    char mergedParents1[mergedParentsLength];
+    char mergedParents2[mergedParentsLength];
+
+    char firstChildString[mergedParentsLength];
+    char secondChildString[mergedParentsLength];
+
+    firstChildString[mergedParentsLastIndex] = '\0';
+    secondChildString[mergedParentsLastIndex] = '\0';
+
+    encode(mergedParents1, parent1, dimensions);
+    encode(mergedParents2, parent2, dimensions);
+
+    createChildren(mergedParents1, mergedParents2, firstChildString,
+                   secondChildString, dimensions);
+
+    // We apply the mutation operator to both children
+    mutate(firstChildString, mergedParentsLength, mutationRate);
+    mutate(secondChildString, mergedParentsLength, mutationRate);
+
+    // We decode both children and add them to the next generation
+    decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
+                      firstChildString, dimensions);
+    decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
+                      secondChildString, dimensions);
+  }
+}
+
+/**
  * This function calculates and stores the fitness of each solution of the
  * population
  *
@@ -295,14 +442,12 @@ static void createNextGeneration(genetic_int *population,
  * @param dimensions the number of parameters in the function to optimize
  * @param populationSize the number of solutions in the population
  */
-static void calculateFitness(genetic_int *population,
-                             genetic_real *populationFitness,
-                             genetic_real *bestFit, genetic_int *bestFitCoord,
-                             fitness_evaluation_function evaluationFunction,
-                             genetic_int *secondBestValues,
-                             genetic_real *secondBestFitness,
-                             const unsigned int dimensions,
-                             const unsigned int populationSize) {
+static void calculateAndStoreFitness(
+    genetic_int *population, genetic_real *populationFitness,
+    genetic_real *bestFit, genetic_int *bestFitCoord,
+    fitness_evaluation_function evaluationFunction,
+    genetic_int *secondBestValues, genetic_real *secondBestFitness,
+    const unsigned int dimensions, const unsigned int populationSize) {
 
   const unsigned int coordArrayByteSize = dimensions * sizeof(*population);
 
@@ -318,7 +463,7 @@ static void calculateFitness(genetic_int *population,
     const genetic_real fitness = evaluationFunction(parameters);
     populationFitness[i] = fitness;
 
-    if (fitness < *(bestFit)) {
+    if (fitness < *bestFit) {
 
       *secondBestFitness = *bestFit;
       *bestFit = fitness;
@@ -336,6 +481,57 @@ static void calculateFitness(genetic_int *population,
     }
   }
 }
+
+/**
+ * This function calculates and stores the two best solutions of the population
+ *
+ * @param population this array stores the values of eaech parameter of the
+ * population
+ * @param bestFit this is the best fitness that was calculated
+ * @param bestFitCoord these are the parameters of the best solution
+ * @param evaluationFunction this function is used to evaluate each solution
+ * @param secondBestValues  this is the second best fitness that was calculated
+ * @param secondBestFitness  these are the parameters of the second solution
+ */
+static void calculateFitness(genetic_int *population, genetic_real *bestFit,
+                             genetic_int *bestFitCoord,
+                             fitness_evaluation_function evaluationFunction,
+                             genetic_int *secondBestValues,
+                             genetic_real *secondBestFitness,
+                             const unsigned int dimensions,
+                             const unsigned int populationSize) {
+
+  const unsigned int coordArrayByteSize = dimensions * sizeof(*population);
+  for (unsigned int i = 0; i < populationSize; i++) {
+
+    genetic_real parameters[dimensions];
+    const unsigned int baseIndex = i * dimensions;
+
+    for (unsigned int j = 0; j < dimensions; j++) {
+      parameters[j] = population[baseIndex + j] * INT_MAX_INVERSE;
+    }
+
+    const genetic_real fitness = evaluationFunction(parameters);
+
+    if (fitness < *bestFit) {
+
+      *secondBestFitness = *bestFit;
+      *bestFit = fitness;
+
+      memcpy(secondBestValues, bestFitCoord, coordArrayByteSize);
+      memcpy(bestFitCoord, population + (i * dimensions), coordArrayByteSize);
+
+    }
+
+    else if (fitness < *(secondBestFitness)) {
+
+      *secondBestFitness = fitness;
+      memcpy(secondBestValues, population + (i * dimensions),
+             coordArrayByteSize);
+    }
+  }
+}
+
 /**
  * This function replaces the current population by its children and follows the
  * principles of a genetic algorithm
@@ -384,6 +580,8 @@ replacePopulation(genetic_int *population, genetic_int *newGeneration,
  * @param tourneySize the number of solutions that are chosen in the tourney ,
  * must be smallere than the population size
  * @param evaluationFunction the function that is used to
+ * @param lowMemoryMode if set to 1 the algorithm will be slower and call the
+ * evaluation function more often
  * @return real the fitness of the best solution
  */
 genetic_real geneticAlgorithm(genetic_real *bestFitValues,
@@ -393,7 +591,8 @@ genetic_real geneticAlgorithm(genetic_real *bestFitValues,
                               unsigned int generationSize,
                               const unsigned int maximumIterationCount,
                               const unsigned int tourneySize,
-                              fitness_evaluation_function evaluationFunction) {
+                              fitness_evaluation_function evaluationFunction,
+                              const unsigned int lowMemoryMode) {
 
   if (generationSize % 2)
     generationSize += 1;
@@ -410,7 +609,6 @@ genetic_real geneticAlgorithm(genetic_real *bestFitValues,
 
   genetic_int population[arraySize];
   genetic_int nextGeneration[childArraySize];
-  genetic_real populationFitness[generationSize];
 
   genetic_int bestValues[parameterCount];
 
@@ -419,21 +617,45 @@ genetic_real geneticAlgorithm(genetic_real *bestFitValues,
 
   fillTable(population, generationSize, parameterCount);
 
-  for (unsigned int i = 0; i < maximumIterationCount; i++) {
+  if (lowMemoryMode == 0) {
 
-    calculateFitness(population, populationFitness, &bestFit, bestValues,
-                     evaluationFunction, secondBestValues, &secondBestFitness,
-                     parameterCount, generationSize);
+    genetic_real populationFitness[generationSize];
 
-    createNextGeneration(population, nextGeneration, populationFitness,
-                         generationSize, parameterCount, tourneySize,
-                         mutationChance);
+    for (unsigned int i = 0; i < maximumIterationCount; i++) {
 
-    replacePopulation(population, nextGeneration, bestValues, secondBestValues,
-                      childArraySize, parameterCount);
+      calculateAndStoreFitness(population, populationFitness, &bestFit,
+                               bestValues, evaluationFunction, secondBestValues,
+                               &secondBestFitness, parameterCount,
+                               generationSize);
 
-    if (bestFit <= epsilon) {
-      break;
+      createNextGeneration(population, nextGeneration, populationFitness,
+                           generationSize, parameterCount, tourneySize,
+                           mutationChance);
+
+      replacePopulation(population, nextGeneration, bestValues,
+                        secondBestValues, childArraySize, parameterCount);
+
+      if (bestFit <= epsilon) {
+        break;
+      }
+    }
+  } else {
+    for (unsigned int i = 0; i < maximumIterationCount; i++) {
+
+      calculateFitness(population, &bestFit, bestValues, evaluationFunction,
+                       secondBestValues, &secondBestFitness, parameterCount,
+                       generationSize);
+
+      createNextGenerationLowMemory(
+          population, nextGeneration, evaluationFunction, generationSize,
+          parameterCount, tourneySize, mutationChance);
+
+      replacePopulation(population, nextGeneration, bestValues,
+                        secondBestValues, childArraySize, parameterCount);
+
+      if (bestFit <= epsilon) {
+        break;
+      }
     }
   }
 

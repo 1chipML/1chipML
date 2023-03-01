@@ -8,14 +8,11 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation genetic genetic_low_memory
+all: linear_congruential_random_generator gauss_elimination poly_interpolation genetic
 
 test: all run_all_tests
 
 genetic : ./tests/test_genetic.c ./src/genetic.c  ./src/linear_congruential_random_generator.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
-
-genetic_low_memory : ./tests/test_genetic_low_memory.c ./src/genetic_low_memory.c  ./src/linear_congruential_random_generator.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 linear_congruential_random_generator: ./tests/test_linear_congruential_random_generator.c ./src/linear_congruential_random_generator.c
@@ -32,7 +29,6 @@ run_all_tests:
 	./test_gauss_elimination.out
 	./test_poly_interpolation.out
 	./test_genetic.out
-	./test_genetic_low_memory.out
 
 clean:
 	rm -rf test_*.out

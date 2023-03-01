@@ -28,6 +28,7 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
                  genetic_real epsilon, const genetic_real mutationChance,
                  const unsigned int generationSize,
                  const unsigned int generations, const unsigned int tourneySize,
-                 fitness_evaluation_function function);
+                 fitness_evaluation_function function,
+                 const unsigned lowMemoryMode);
 
 #endif
