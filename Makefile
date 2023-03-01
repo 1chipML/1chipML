@@ -39,10 +39,10 @@ lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruenti
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 image_processing: ./src/FFT.c \
-	./prototype/FFT_image_processing/test_FFT.c \
+	./prototype/FFT_image_processing/image_processing.c \
 	./prototype/FFT_image_processing/bitmap.c ./prototype/FFT_image_processing/bitmap.h \
 	./prototype/FFT_image_processing/serial_port.c ./prototype/FFT_image_processing/serial_port.h
-	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $^ -o ./prototype/FFT_image_processing/main.out $(LDLIBS)
+	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $^ -o ./prototype/FFT_image_processing/$@.out $(LDLIBS)
 
 
 run_all_tests:
