@@ -222,8 +222,7 @@ static void decodeAndAddChild(genetic_int *nextGeneration,
 
   for (unsigned int i = 0; i < dimensions; i++) {
 
-    memcpy(parameter, child + (i * INT_MAX_DIGIT_COUNT),
-           INT_MAX_DIGIT_COUNT);
+    memcpy(parameter, child + i * INT_MAX_DIGIT_COUNT, INT_MAX_DIGIT_COUNT);
 
     genetic_int value = atoi(parameter);
 
@@ -276,7 +275,7 @@ static void encode(char *combinedValue, genetic_int *parent,
 
   for (int i = 0; i < dimensions; i++) {
 
-    sprintf(combinedValue + (i * INT_MAX_DIGIT_COUNT), "%.5hu", parent[i]);
+    sprintf(combinedValue + i * INT_MAX_DIGIT_COUNT, "%.5hu", parent[i]);
   }
 }
 /**
@@ -523,7 +522,7 @@ static void calculateFitness(genetic_int *population, genetic_real *bestFit,
 
     }
 
-    else if (fitness < *(secondBestFitness)) {
+    else if (fitness < *secondBestFitness) {
 
       *secondBestFitness = fitness;
       memcpy(secondBestValues, population + (i * dimensions),
@@ -584,21 +583,19 @@ replacePopulation(genetic_int *population, genetic_int *newGeneration,
  * evaluation function more often
  * @return real the fitness of the best solution
  */
-genetic_real geneticAlgorithm(genetic_real *bestFitValues,
-                              const unsigned int parameterCount,
-                              const genetic_real epsilon,
-                              const genetic_real mutationChance,
-                              unsigned int generationSize,
-                              const unsigned int maximumIterationCount,
-                              const unsigned int tourneySize,
-                              fitness_evaluation_function evaluationFunction,
-                              const unsigned int lowMemoryMode) {
+genetic_real
+geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
+                 const genetic_real epsilon, const genetic_real mutationChance,
+                 unsigned int generationSize, unsigned int tourneySize,
+                 const unsigned int maximumIterationCount,
+                 fitness_evaluation_function evaluationFunction,
+                 const unsigned int lowMemoryMode) {
 
   if (generationSize % 2)
     generationSize += 1;
 
   if (tourneySize > generationSize)
-    exit(1);
+    tourneySize = generationSize;
 
   genetic_real bestFit = FLT_MAX;
 

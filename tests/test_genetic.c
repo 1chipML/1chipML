@@ -26,21 +26,22 @@ int main() {
   float bestFitValues[2];
   float lowMemoryBestFitValues[2];
   const unsigned int dimensions = 2;
-  const unsigned int tournamentSize = 20;
   const unsigned int maxIterations = 10000;
   unsigned int populationSize = 100;
+  unsigned int tournamentSize = 20;
 
   set_linear_congruential_generator_seed(16);
 
   float result = geneticAlgorithm(bestFitValues, dimensions, epsilon,
-                                  mutationRate, populationSize, maxIterations,
-                                  tournamentSize, evaluateStrength, 0);
+                                  mutationRate, populationSize, tournamentSize,
+                                  maxIterations, evaluateStrength, 0);
 
   // We reset the seed
   set_linear_congruential_generator_seed(16);
+
   float lowMemoryResult = geneticAlgorithm(
       lowMemoryBestFitValues, dimensions, epsilon, mutationRate, populationSize,
-      maxIterations, tournamentSize, evaluateStrength, 1);
+      tournamentSize, maxIterations, evaluateStrength, 1);
 
   float fitness = evaluateStrength(bestFitValues);
 

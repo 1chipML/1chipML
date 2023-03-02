@@ -26,8 +26,8 @@ typedef genetic_real (*fitness_evaluation_function)(genetic_real *);
 genetic_real
 geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
                  genetic_real epsilon, const genetic_real mutationChance,
-                 const unsigned int generationSize,
-                 const unsigned int generations, const unsigned int tourneySize,
+                 unsigned int generationSize, unsigned int tourneySize,
+                 const unsigned int maxIterations,
                  fitness_evaluation_function function,
                  const unsigned lowMemoryMode);
 
