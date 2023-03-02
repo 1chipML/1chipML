@@ -9,12 +9,41 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
-  // Tell we are ready
-  const unsigned messageLength = 6;
-  const char readyBuffer[messageLength] = "Ready";
-  while (Serial.availableForWrite() < messageLength); // wait for write
-  Serial.write(readyBuffer, messageLength);
+  // Ping
+  const char PING[] = {'P', 'i', 'n', 'g'};
+  const char PONG[] = {'P', 'o', 'n', 'g'};
+  char pingBuffer[8];
+  bool isPing = false;
+  while (!isPing) {
+    while(Serial.available() < 8);
+    Serial.readBytes(pingBuffer, 8);
+    isPing = strstr(pingBuffer, PING) != NULL;
+  }
+
+  // Pong
+  while (Serial.availableForWrite() < 4); // wait for write
+  Serial.write(PONG, 4);
   Serial.flush();
+
+  // Ping
+  isPing = false;
+  while (!isPing) {
+    while(Serial.available() < 8);
+    Serial.readBytes(pingBuffer, 8);
+    isPing = strstr(pingBuffer, PING) != NULL;
+  }
+
+  // Empty
+  while (Serial.read() >= 0);
+
+  // Pong
+  while (Serial.availableForWrite() < 4); // wait for write
+  Serial.write(PONG, 4);
+  Serial.flush();
+
+  while(Serial.available() < 4);
+  Serial.readBytes(pingBuffer, 4);
+  
 }
 
 unsigned FFTLength = 0;
@@ -48,7 +77,7 @@ void loop() {
     // Execute FFT
     fftCode = FFT(FFTLength, FFTreals, FFTimgs, dir);
     if (fftCode != 0) {
-      digitalWrite(LED_BUILTIN, HIGH);
+      digitalWrite(LED_BUILTIN, LOW);
       return;
     }
 

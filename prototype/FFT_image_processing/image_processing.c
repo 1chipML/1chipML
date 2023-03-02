@@ -209,7 +209,7 @@ int main() {
   const unsigned SERIAL_BUFFER_SIZE = 32;
   char* serialPortName = "/dev/ttyACM0";
 
-  char* openedImageName = "1chipML_color.bmp";
+  char* openedImageName = "1chipML_color32.bmp";
   char* greyImageName = "bitmapImageGrey.bmp";
   char* magnitudeImageName = "magnitude.bmp";
   char* realsImageName = "real.bmp";
@@ -238,6 +238,7 @@ int main() {
 
   // Open the image
   // The origin of the image (0,0) is at the bottom left
+  printf("Loading source image\n");
   unsigned char* originalImageData = readBitmapImage(openedImageName, &bitmapInfoHeader);
   if (originalImageData == NULL) {
     printf("Could not load the image\n");
