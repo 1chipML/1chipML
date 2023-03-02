@@ -173,7 +173,7 @@ int writeArray(const unsigned arraySize,
  * This function will block until all elements are read.
  * @param element The element to read.
  * @param sizeOfElement The size of the element to read.
- * @returnThe number of bytes read. -1 if there was an error.
+ * @return The number of bytes read. -1 if there was an error.
  */
 int readElement(void* element, const unsigned sizeOfElement) {
   if (fileDescriptor < 0) {
@@ -197,10 +197,10 @@ int readElement(void* element, const unsigned sizeOfElement) {
 }
 
 /**
- * @brief Write an element of an arbitrary size
+ * @brief Write an element of an arbitrary size.
  * The number of elements written at once depends on the
  * buffer size.
- * This function will block until all elements are written.
+ * This function will block until the element is written.
  * @param element The element to write.
  * @param sizeOfElement The size of the element to write.
  * @return The number of bytes written. -1 if there was an error.

@@ -12,8 +12,9 @@ void setup() {
   // Tell we are ready
   const unsigned messageLength = 6;
   const char readyBuffer[messageLength] = "Ready";
-  while(Serial.availableForWrite() < messageLength); // wait for write
+  while (Serial.availableForWrite() < messageLength); // wait for write
   Serial.write(readyBuffer, messageLength);
+  Serial.flush();
 }
 
 unsigned FFTLength = 0;
@@ -37,7 +38,6 @@ void loop() {
     memset(FFTreals, 0, FFTLength * sizeof(fft_real));
     memset(FFTimgs, 0, FFTLength * sizeof(fft_real));
 
-
     // read reals
     readArray(FFTLength, FFTreals, sizeof(fft_real));
     // read imaginaries
@@ -45,7 +45,7 @@ void loop() {
     // read direction
     readElement(&dir, sizeof(dir));
 
-    //Execute FFT
+    // Execute FFT
     fftCode = FFT(FFTLength, FFTreals, FFTimgs, dir);
     if (fftCode != 0) {
       digitalWrite(LED_BUILTIN, HIGH);
@@ -58,61 +58,60 @@ void loop() {
     // write imaginaries
     writeArray(FFTLength, FFTimgs, sizeof(fft_real));
 
-    //uint32_t size = 0;
-    //float* array = NULL;
-    //readElement(&size, sizeof(size));
-    //if (size > 0) {
-    //  array = malloc(size * sizeof(float));
-    //}
-    //readArray(size, array, sizeof(float));
-    //writeArray(size, array, sizeof(float));
-    //free(array);
-    //array = NULL;
-
-    //char buffer[] = "     ";
-    //Serial.readBytes(buffer, 6);
-    //String buffer = Serial.readStringUntil('\0');
-
-    // read float from bytes
-    //float receivedFloat; // @@@@ = 0x40404040 = 3.00392
-    //Serial.readBytes((unsigned char*) &receivedFloat, sizeof(receivedFloat));
-    //
-    //if (receivedFloat - 3.00392 < 1e-20)
-    //  digitalWrite(LED_BUILTIN, HIGH);
-    //delay(2000);
-    //digitalWrite(LED_BUILTIN, LOW);
-    //// Serial.println(buffer);
-    //// Reminder: Float has a 6 decimal preicision display
-    //Serial.println(receivedFloat, 6);
-    
   } else {
     digitalWrite(LED_BUILTIN, LOW);
   }
-  
 }
 
-int readArray(const uint32_t arraySize, void* outArray, const uint32_t sizeOfElement) {
+/**
+ * @brief Read an array of length arraySize, where each element is of size
+ * sizeOfElement. This function will block untill all elements are read.
+ * @param arraySize The size of the array to read.
+ * @param outArray The array in which to store the result of the read data.
+ * @param sizeOfElement The size of each element in the array.
+ */
+int readArray(const uint32_t arraySize, void* outArray,
+              const uint32_t sizeOfElement) {
   readElement(outArray, arraySize * sizeOfElement);
 }
 
-void writeArray(const uint32_t arraySize, float* array, const uint32_t sizeOfElement) {
-  for(uint32_t i = 0; i < arraySize; ++i) {
+/**
+ * @brief Write an array of length arraySize, where each element is of size
+ * sizeOfElement. This function will block untill all elements are written.
+ * @param arraySize The size of the array to read.
+ * @param array The array containing the data to be written.
+ * @param sizeOfElement The size of each element in the array.
+ */
+void writeArray(const uint32_t arraySize, float* array,
+                const uint32_t sizeOfElement) {
+  for (uint32_t i = 0; i < arraySize; ++i) {
     writeElement(&array[i], sizeOfElement);
   }
 }
 
+/**
+ * @brief Read an element of an arbitrary size
+ * One byte is read at a time
+ * This function will block until all elements are read.
+ * @param element The element to read.
+ * @param sizeOfElement The size of the element to read.
+ */
 void readElement(void* element, const uint32_t sizeOfElement) {
-
-  unsigned char* readElement = (unsigned char*) element;
-  for(uint32_t i = 0; i < sizeOfElement; ++i) {
-    while(Serial.available() < 1); // Wait for element
+  unsigned char* readElement = (unsigned char*)element;
+  for (uint32_t i = 0; i < sizeOfElement; ++i) {
+    while (Serial.available() < 1); // Wait for element
     Serial.readBytes(&readElement[i], sizeof(unsigned char));
   }
-  
 }
 
+/**
+ * @brief Write an element of an arbitrary size.
+ * This function will block until the element is written.
+ * @param element The element to write.
+ * @param sizeOfElement The size of the element to write.
+ */
 void writeElement(void* element, const uint32_t sizeOfElement) {
-  while(Serial.availableForWrite() < sizeOfElement); // wait for write
-  Serial.write((unsigned char*) element, sizeOfElement);
+  while (Serial.availableForWrite() < sizeOfElement); // wait for write
+  Serial.write((unsigned char*)element, sizeOfElement);
   Serial.flush(); // wait until data is sent
 }
