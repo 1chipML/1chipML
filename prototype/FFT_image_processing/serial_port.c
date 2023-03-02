@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 // Linux headers
 #include <errno.h>   // Error integer and strerror() function
@@ -12,7 +11,6 @@
 #include <unistd.h>  // write(), read(), close()
 
 static int setupSerialPort(int serialPort, const speed_t baudRate);
-static int setNonCanonicalState(cc_t vmin, cc_t vtime);
 static speed_t getBaudRateCode(const unsigned baudRate);
 static int fileDescriptor = -1;
 static unsigned serialWriteBufferSize = -1;
@@ -51,9 +49,8 @@ int openSerialPort(char* portName,
     return setupReturnCode;
   }
 
-  
-
-  // The Arduino UNO resets twice when the first connection is created.
+  // The Arduino UNO self-reset from bootloader after writing the uploaded hex
+  // and resets when the first connection is created.
   // This prevents from directly sending data to the board when
   // the serial connection is initiated, as it is resetting.
   // This behaviour is linked to the DTR.
@@ -61,90 +58,8 @@ int openSerialPort(char* portName,
   // In order to bypass this behavior,
   // it is possible to attach a 10 uF electrolytic capacitor between
   // the Reset and the Ground on the Arduino UNO board.
-
-  // Set as non-blocking, with exact match
+  sleep(2);
   tcflush(fileDescriptor, TCIOFLUSH);
-  int stateCode = setNonCanonicalState(0, 0);
-  if (stateCode) {
-    closeSerialPort();
-    return stateCode;
-  }
-
-  printf("Attempting connection\n");
-
-  // Prepare polling by pinging the board
-  const char PING[] = {'P', 'i', 'n', 'g'};
-  const char PONG[] = {'P', 'o', 'n', 'g'};
-  const unsigned PING_US = 1000;
-  const unsigned DISPLAY_PING_US = 500000;
-  char pongBuffer[4];
-  memset(pongBuffer, 0, 4);
-  
-  // Keep pinging the board until it responds
-  unsigned displayPing = DISPLAY_PING_US;
-  while (1) {
-
-    // For display purposes
-    if (displayPing >= DISPLAY_PING_US) {
-      printf("Ping...\n");
-      displayPing = 0;
-    }
-    displayPing += PING_US;
-
-    usleep(PING_US);
-
-    // write the ping
-    write(fileDescriptor, PING, 4);
-
-    // drain and flush remaining output
-    tcdrain(fileDescriptor);
-    tcflush(fileDescriptor, TCOFLUSH);
-
-    // Check for a response from the board
-    read(fileDescriptor, pongBuffer, 4);
-    if (strncmp(pongBuffer, PONG, 4) == 0) {
-      printf("Pong!\n");
-      break;
-    }
-  }
-
-  // Set to blocking
-  stateCode = setNonCanonicalState(4, 0);
-  if (stateCode) {
-    closeSerialPort();
-    return stateCode;
-  }
-
-  // Drain and flush remaining pings
-  tcdrain(fileDescriptor);
-  tcflush(fileDescriptor, TCIOFLUSH);
-
-  // Write Ping response
-  printf("Ping?\n");
-  write(fileDescriptor, PING, 4);
-  tcdrain(fileDescriptor);
-  tcflush(fileDescriptor, TCIOFLUSH);
-
-  // Read if the board is ready
-  memset(pongBuffer, 0, 4);
-  read(fileDescriptor, pongBuffer, 4);
-  if (strncmp(pongBuffer, PONG, 4) == 0) {
-    printf("Pong!\n");
-  }
-
-  write(fileDescriptor, PING, 4);
-  tcdrain(fileDescriptor);
-  tcflush(fileDescriptor, TCIOFLUSH);
-
-  // Set to desired behavior
-  stateCode = setNonCanonicalState(1, 0);
-  if (stateCode) {
-    closeSerialPort();
-    return stateCode;
-  }
-  tcflush(fileDescriptor, TCIOFLUSH);
-
-  printf("Successfully connected!\n");
 
   return 0;
 }
@@ -211,7 +126,7 @@ static int setupSerialPort(int serialPort, const speed_t baudRate) {
   
   // Save tty settings
   // Make the change immediatly
-  if (tcsetattr(serialPort, TCSAFLUSH, &tty) != 0) {
+  if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
     printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
     return 1;
   }
@@ -320,30 +235,6 @@ int writeElement(void* element, const unsigned sizeOfElement) {
   }
 
   return numBytesWritten;
-}
-
-/**
- * @brief Sets the non-canonical vmin and vtime parameters
- * VMIN and VTIME have no effect in canonical mode
- * @param vmin The number of butes before unblocking
- * @param vtime The maximum wait time. Blocking at 0
- * @return 0 if successfull, 1 otherwise
-*/
-static int setNonCanonicalState(cc_t vmin, cc_t vtime) {
-  struct termios tty;
-  if (tcgetattr(fileDescriptor, &tty) != 0) {
-    printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
-    return 1;
-  }
-
-  tty.c_cc[VMIN] = vmin;
-  tty.c_cc[VTIME] = vtime; 
-
-  if (tcsetattr(fileDescriptor, TCSANOW, &tty) != 0) {
-    printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
-    return 1;
-  }
-  return 0;
 }
 
 /**
