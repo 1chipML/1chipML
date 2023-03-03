@@ -1,6 +1,6 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
 
 double myFunction(double x);
 double monteCarloEstimate(double lowBound, double upBound, int iterations);
@@ -40,7 +40,7 @@ double monteCarloEstimate(double lowBound, double upBound, int iterations)
   while (iter < iterations - 1) {
 
     // Select a random number within the limits of integration
-    randNum = lowBound + (float)rand() / RAND_MAX * (upBound - lowBound);
+    randNum = lowBound + (float(rand()) / RAND_MAX) * (upBound - lowBound);
 
     // Sample the function's values
     functionVal = myFunction(randNum);
