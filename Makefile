@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos monte_carlo
+all: linear_congruential_random_generator gauss_elimination poly_interpolation monte_carlo
 
 test: all run_all_tests
 
@@ -24,6 +24,7 @@ poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 monte_carlo:
 	$(CC) ./tests/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c -lm -Wall -std=c99 -I./src -o test_monte_carlo.out
 
+<<<<<<< HEAD
 FFT: ./tests/test_FFT.c ./src/FFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
@@ -34,14 +35,19 @@ lanczos: ./tests/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 
+=======
+>>>>>>> parent of 175e5b3 (FFT and DFT implementation (#18))
 run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
 	./test_poly_interpolation.out
 	./test_monte_carlo.out
+<<<<<<< HEAD
 	./test_DFT.out
 	./test_FFT.out
 	./test_lanczos.out
+=======
+>>>>>>> parent of 175e5b3 (FFT and DFT implementation (#18))
 
 clean:
 	rm -rf test_*.out
