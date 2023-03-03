@@ -10,12 +10,12 @@
  * License          : Apache 2                           *
  * ***************************************************** */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
 
 /* Include 1chipML methods below */
-#include "./gauss_elimination.h"
 #include "./linear_congruential_random_generator.h"
+#include "./gauss_elimination.h"
 
 /* -- End of file -- */
