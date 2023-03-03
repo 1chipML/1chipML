@@ -334,11 +334,16 @@ static void createNextGeneration(genetic_int *population,
     firstChildString[mergedParentsLastIndex] = '\0';
     secondChildString[mergedParentsLastIndex] = '\0';
 
+
     encode(mergedParents1, parent1, dimensions);
     encode(mergedParents2, parent2, dimensions);
 
     createChildren(mergedParents1, mergedParents2, firstChildString,
                    secondChildString, dimensions);
+
+    printf("%s \n",firstChildString);
+    printf( "%s \n", secondChildString);
+
 
     // We apply the mutation operator to both children
     mutate(firstChildString, mergedParentsLength, mutationRate);
