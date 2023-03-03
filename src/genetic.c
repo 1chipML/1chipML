@@ -175,26 +175,52 @@ static void tourneyLowMemory(genetic_int *population,
 }
 
 /**
+ * This function generates a number based off of a Poisson generation around the
+ * given lambda
+ *
+ * @param expectedValue  the lambda for the Poisson table
+ * @return unsigned int
+ */
+unsigned int randomPoissonGenerator(genetic_real expectedValue) {
+
+  unsigned int value = 0;
+  genetic_real number = linear_congruential_random_generator();
+
+  // This value is the target that the multiplication of random numbers cannot
+  // go below
+  genetic_real cutoff = exp(-expectedValue);
+
+  for (; number > cutoff; value++) {
+    number *= linear_congruential_random_generator();
+  }
+  return value;
+}
+
+/**
  * This function simulates the mutation genetic operation on our created child
  *
  * @param gene  this char array represents the created child and at each index
  * is a digit
  * @param geneLength the length of the created child
- * @param mutationRate the chance that a child will have a mutation on of its
- * genes
+ * @param averageNumberofMutations the average number of mutations on the child
  */
 static void mutate(char *gene, const unsigned int geneLength,
-                   const genetic_real mutationRate) {
+                   const genetic_real averageNumberofMutations) {
 
-  const genetic_real mutation = linear_congruential_random_generator();
+  int numberOfMutations = randomPoissonGenerator(averageNumberofMutations);
 
-  if (mutation <= mutationRate) {
+  for (unsigned int i = 0; i < numberOfMutations; i++) {
 
     const unsigned int mutatedIndex =
         linear_congruential_random_generator() * (geneLength - 1);
 
     // We then generate a number between 0 and 9 to replace the chosen digit
-    const unsigned int newValue = linear_congruential_random_generator() * 9;
+    unsigned int newValue = linear_congruential_random_generator() * 10;
+
+    // We do this to get an equal chance to generate a number between 0 and 9
+    while (newValue == 10) {
+      newValue = linear_congruential_random_generator() * 10;
+    }
 
     // Converts int to char
     gene[mutatedIndex] = intDigitToChar(newValue);
@@ -290,8 +316,8 @@ static void encode(char *combinedValue, genetic_int *parent,
  * @param dimensions the number of parameters in the function to minimize
  * @param tournamentSelectionsSize the number of solutions that are selected to
  * be part of the tournament
- * @param mutationRate = the chance that a child will have a mutation on one of
- * its genes
+ * @param averageNumberOfMutations the average number of mutations present on
+ * each created child
  */
 static void createNextGeneration(genetic_int *population,
                                  genetic_int *nextGeneration,
@@ -299,7 +325,7 @@ static void createNextGeneration(genetic_int *population,
                                  const unsigned int populationSize,
                                  const unsigned int dimensions,
                                  const unsigned int tournamentSelectionsSize,
-                                 const genetic_real mutationRate) {
+                                 const genetic_real averageNumberOfMutations) {
 
   unsigned int currentNextGenerationSize = 0;
 
@@ -341,8 +367,8 @@ static void createNextGeneration(genetic_int *population,
                    secondChildString, dimensions);
 
     // We apply the mutation operator to both children
-    mutate(firstChildString, mergedParentsLength, mutationRate);
-    mutate(secondChildString, mergedParentsLength, mutationRate);
+    mutate(firstChildString, mergedParentsLength, averageNumberOfMutations);
+    mutate(secondChildString, mergedParentsLength, averageNumberOfMutations);
 
     // We decode both children and add them to the next generation
     decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
@@ -364,15 +390,14 @@ static void createNextGeneration(genetic_int *population,
  * @param dimensions the number of parameters in the function to minimize
  * @param tournamentSelectionsSize the number of solutions that are selected to
  * be part of the tournament
- * @param mutationRate = the chance that a child will have a mutation on one of
- * its genes
+ * @param averageNumberOfMutations the average number of mutations per child
  */
 static void createNextGenerationLowMemory(
     genetic_int *population, genetic_int *nextGeneration,
     fitness_evaluation_function evaluationFunction,
     const unsigned int populationSize, const unsigned int dimensions,
     const unsigned int tournamentSelectionsSize,
-    const genetic_real mutationRate) {
+    const genetic_real averageNumberOfMutations) {
 
   unsigned int currentNextGenerationSize = 0;
 
@@ -415,8 +440,8 @@ static void createNextGenerationLowMemory(
                    secondChildString, dimensions);
 
     // We apply the mutation operator to both children
-    mutate(firstChildString, mergedParentsLength, mutationRate);
-    mutate(secondChildString, mergedParentsLength, mutationRate);
+    mutate(firstChildString, mergedParentsLength, averageNumberOfMutations);
+    mutate(secondChildString, mergedParentsLength, averageNumberOfMutations);
 
     // We decode both children and add them to the next generation
     decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
@@ -597,6 +622,8 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
   if (tourneySize > generationSize)
     tourneySize = generationSize;
 
+  genetic_real averageMutationsPerChromosone = tourneySize * mutationChance;
+
   genetic_real bestFit = FLT_MAX;
 
   const unsigned int arraySize = generationSize * parameterCount;
@@ -627,7 +654,7 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
 
       createNextGeneration(population, nextGeneration, populationFitness,
                            generationSize, parameterCount, tourneySize,
-                           mutationChance);
+                           averageMutationsPerChromosone);
 
       replacePopulation(population, nextGeneration, bestValues,
                         secondBestValues, childArraySize, parameterCount);
@@ -645,7 +672,7 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
 
       createNextGenerationLowMemory(
           population, nextGeneration, evaluationFunction, generationSize,
-          parameterCount, tourneySize, mutationChance);
+          parameterCount, tourneySize, averageMutationsPerChromosone);
 
       replacePopulation(population, nextGeneration, bestValues,
                         secondBestValues, childArraySize, parameterCount);
