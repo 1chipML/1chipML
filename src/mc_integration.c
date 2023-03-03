@@ -1,60 +1,57 @@
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 double myFunction(double x);
 double monteCarloEstimate(double lowBound, double upBound, int iterations);
 
-int main()
-{
+int main() {
 
-	double lowerBound, upperBound;
-	int iterations;
+  double lowerBound, upperBound;
+  int iterations;
 
-	lowerBound = 1;
-	upperBound = 5;
-	iterations = 200;
+  lowerBound = 1;
+  upperBound = 5;
+  iterations = 200;
 
-	double estimate = monteCarloEstimate(lowerBound, upperBound,iterations);
+  double estimate = monteCarloEstimate(lowerBound, upperBound, iterations);
 
-	printf("Estimate for %.1f -> %.1f is %.2f, (%i iterations)\n",
-			lowerBound, upperBound, estimate, iterations);
+  printf("Estimate for %.1f -> %.1f is %.2f, (%i iterations)\n", lowerBound,
+         upperBound, estimate, iterations);
 
-	return 0;
+  return 0;
 }
 
-
 double myFunction(double x)
-//Function to integrate
+// Function to integrate
 {
-	return pow(x,4)*exp(-x);
+  return pow(x, 4) * exp(-x);
 }
 
 double monteCarloEstimate(double lowBound, double upBound, int iterations)
-//Function to execute Monte Carlo integration on predefined function
+// Function to execute Monte Carlo integration on predefined function
 {
 
-	double totalSum = 0;
-	double randNum, functionVal;
+  double totalSum = 0;
+  double randNum, functionVal;
 
-	int iter = 0;
+  int iter = 0;
 
-	while (iter<iterations-1)
-	{
+  while (iter < iterations - 1) {
 
-		//Select a random number within the limits of integration
-		randNum = lowBound + (float(rand())/RAND_MAX) * (upBound-lowBound);
+    // Select a random number within the limits of integration
+    randNum = lowBound + (float)rand() / RAND_MAX * (upBound - lowBound);
 
-		//Sample the function's values
-		functionVal = myFunction(randNum);
+    // Sample the function's values
+    functionVal = myFunction(randNum);
 
-		//Add the f(x) value to the running sum
-		totalSum += functionVal;
+    // Add the f(x) value to the running sum
+    totalSum += functionVal;
 
-		iter++;
-	}
+    iter++;
+  }
 
-	double estimate = (upBound-lowBound)*totalSum/iterations;
+  double estimate = (upBound - lowBound) * totalSum / iterations;
 
-	return estimate;
+  return estimate;
 }

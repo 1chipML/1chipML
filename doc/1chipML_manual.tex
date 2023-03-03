@@ -9,6 +9,8 @@
 \usepackage{amsmath}
 \usepackage{setspace}
 \usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \begin{document}
 
@@ -381,8 +383,55 @@ Work in progress.
 Work in progress.
 \subsection{The Lanczos method}
 
-Work in progress.
+The lanczos method is an iterative algorithm for approximating the eigenvalues and eigenvectors of a symmetrical, sparse matrix.
 
+The algorithm generates a sequence of orthonormal vectors, called the Lanczos basis, that form an approximation of the eigenvectors of the matrix. At each iteration, the algorithm computes values forming a tridiagonal matrix that is similar to the original matrix and has the same eigenvalues.
+
+The basic idea behind the Lanczos algorithm is to generate an orthonormal basis for the subspace spanned by the approximate eigenvectors of the matrix and then use this basis to construct the tridiagonal matrix.
+
+Here is a pseudo-code of the algorithm :
+
+\begin{algorithm}
+  \caption{Lanczos Algorithm}
+  \begin{algorithmic}[1]
+    \State $\text{$x_{0}$} \gets \text{Random unit vector}$
+    \State $\beta_{0} \gets 0$
+  \For{\texttt{i = 1; i $\le$ k; i++}} \Comment{k is the number of iterations}
+    \State $\textit{v}_{i} \gets Ax_{i-1} - \beta_{i}\textit{v}_{i-1}$
+    \State $\alpha_{i} \gets v_{i}^{T} \cdot x_{i-1}$
+    \State $v_{i} \gets v_{i}/||v_{i}||$
+    \State $x_{i} \gets v_{i}$
+    \State $\beta_{i} \gets ||v_{i}||$
+  \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+$$
+T=
+\begin{bmatrix}
+  \alpha_{1} & \beta_{1} & \ldots & 0\\
+  \beta_{1} & \alpha_{2} & \beta_{2} & \vdots \\
+  \vdots & \beta_{2} &  \ddots & \beta_{k} \\
+  0 & \ldots & \beta_{k} & \alpha_{k}
+\end{bmatrix}
+$$
+
+$$
+V=
+\begin{bmatrix}
+  v_{0} & v_{1} & \ldots & v_{n} \\
+\end{bmatrix}
+$$
+The Lanczos algorithm is useful for solving large sparse eigenvalue problems since it generates a small, dense tridiagonal matrix that can be solved efficiently, rather than solving the entire matrix. It can also be used to compute a few eigenvalues and eigenvectors of the matrix, rather than all of them.
+
+Due to the rounding error caused by the IEEE-754 standard, the Lanczos algorithm is vulnerable to numerical instability. When applying the algorithm, Lanczos bases tend to loose their orthogonality. To overcome this issue, the Gram-Schmidt algorithm is applied after every iteration to reorthogonalize the vectors $v_{i}$.
+
+The Lanczos algorithm does not directly outputs the eigenvalues and the eigenvectors associated with the original matrix. Further steps are needed to compute those values. However, the Lanczos algorithm does help finding those values by providing a tridiagonal matrix T which is much easier to compute. 
+
+  The eigenvalues and eigenvectors of T can be calculated using standard methods such as the Jacobi algorithm. 
+
+  Once the eigenvectors and eigenvalues of T are known, the eigenvectors of the original matrix can be approximated by linear combinations of the Lanczos basis vectors. For example, given an eigenvector of T, say $\gamma$, corresponding eigenvector of the original matrix, say $\lambda$ is given by $\lambda = V\gamma$ 
+  
 \section{Statistical approaches}
 
 Work in progress.
@@ -402,7 +451,38 @@ Work in progress.
 \section{The Fast Fourier Transform}
 
 
-Work in progress.
+The Fast Fourier Transform (FFT) is an algorithm that computes the discrete fourier transform (DFT) of a set of complex values. More specifically, the FFT is often used to convert a set of values from its original domain to a representation in the frequency domain.
+
+The DFT equation can be seen in \ref{eqn:DFT}:
+\begin{equation}
+	X_k = \sum_{n=0}^{N-1} x_n \exp \biggl(- \frac{2 \pi i}{N} nk \biggr)
+	\label{eqn:DFT}
+\end{equation}
+where N is the size of set of values, k ranges from 0 to $N-1$ and $i$ is the imaginary part. The equation shown in \ref{eqn:FFTTwiddle} represents the twiddle factor.
+\begin{equation}
+	\exp \biggl( - \frac{2 \pi i k}{N} \biggr)
+	\label{eqn:FFTTwiddle}
+\end{equation}
+
+The Cooley–Tukey FFT algorithm is used to find the FFT of a set of values. This algorithm uses a strategy similar to divide-and-conquer, allowing it to have a time complexity of O(n log n). \\
+
+The algorithm is implemented in a function that takes in two separate arrays to represent complex values. The first array consists of real numbers, while the second array holds imaginary numbers. This algorithm overrides the arrays passed as arguments and replaces them for the result of the FFT. Furthermore, the radix-2 decimation-in-time (DIT) method was used, meaning the arrays must have a length equal to a power of 2. If this is not the case, an error code will be returned by the function. 
+
+The first step of the algorithm is to execute bit-reversal permutation on the incoming arrays, as it uses the iterative approach. Then, the divide-and-conquer strategy starts. For the first set, the algorithm iterates over the elements that require the same twiddle factor. It then iterates over each group and uses the same twiddle factor for each one. After that, the twiddle factor is updated using the trigonometric recurrence formula and the next elements are selected. The same steps are repeated for the second set and so forth. By using this strategy, we end up with the result of the FFT.\\
+
+
+Given the context of microcontrollers and their lack of memory, multiple design choices were made, which are summarized here:
+\begin{itemize}
+	\item The FFT takes in two arrays of the same size (real and imaginary)
+	\item The FFT only takes in arrays that have a length equal to a power of 2
+	\item The FFT overrides the incoming arrays with the result
+	\item The FFT returns 1 in case of an error, 0 otherwise
+	\item The FFT has a space complexity of O(1) and a time complexity of O(nlogn)
+	\item The FFT uses the iterative approach
+	\item The FFT uses bit-reversal for the iterative approach
+	\item The FFT does not calculate the twiddle factors in advance
+	\item The FFT uses the trigonometric recurrence formula to reduce the number of sin and cos calculated
+\end{itemize}
 
 
 \chapter{Machine learning}
