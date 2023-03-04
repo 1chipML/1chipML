@@ -31,8 +31,8 @@ lanczos: ./tests/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 
-monte_carlo:
-	$(CC) ./tests/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c -lm -Wall -std=c99 -I./src -o test_monte_carlo.out
+monte_carlo: ./tests/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./test_linear_congruential_random_generator.out
