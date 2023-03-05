@@ -1,8 +1,8 @@
 #include <monte_carlo.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 Board playAction(Board board, Action* action) {
   Board childBoard;
@@ -127,7 +127,8 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
       getNumPossibleActions, removeAction, getBoardSize,
   };
 
-  Action action = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
+  Action action =
+      mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
   if (action.xPos == 0 && action.yPos == 2) {
     printf("Success : %s()\n", __func__);
     return 0;
