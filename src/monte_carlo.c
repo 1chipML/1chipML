@@ -207,37 +207,31 @@ void freeMCTree(Node* node) {
  * @param maxSim Maximum number of simulations to run.
  * @return The board with the best action to play after the execution of the Monte Carlo algorithm.
  */
-Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
+Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
              mc_real goalValue) {
-  Node* node = malloc(sizeof(Node));
-  node->nVisits = 0;
-  node->score = 0;
-  node->state = board;
-  node->action.player = -player;
-  node->action.xPos = 0; // Default value
-  node->action.yPos = 0; // Default value
-  node->nChildren = 0;
-  node->children = NULL;
-  node->parent = NULL;
+  Node node;
+  node.nVisits = 0;
+  node.score = 0;
+  node.state = board;
+  node.action.player = -player;
+  node.action.xPos = 0; // Default value
+  node.action.yPos = 0; // Default value
+  node.nChildren = 0;
+  node.children = NULL;
+  node.parent = NULL;
   set_linear_congruential_generator_seed(time(NULL));
 
   int iterations = 0;
-  while ((node->nVisits < minSim ||
-          calcUCB(findMaxUCB(node->children, node->nChildren)) < goalValue) &&
-         node->nVisits < maxSim) {
-    Node* selectedNode = selectChildren(node);
+  while ((node.nVisits < minSim ||
+          calcUCB(findMaxUCB(node.children, node.nChildren)) < goalValue) &&
+         node.nVisits < maxSim) {
+    Node* selectedNode = selectChildren(&node);
     expandLeaf(selectedNode, game);
     int score = mcEpisode(selectedNode, player, &game);
     backpropagate(selectedNode, score);
     iterations++;
   }
 
-  Board retBoard;
-  retBoard.values = malloc(game.getBoardSize() * sizeof(int));
-  memcpy(retBoard.values,
-         findMaxUCB(node->children, node->nChildren)->state.values,
-         game.getBoardSize() * sizeof(int));
-  freeMCTree(node);
-  free(node);
-  return retBoard;
+  freeMCTree(&node);
+  return findMaxUCB(node.children, node.nChildren)->action;
 }

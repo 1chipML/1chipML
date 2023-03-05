@@ -1,6 +1,8 @@
 #ifndef ONECHIPML_MONTE_CARLO_RL
 #define ONECHIPML_MONTE_CARLO_RL
 
+#include <stdbool.h>
+
 #ifndef mc_real
 #define mc_real float
 #endif
@@ -26,7 +28,7 @@ typedef struct {
 
 typedef struct {
   // Methods specific to the game
-  char (*isValidAction)(Board*, Action*, int);
+  bool (*isValidAction)(Board*, Action*, int);
   Board (*playAction)(Board, Action*);
   int (*getScore)(Board*, int);
   void (*getPossibleActions)(Board, Action*);
@@ -46,7 +48,7 @@ typedef struct Node {
 } Node;
 
 typedef Board (*playActionType)(Board, Action*);
-typedef char (*isValidActionType)(Board*, Action*, int);
+typedef bool (*isValidActionType)(Board*, Action*, int);
 typedef int (*getScoreType)(Board*, int);
 typedef void (*getPossibleActionsType)(Board, Action*);
 typedef int (*getNumPossibleActionsType)(void);
@@ -59,7 +61,7 @@ Node* selectNode(Node* node);
 void expandLeaf(Node* node, Game game);
 int mcEpisode(Node* node, int player, Game* game);
 void backpropagate(Node* node, int score);
-Board mcGame(Board board, int player, Game game, int minSim, int maxSim,
+Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
              mc_real goalValue);
 
 #ifdef __cplusplus

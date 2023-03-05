@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 Board playAction(Board board, Action* action) {
   Board childBoard;
@@ -12,7 +13,7 @@ Board playAction(Board board, Action* action) {
   return childBoard;
 }
 
-char isValidAction(Board* board, Action* action, int player) {
+bool isValidAction(Board* board, Action* action, int player) {
   if (action->player == player &&
       board->values[action->xPos * 3 + action->yPos] == 0) {
     return 1;
@@ -120,25 +121,19 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
   board.values[0] = 1;
   board.values[1] = 1;
   board.nPlayers = 2;
-  Action* action;
 
   Game game = {
       isValidAction,         playAction,   getScore,     getPossibleActions,
       getNumPossibleActions, removeAction, getBoardSize,
   };
 
-  board = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
-  if (board.values[2] == 1) {
-    free(board.values);
+  Action action = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
+  if (action.xPos == 0 && action.yPos == 2) {
     printf("Success : %s()\n", __func__);
     return 0;
   } else {
-    printf("Fail board: [%d, %d, %d] [%d, %d, %d] "
-           "[%d, %d, %d]\n", board.values[0], board.values[1], board.values[2], board.values[3], board.values[4], board.values[5], board.values[6], board.values[7], board.values[8]);
-    free(board.values);
-    printf("Fail : %s(), expected best action to be: [%d, %d, %d] [%d, %d, %d] "
-           "[%d, %d, %d]\n",
-           __func__, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+    printf("Fail : %s(), expected best action to be: Player: %d, [%d, %d]\n",
+           __func__, 1, 0, 2);
     return 1;
   }
 }
