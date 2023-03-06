@@ -622,7 +622,7 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
   if (tourneySize > generationSize)
     tourneySize = generationSize;
 
-  genetic_real averageMutationsPerChromosone = tourneySize * mutationChance;
+  genetic_real averageMutationsPerChromosone = INT_MAX_DIGIT_COUNT * mutationChance * parameterCount;
 
   genetic_real bestFit = FLT_MAX;
 
