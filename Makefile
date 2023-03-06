@@ -33,6 +33,14 @@ DFT: ./tests/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c
 lanczos: ./tests/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c 
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
+curve-fitting: ./src/genetic.c ./src/linear_congruential_random_generator.c \
+	./prototype/genetic_curve-fitting/curve-fitting.c \
+	./prototype/genetic_curve-fitting/serial_port.c ./prototype/genetic_curve-fitting/serial_port.h
+	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $^ -o ./prototype/genetic_curve-fitting/$@.out $(LDLIBS)
+
+test_curve-fitting: ./src/genetic.c ./src/linear_congruential_random_generator.c \
+	./prototype/genetic_curve-fitting/curve-fitting_test.c 
+	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $^ -o ./prototype/genetic_curve-fitting/$@.out $(LDLIBS)
 
 run_all_tests:
 	./test_linear_congruential_random_generator.out
