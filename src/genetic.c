@@ -20,7 +20,7 @@ static inline char intDigitToChar(const unsigned int value) {
  * @param populationSize The size of the population of solutions
  * @param dimensions The number of parameters of the function to optimizes
  */
-static void fillTable(genetic_int *population,
+static void fillTable(genetic_int* population,
                       const unsigned int populationSize,
                       const unsigned int dimensions) {
 
@@ -45,8 +45,8 @@ static void fillTable(genetic_int *population,
  * selected for a tournament
  * @param populationSize the number of solutions in the population
  */
-static void tourney(void *populationStrength, unsigned int *firstParentIndex,
-                    unsigned int *secondParentIndex,
+static void tourney(void* populationStrength, unsigned int* firstParentIndex,
+                    unsigned int* secondParentIndex,
                     const unsigned int tournamentSelectionsSize,
                     const unsigned int populationSize) {
   genetic_real chosenIndexes[tournamentSelectionsSize];
@@ -77,7 +77,7 @@ static void tourney(void *populationStrength, unsigned int *firstParentIndex,
       }
     }
 
-    const genetic_real fitness = ((genetic_real *)populationStrength)[index];
+    const genetic_real fitness = ((genetic_real*)populationStrength)[index];
 
     if (isNotAlreadyChosen) {
       chosenIndexes[i] = index;
@@ -110,9 +110,9 @@ static void tourney(void *populationStrength, unsigned int *firstParentIndex,
  * second chosen parent
  * @param evaluationFunction the function that is used to evaluate each solution
  */
-static void tourneyLowMemory(genetic_int *population,
-                             unsigned int *firstParentIndex,
-                             unsigned int *secondParentIndex,
+static void tourneyLowMemory(genetic_int* population,
+                             unsigned int* firstParentIndex,
+                             unsigned int* secondParentIndex,
                              fitness_evaluation_function evaluationFunction,
                              unsigned int tournamentSelectionsSize,
                              unsigned int populationSize,
@@ -204,7 +204,7 @@ unsigned int randomPoissonGenerator(genetic_real expectedValue) {
  * @param geneLength the length of the created child
  * @param averageNumberofMutations the average number of mutations on the child
  */
-static void mutate(char *gene, const unsigned int geneLength,
+static void mutate(char* gene, const unsigned int geneLength,
                    const genetic_real averageNumberofMutations) {
 
   int numberOfMutations = randomPoissonGenerator(averageNumberofMutations);
@@ -237,8 +237,8 @@ static void mutate(char *gene, const unsigned int geneLength,
  * @param child the encoded string of the new child
  * @param dimensions the number of parameters in the function to minimizes
  */
-static void decodeAndAddChild(genetic_int *nextGeneration,
-                              unsigned int *nextGenerationSize, char *child,
+static void decodeAndAddChild(genetic_int* nextGeneration,
+                              unsigned int* nextGenerationSize, char* child,
                               const unsigned int dimensions) {
 
   char parameter[INT_MAX_DIGIT_COUNT + 1];
@@ -270,8 +270,8 @@ static void decodeAndAddChild(genetic_int *nextGeneration,
  * @param secondChildString the char array that will be used to store the second
  * child
  */
-static void createChildren(char *firstParent, char *secondParent,
-                           char *firstChildString, char *secondChildString,
+static void createChildren(char* firstParent, char* secondParent,
+                           char* firstChildString, char* secondChildString,
                            const unsigned int dimensions) {
 
   const unsigned int arraySize = INT_MAX_DIGIT_COUNT * dimensions;
@@ -296,7 +296,7 @@ static void createChildren(char *firstParent, char *secondParent,
  * @param parent an array containing the parameters of the parent
  * @param dimensions the number of parameters in the function to minimize
  */
-static void encode(char *combinedValue, genetic_int *parent,
+static void encode(char* combinedValue, genetic_int* parent,
                    const unsigned int dimensions) {
 
   for (int i = 0; i < dimensions; i++) {
@@ -319,9 +319,9 @@ static void encode(char *combinedValue, genetic_int *parent,
  * @param averageNumberOfMutations the average number of mutations present on
  * each created child
  */
-static void createNextGeneration(genetic_int *population,
-                                 genetic_int *nextGeneration,
-                                 genetic_real *populationFitness,
+static void createNextGeneration(genetic_int* population,
+                                 genetic_int* nextGeneration,
+                                 genetic_real* populationFitness,
                                  const unsigned int populationSize,
                                  const unsigned int dimensions,
                                  const unsigned int tournamentSelectionsSize,
@@ -393,7 +393,7 @@ static void createNextGeneration(genetic_int *population,
  * @param averageNumberOfMutations the average number of mutations per child
  */
 static void createNextGenerationLowMemory(
-    genetic_int *population, genetic_int *nextGeneration,
+    genetic_int* population, genetic_int* nextGeneration,
     fitness_evaluation_function evaluationFunction,
     const unsigned int populationSize, const unsigned int dimensions,
     const unsigned int tournamentSelectionsSize,
@@ -467,10 +467,10 @@ static void createNextGenerationLowMemory(
  * @param populationSize the number of solutions in the population
  */
 static void calculateAndStoreFitness(
-    genetic_int *population, genetic_real *populationFitness,
-    genetic_real *bestFit, genetic_int *bestFitCoord,
+    genetic_int* population, genetic_real* populationFitness,
+    genetic_real* bestFit, genetic_int* bestFitCoord,
     fitness_evaluation_function evaluationFunction,
-    genetic_int *secondBestValues, genetic_real *secondBestFitness,
+    genetic_int* secondBestValues, genetic_real* secondBestFitness,
     const unsigned int dimensions, const unsigned int populationSize) {
 
   const unsigned int coordArrayByteSize = dimensions * sizeof(*population);
@@ -517,11 +517,11 @@ static void calculateAndStoreFitness(
  * @param secondBestValues  this is the second best fitness that was calculated
  * @param secondBestFitness  these are the parameters of the second solution
  */
-static void calculateFitness(genetic_int *population, genetic_real *bestFit,
-                             genetic_int *bestFitCoord,
+static void calculateFitness(genetic_int* population, genetic_real* bestFit,
+                             genetic_int* bestFitCoord,
                              fitness_evaluation_function evaluationFunction,
-                             genetic_int *secondBestValues,
-                             genetic_real *secondBestFitness,
+                             genetic_int* secondBestValues,
+                             genetic_real* secondBestFitness,
                              const unsigned int dimensions,
                              const unsigned int populationSize) {
 
@@ -571,8 +571,8 @@ static void calculateFitness(genetic_int *population, genetic_real *bestFit,
  * @param dimensions the number of parameters in the function to optimize
  */
 static void
-replacePopulation(genetic_int *population, genetic_int *newGeneration,
-                  genetic_int *bestFitValues, genetic_int *secondBestValues,
+replacePopulation(genetic_int* population, genetic_int* newGeneration,
+                  genetic_int* bestFitValues, genetic_int* secondBestValues,
                   const unsigned int arraySize, const unsigned int dimensions) {
 
   const unsigned int nextGenerationStartingIndex = 2 * dimensions;
@@ -609,7 +609,7 @@ replacePopulation(genetic_int *population, genetic_int *newGeneration,
  * @return real the fitness of the best solution
  */
 genetic_real
-geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
+geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
                  const genetic_real epsilon, const genetic_real mutationChance,
                  unsigned int generationSize, unsigned int tourneySize,
                  const unsigned int maximumIterationCount,
@@ -622,7 +622,8 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
   if (tourneySize > generationSize)
     tourneySize = generationSize;
 
-  genetic_real averageMutationsPerChromosone = INT_MAX_DIGIT_COUNT * mutationChance * parameterCount;
+  genetic_real averageMutationsPerChromosone =
+      INT_MAX_DIGIT_COUNT * mutationChance * parameterCount;
 
   genetic_real bestFit = FLT_MAX;
 
