@@ -43,7 +43,7 @@ int openSerialPort(char* portName,
     return 1;
   }
 
-  int setupReturnCode = setupSerialPort(fileDescriptor, baudRate);
+  int setupReturnCode = setupSerialPort(fileDescriptor, convertedBaudRate);
   if (setupReturnCode != 0) {
     closeSerialPort();
     return setupReturnCode;
@@ -220,13 +220,13 @@ int writeElement(void* element, const unsigned sizeOfElement) {
 
     // Write the data
     int returnValue = write(fileDescriptor, elementStartAddress, sizeToWrite);
-
-    // Wait until all output has actually been sent to the terminal device.
-    int drainCode = tcdrain(fileDescriptor);
     if (returnValue == -1) {
       printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
       return returnValue;
     }
+
+    // Wait until all output has actually been sent to the terminal device.
+    int drainCode = tcdrain(fileDescriptor);
     if (drainCode == -1) {
       printf("tcdrain error %i during writing to serial port: %s\n", errno, strerror(errno));
       return drainCode;
@@ -308,8 +308,6 @@ static speed_t getBaudRateCode(const unsigned baudRate) {
     return B3500000;
   case 4000000:
     return B4000000;
-  default:
-    break;
   }
 
   return -1;
