@@ -10,42 +10,36 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h>  // write(), read(), close()
 
-static int setupSerialPort(int serialPort, const speed_t baudRate);
+static int setupSerialPort(const int serialPort, const speed_t baudRate);
 static speed_t getBaudRateCode(const unsigned baudRate);
-static int fileDescriptor = -1;
-static unsigned serialWriteBufferSize = -1;
 
 /**
  * @brief Opens a serial port for communication.
  * The serial communication is blocking.
- * @param portName The name of the serial port.
- * @param serialBufferSize The buffer size of the serial port.
- * @param baudRate The baud rate for the serial port.
+ * @param serialPort The serial port information
+ * @return 0 if successfull. An error code otherwise
  */
-int openSerialPort(char* portName, 
-                   const unsigned serialBufferSize,
-                   const unsigned baudRate) {
-  if (serialBufferSize == 0) {
+int openSerialPort(serialPort_t* serialPort) {
+  if (serialPort->serialBufferSize == 0) {
     printf("Serial buffer size must be greater than 0\n");
     return 1;
   }
-  serialWriteBufferSize = serialBufferSize;
 
-  speed_t convertedBaudRate = getBaudRateCode(baudRate);
+  speed_t convertedBaudRate = getBaudRateCode(serialPort->baudRate);
   if (convertedBaudRate == -1) {
-    printf("The baudrate %d is not supported\n", baudRate);
+    printf("The baudrate %d is not supported\n", serialPort->baudRate);
     return 1;
   }
 
-  fileDescriptor = open(portName, O_RDWR | O_NOCTTY | O_SYNC);
-  if (fileDescriptor < 0) {
+  serialPort->fileDescriptor = open(serialPort->serialPortName, O_RDWR | O_NOCTTY | O_SYNC);
+  if (serialPort->fileDescriptor < 0) {
     printf("Error %i from open: %s\n", errno, strerror(errno));
     return 1;
   }
 
-  int setupReturnCode = setupSerialPort(fileDescriptor, convertedBaudRate);
+  int setupReturnCode = setupSerialPort(serialPort->fileDescriptor, convertedBaudRate);
   if (setupReturnCode != 0) {
-    closeSerialPort();
+    closeSerialPort(serialPort);
     return setupReturnCode;
   }
 
@@ -59,21 +53,22 @@ int openSerialPort(char* portName,
   // it is possible to attach a 10 uF electrolytic capacitor between
   // the Reset and the Ground on the Arduino UNO board.
   sleep(2);
-  tcflush(fileDescriptor, TCIOFLUSH);
+  tcflush(serialPort->fileDescriptor, TCIOFLUSH);
 
   return 0;
 }
 
 /**
  * @brief Closes the currently opened serial port.
+ * @param serialPort The serial port information
  */
-void closeSerialPort() {
-  if (fileDescriptor < 0) {
+void closeSerialPort(serialPort_t* serialPort) {
+  if (serialPort->fileDescriptor < 0) {
     return;
   }
-  close(fileDescriptor);
-  fileDescriptor = -1;
-  serialWriteBufferSize = -1;
+
+  close(serialPort->fileDescriptor);
+  serialPort->fileDescriptor = -1;
 }
 
 /**
@@ -82,7 +77,7 @@ void closeSerialPort() {
  * @param baudRate The baud rate for the serial port.
  * @return 0 if successfull. 1 otherwise.
  */
-static int setupSerialPort(int serialPort, const speed_t baudRate) {
+static int setupSerialPort(const int serialPort, const speed_t baudRate) {
   struct termios tty;
 
   if (tcgetattr(serialPort, &tty) != 0) {
@@ -135,45 +130,17 @@ static int setupSerialPort(int serialPort, const speed_t baudRate) {
 }
 
 /**
- * @brief Read an array of length arraySize, where each element is of size
- * sizeOfElement. This function will block untill all elements are read.
- * @param arraySize The size of the array to read.
- * @param outArray The array in which to store the result of the read data.
- * @param sizeOfElement The size of each element in the array.
- * @return Read return code. 0 if everything went correctly.
- */
-int readArray(const unsigned arraySize, 
-              void* outArray,
-              const unsigned sizeOfElement) {
-  int numBytesWritten = readElement(outArray, arraySize * sizeOfElement);
-  return numBytesWritten;
-}
-
-/**
- * @brief Write an array of length arraySize, where each element is of size
- * sizeOfElement. This function will block untill all elements are written.
- * @param arraySize The size of the array to read.
- * @param array The array containing the data to be written.
- * @param sizeOfElement The size of each element in the array.
- * @return The number of bytes written. -1 if there was an error.
- */
-int writeArray(const unsigned arraySize, 
-               void* array,
-               const unsigned sizeOfElement) {
-  return writeElement(array, arraySize * sizeOfElement);
-}
-
-/**
  * @brief Read an element of an arbitrary size
  * According to the current tty.c_cc[VMIN] setting,
  * One byte is read at a time to implement blocking behavior
  * This function will block until all elements are read.
+ * @param serialPort The serial port information
  * @param element The element to read.
  * @param sizeOfElement The size of the element to read.
  * @return The number of bytes read. -1 if there was an error.
  */
-int readElement(void* element, const unsigned sizeOfElement) {
-  if (fileDescriptor < 0) {
+int readElement(serialPort_t* serialPort, void* element, const unsigned sizeOfElement) {
+  if (serialPort->fileDescriptor < 0) {
     return -1;
   }
 
@@ -182,7 +149,7 @@ int readElement(void* element, const unsigned sizeOfElement) {
   int returnValue = -1;
 
   for (unsigned i = 0; i < sizeOfElement; ++i) {
-    returnValue = read(fileDescriptor, &readElement[i], sizeof(unsigned char));
+    returnValue = read(serialPort->fileDescriptor, &readElement[i], sizeof(unsigned char));
     if (returnValue == -1) {
       printf("Error %i from reading to serial port: %s\n", errno, strerror(errno));
       return returnValue;
@@ -198,35 +165,36 @@ int readElement(void* element, const unsigned sizeOfElement) {
  * The number of elements written at once depends on the
  * buffer size.
  * This function will block until the element is written.
+ * @param serialPort The serial port information
  * @param element The element to write.
  * @param sizeOfElement The size of the element to write.
  * @return The number of bytes written. -1 if there was an error.
  */
-int writeElement(void* element, const unsigned sizeOfElement) {
-  if (fileDescriptor < 0) {
+int writeElement(serialPort_t* serialPort, void* element, const unsigned sizeOfElement) {
+  if (serialPort->fileDescriptor < 0) {
     return -1;
   }
 
   int numBytesWritten = 0;
 
-  for (unsigned i = 0; i < sizeOfElement; i += serialWriteBufferSize) {
+  for (unsigned i = 0; i < sizeOfElement; i += serialPort->serialBufferSize) {
 
     // Prepare the data to write
     void* elementStartAddress = element + i;
-    unsigned sizeToWrite = serialWriteBufferSize;
-    if (i + serialWriteBufferSize > sizeOfElement) {
+    unsigned sizeToWrite = serialPort->serialBufferSize;
+    if (i + serialPort->serialBufferSize > sizeOfElement) {
       sizeToWrite = sizeOfElement - i;
     }
 
     // Write the data
-    int returnValue = write(fileDescriptor, elementStartAddress, sizeToWrite);
+    int returnValue = write(serialPort->fileDescriptor, elementStartAddress, sizeToWrite);
     if (returnValue == -1) {
       printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
       return returnValue;
     }
 
     // Wait until all output has actually been sent to the terminal device.
-    int drainCode = tcdrain(fileDescriptor);
+    int drainCode = tcdrain(serialPort->fileDescriptor);
     if (drainCode == -1) {
       printf("tcdrain error %i during writing to serial port: %s\n", errno, strerror(errno));
       return drainCode;

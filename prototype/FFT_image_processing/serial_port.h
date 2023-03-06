@@ -1,14 +1,23 @@
-void closeSerialPort();
-int openSerialPort(char* portName, 
-                   const unsigned serialBufferSize,
-                   const unsigned baudRate);
+#ifndef SERIAL_PORT_H
+#define SERIAL_PORT_H
 
-int readArray(const unsigned arraySize, 
-              void* outArray,
-              const unsigned sizeOfElement);
-int readElement(void* element, const unsigned sizeOfElement);
+typedef struct  {
+    unsigned baudRate;         // The baudrate
+    unsigned serialBufferSize; // The serial buffer size, in bytes
+    char* serialPortName;      // The serial port name
+    int fileDescriptor;        // The file descriptor of the opened serial port. Should not be changed
+} serialPort_t;
 
-int writeArray(const unsigned arraySize, 
-               void* array,
-               const unsigned sizeOfElement);
-int writeElement(void* element, const unsigned sizeOfElement);
+
+void closeSerialPort(serialPort_t* serialPort);
+int openSerialPort(serialPort_t* serialPort);
+
+int readElement(serialPort_t* serialPort, 
+                void* element, 
+                const unsigned sizeOfElement);
+
+int writeElement(serialPort_t* serialPort, 
+                void* element, 
+                const unsigned sizeOfElement);
+
+#endif // SERIAL_PORT_H

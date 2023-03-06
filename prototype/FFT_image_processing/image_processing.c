@@ -1,13 +1,14 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 
 #define fft_real float
 
 // project includes
 #include "bitmap.h"
 #include "serial_port.h"
+
+serialPort_t serialPort;
 
 /**
  * @brief Sends an FFT over serial communication. 
@@ -23,32 +24,32 @@
 static int FFTOverSerial(uint16_t length, fft_real* reals, fft_real* imgs, int16_t dir) {
   // Writing
   // write length
-  int returncode = writeElement(&length, sizeof(length));
+  int returncode = writeElement(&serialPort, &length, sizeof(length));
   // write reals
   if (returncode >= 0) {
-    int writeCode = writeArray(length, reals, sizeof(fft_real));
+    int writeCode = writeElement(&serialPort, reals, length * sizeof(fft_real));
     returncode = writeCode < 0 ? writeCode : returncode + writeCode;
   }
   // write imaginaries
   if (returncode >= 0) {
-    int writeCode = writeArray(length, imgs, sizeof(fft_real));
+    int writeCode = writeElement(&serialPort, imgs, length * sizeof(fft_real));
     returncode = writeCode < 0 ? writeCode : returncode + writeCode;
   }
   // write direction
   if (returncode >= 0) {
-    int writeCode = writeElement(&dir, sizeof(dir));
+    int writeCode = writeElement(&serialPort, &dir, sizeof(dir));
     returncode = writeCode < 0 ? writeCode : returncode + writeCode;
   }
 
   // Reading
   // read reals
   if (returncode >= 0) {
-    int writeCode = readArray(length, reals, sizeof(fft_real));
+    int writeCode = readElement(&serialPort, reals, length * sizeof(fft_real));
     returncode = writeCode < 0 ? writeCode : returncode + writeCode;
   }
   // read imaginaries
   if (returncode >= 0) {
-    int writeCode = readArray(length, imgs, sizeof(fft_real));
+    int writeCode = readElement(&serialPort, imgs, length * sizeof(fft_real));
     returncode = writeCode < 0 ? writeCode : returncode + writeCode;
   }
 
@@ -205,16 +206,19 @@ static void generateMagnitudeImage(unsigned height, unsigned int width, fft_real
 
 int main() {
 
-  const unsigned BAUD_RATE = 115200;
-  const unsigned SERIAL_BUFFER_SIZE = 32;
-  char* serialPortName = "/dev/ttyACM0";
+  char serialPortName[] = "/dev/ttyACM0";
+  serialPort = (serialPort_t) {
+    .baudRate = 115200,
+    .serialBufferSize = 32,
+    .serialPortName = serialPortName
+  };
 
-  char* openedImageName = "1chipML_color32.bmp";
-  char* greyImageName = "bitmapImageGrey.bmp";
-  char* magnitudeImageName = "magnitude.bmp";
-  char* realsImageName = "real.bmp";
-  char* imaginariesImageName = "imaginary.bmp";
-  char* resultImageName = "result.bmp";
+  char openedImageName[] = "1chipML_color.bmp";
+  char greyImageName[] = "bitmapImageGrey.bmp";
+  char magnitudeImageName[] = "magnitude.bmp";
+  char realsImageName[] = "real.bmp";
+  char imaginariesImageName[] = "imaginary.bmp";
+  char resultImageName[] = "result.bmp";
 
   // Kernel matrix definition and initialization
   unsigned kernelHeight = 9;
@@ -229,7 +233,7 @@ int main() {
   int exitCode = 0;
   
   // Open the serial port
-  exitCode = openSerialPort(serialPortName, SERIAL_BUFFER_SIZE, BAUD_RATE);
+  exitCode = openSerialPort(&serialPort);
   if (exitCode != 0) {
     return exitCode;
   }
@@ -241,6 +245,7 @@ int main() {
   printf("Loading source image\n");
   unsigned char* originalImageData = readBitmapImage(openedImageName, &bitmapInfoHeader);
   if (originalImageData == NULL) {
+    closeSerialPort(&serialPort);
     printf("Could not load the image\n");
     return 1;
   }
@@ -408,7 +413,7 @@ int main() {
   free(kernelReals);
   free(kernelImgs);
 
-  closeSerialPort();
+  closeSerialPort(&serialPort);
 
   return exitCode;
 }

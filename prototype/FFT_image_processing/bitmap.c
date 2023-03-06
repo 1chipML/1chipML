@@ -26,7 +26,8 @@ static void writeImageToFile(const unsigned char* image,
  * @param imageData The image data that will be transformed to Greyscale.
  * Expected channel format: B, G, R (default bitmap format)
  * @param numberOfPixels The number of pixels of the incoming RGB image data
- * @return A 8-bit channel containing the Greyscale value
+ * @return A 8-bit channel containing the Greyscale value. This data must be freed by the 
+ * user after use to prevent memory leaks
 */
 unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int numberOfPixels) {
   
@@ -35,6 +36,7 @@ unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int num
     return NULL;
   }
 
+  // Luminosity method
   const double wBlue = 0.114;
   const double wGreen = 0.587;
   const double wRed = 0.299;
@@ -55,8 +57,8 @@ unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int num
  * @param filename The bitmap filename with the extension
  * @param bitmapInfoHeader The struct that will hold the BITMAPINFOHEADER
  * of the opened bitmap file
- * @return The entire image data, in bytes. This data must be freed after use to
- * prevent memory leaks
+ * @return The entire image data, in bytes. This data must be freed by the 
+ * user after use to prevent memory leaks
 */
 unsigned char* readBitmapImage(char *filename, BITMAPINFOHEADER *bitmapInfoHeader) {
   
@@ -115,11 +117,6 @@ unsigned char* readBitmapImage(char *filename, BITMAPINFOHEADER *bitmapInfoHeade
 
   //read in the bitmap image data
   fread(imageData, bitmapInfoHeader->biSizeImage, 1, imageFile);
-  if (imageData == NULL)
-  {
-      fclose(imageFile);
-      return NULL;
-  }
 
   // close file and return bitmap image data in the BGR format
   fclose(imageFile);
