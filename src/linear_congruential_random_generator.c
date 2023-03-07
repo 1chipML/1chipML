@@ -2,8 +2,6 @@
 
 #include "linear_congruential_random_generator.h"
 
-#include <stdint.h> 
-
 /* The routines below implements the linear congruential random
    number generator. In particular, the function
    "set_linear_congruential_generator_seed" sets the seed of the random
@@ -14,10 +12,9 @@
 uint16_t ISEED = 16; /* Default value in case the user does not specify the seed */
 #define LINEAR_RAND_MAX pow(2, sizeof(ISEED) * 8)
 
+void set_linear_congruential_generator_seed(uint16_t num) { ISEED = num; }
 
-void set_linear_congruential_generator_seed(int num) { ISEED = num; }
-
-lcrg_real linear_congruential_random_generator(void) {
+lcrg_real linear_congruential_random_generator() {
   ISEED = 75 * ISEED + 74;
   return ISEED * (1.0 / LINEAR_RAND_MAX);
 }
