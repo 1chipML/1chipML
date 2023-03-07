@@ -238,7 +238,7 @@ int main() {
     return exitCode;
   }
 
-  BITMAPINFOHEADER bitmapInfoHeader;
+  BitmapInfoHeader bitmapInfoHeader;
 
   // Open the image
   // The origin of the image (0,0) is at the bottom left
@@ -249,6 +249,8 @@ int main() {
     printf("Could not load the image\n");
     return 1;
   }
+
+  printf("Initiating image convolution\n");
 
   // Prepare padding, depending on the kernel size
   // padding occurs on the top and on the right

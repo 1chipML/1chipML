@@ -1,7 +1,7 @@
 #ifndef SERIAL_PORT_H
 #define SERIAL_PORT_H
 
-typedef struct  {
+typedef struct serialPort_t {
     unsigned baudRate;         // The baudrate
     unsigned serialBufferSize; // The serial buffer size, in bytes
     char* serialPortName;      // The serial port name

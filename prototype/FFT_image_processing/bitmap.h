@@ -12,15 +12,15 @@
 extern "C" {
 #endif
 
-typedef struct BITMAPFILEHEADER {
+typedef struct BitmapFileHeader {
   uint16_t bfType;      // file type
   uint32_t bfSize;      // the size in bytes of the bitmap file
   uint16_t bfReserved1; // reserved; must be 0
   uint16_t bfReserved2; // reserved; must be 0
   uint32_t bfOffBits;   // start pixel of the array
-} BITMAPFILEHEADER;
+} BitmapFileHeader;
 
-typedef struct BITMAPINFOHEADER {
+typedef struct BitmapInfoHeader {
   uint32_t biSize;          // bitmap info header size in bytes
   uint32_t biWidth;         // image width in pixels
   uint32_t biHeight;        // image height in pixels
@@ -32,10 +32,10 @@ typedef struct BITMAPINFOHEADER {
   uint32_t biYPelsPerMeter; // vertical resolution
   uint32_t biClrUsed;       // number of colors in the color table
   uint32_t biClrImportant;  // number of colors that are important
-} BITMAPINFOHEADER;
+} BitmapInfoHeader;
 
 unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int numberOfPixels);
-unsigned char* readBitmapImage(char *filename, BITMAPINFOHEADER *bitmapInfoHeader);
+unsigned char* readBitmapImage(char *filename, BitmapInfoHeader *bitmapInfoHeader);
 
 void generateBitmapImageRGB(unsigned char* image, const unsigned int height,
                             const unsigned int width, char* imageFileName);

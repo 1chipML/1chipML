@@ -60,10 +60,10 @@ unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int num
  * @return The entire image data, in bytes. This data must be freed by the 
  * user after use to prevent memory leaks
 */
-unsigned char* readBitmapImage(char *filename, BITMAPINFOHEADER *bitmapInfoHeader) {
+unsigned char* readBitmapImage(char *filename, BitmapInfoHeader *bitmapInfoHeader) {
   
   FILE *imageFile;
-  BITMAPFILEHEADER bitmapFileHeader;
+  BitmapFileHeader bitmapFileHeader;
 
   //open file in read binary mode
   imageFile = fopen(filename,"rb");
