@@ -213,7 +213,7 @@ int main() {
     .serialPortName = serialPortName
   };
 
-  char openedImageName[] = "1chipML_color.bmp";
+  char openedImageName[] = "1chipML_color32.bmp";
   char greyImageName[] = "bitmapImageGrey.bmp";
   char magnitudeImageName[] = "magnitude.bmp";
   char realsImageName[] = "real.bmp";
