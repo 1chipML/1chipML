@@ -29,8 +29,6 @@ void loop() {
     // init arrays
     fft_real FFTreals[FFTLength];
     fft_real FFTimgs[FFTLength];
-    memset(FFTreals, 0, FFTLength * sizeof(fft_real));
-    memset(FFTimgs, 0, FFTLength * sizeof(fft_real));
 
     // read reals
     readArray(FFTLength, FFTreals, sizeof(fft_real));
