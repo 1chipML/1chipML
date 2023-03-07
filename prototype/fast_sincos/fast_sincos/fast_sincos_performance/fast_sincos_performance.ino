@@ -1,7 +1,8 @@
 #include "fast_sincos.h"
 
-int degree = 7;
-uint32_t start, stop;
+int degree = 2;
+uint32_t totalTime = 0;
+int iterator = 0;
 volatile float x;
 volatile int y;
 
@@ -12,49 +13,83 @@ void setup() {
   Serial.println(__FILE__);
   delay(10);
 
+  constexpr int lowerBound = -100;
+  constexpr int upperBound = 100;
+  constexpr int step = 1;
+  constexpr float factor = 0.1;
+  constexpr float iterations = (upperBound - lowerBound) / step;
+
   // SIN
-  start = micros();
-  for (float r = -100.0; r < 100.0; r += 0.1)
-  {
-    x = sin(r);
+  totalTime = 0;
+  iterator = lowerBound;
+  while (iterator < upperBound) {
+    float input = iterator * factor;
+
+    uint32_t start = micros();
+    x = sin(input);
+    uint32_t stop = micros();
+
+    totalTime += stop - start;
+    iterator += step;
   }
-  stop = micros();
+
   Serial.print("SIN: \t\t");
-  Serial.print(stop - start);
+  Serial.print(totalTime / iterations);
   Serial.println(" us");
   delay(10);
 
-  start = micros();
-  for (float r = -100.0; r < 100.0; r += 0.1)
-  {
-    x = fastSin(r, degree);
+  totalTime = 0;
+  iterator = lowerBound;
+  while (iterator < upperBound) {
+    float input = iterator * factor;
+
+    uint32_t start = micros();
+    x = fastSin(input, degree);
+    uint32_t stop = micros();
+
+    totalTime += stop - start;
+    iterator += step;
   }
-  stop = micros();
+
   Serial.print("FASTSIN: \t");
-  Serial.print(stop - start);
+  Serial.print(totalTime / iterations);
   Serial.println(" us");
   delay(10);
 
   // COS
-  start = micros();
-  for (float r = -100.0; r < 100.0; r += 0.1)
-  {
-    x = cos(r);
+  totalTime = 0;
+  iterator = lowerBound;
+  while (iterator < upperBound) {
+    float input = iterator * factor;
+
+    uint32_t start = micros();
+    x = cos(input);
+    uint32_t stop = micros();
+
+    totalTime += stop - start;
+    iterator += step;
   }
-  stop = micros();
+
   Serial.print("COS: \t\t");
-  Serial.print(stop - start);
+  Serial.print(totalTime / iterations);
   Serial.println(" us");
   delay(10);
 
-  start = micros();
-  for (float r = -100.0; r < 100.0; r += 0.1)
-  {
-    x = fastCos(r, degree);
+  totalTime = 0;
+  iterator = lowerBound;
+  while (iterator < upperBound) {
+    float input = iterator * factor;
+
+    uint32_t start = micros();
+    x = fastCos(input, degree);
+    uint32_t stop = micros();
+
+    totalTime += stop - start;
+    iterator += step;
   }
-  stop = micros();
+
   Serial.print("FASTCOS: \t");
-  Serial.print(stop - start);
+  Serial.print(totalTime / iterations);
   Serial.println(" us");
   delay(10);
 

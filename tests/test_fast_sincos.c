@@ -3,14 +3,14 @@
 static void getFastSinError(int lowerBound, int upperBound, int step, double multFactor, int degree);
 static void getFastCosError(int lowerBound, int upperBound, int step, double multFactor, int degree);
 static void getGenericError(int lowerBound, int upperBound, int step, double multFactor, int degree, 
-char* title, double(*actualFunc)(double), double(*approxFunc)(double, int));
+char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sincos_real, int));
 
 int main() {
 
     int lowerBound = -100;
     int upperBound = 100;
     int step = 1;
-    double multFactor = 0.1;
+    fast_sincos_real multFactor = 0.1;
 
     printf("\n");
     getFastSinError(lowerBound, upperBound, step, multFactor, 1);
@@ -38,7 +38,7 @@ static void getFastCosError(int lowerBound, int upperBound, int step, double mul
 
 
 static void getGenericError(int lowerBound, int upperBound, int step, double multFactor, int degree, 
-char* title, double(*actualFunc)(double), double(*approxFunc)(double, int)) {
+char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sincos_real, int)) {
     double maxAbsoluteError = 0.0;
     double maxRelativeError = 0.0;
 
