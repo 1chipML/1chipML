@@ -23,16 +23,14 @@ int readArray(const uint32_t arraySize, void* outArray,
 }
 
 /**
- * @brief Write an array of length arraySize, where each element is of size
- * sizeOfElement. This function will block untill all elements are written.
+ * @brief Write an array of length arraySize. 
+ * This function will block until all elements are written.
  * @param arraySize The size of the array to read.
  * @param array The array containing the data to be written.
- * @param sizeOfElement The size of each element in the array.
  */
-void writeFloatArray(const uint32_t arraySize, float* array,
-                const uint32_t sizeOfElement) {
+void writeFloatArray(const uint32_t arraySize, float* array) {
   for (uint32_t i = 0; i < arraySize; ++i) {
-    writeElement(&array[i], sizeOfElement);
+    writeElement(&array[i], sizeof(float));
   }
 }
 

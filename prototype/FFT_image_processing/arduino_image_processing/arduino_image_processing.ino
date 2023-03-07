@@ -46,9 +46,9 @@ void loop() {
 
     // Writing
     // write reals
-    writeFloatArray(FFTLength, FFTreals, sizeof(fft_real));
+    writeFloatArray(FFTLength, FFTreals);
     // write imaginaries
-    writeFloatArray(FFTLength, FFTimgs, sizeof(fft_real));
+    writeFloatArray(FFTLength, FFTimgs);
 
   } else {
     digitalWrite(LED_BUILTIN, LOW);
