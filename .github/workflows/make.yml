@@ -1,0 +1,26 @@
+name: Build and Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Build files
+        run: make all 
+
+      - name: Run tests
+        run: make run_all_tests
