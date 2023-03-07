@@ -40,8 +40,8 @@ lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruenti
 
 image_processing: ./src/FFT.c \
 	./prototype/FFT_image_processing/image_processing.c \
-	./prototype/FFT_image_processing/bitmap.c ./prototype/FFT_image_processing/bitmap.h \
-	./prototype/FFT_image_processing/serial_port.c ./prototype/FFT_image_processing/serial_port.h
+	./prototype/utils/bitmap.c ./prototype/utils/bitmap.h \
+	./prototype/utils/serial_port.c ./prototype/utils/serial_port.h
 	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $^ -o ./prototype/FFT_image_processing/$@.out $(LDLIBS)
 
 

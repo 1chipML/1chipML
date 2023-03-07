@@ -5,8 +5,8 @@
 #define fft_real float
 
 // project includes
-#include "bitmap.h"
-#include "serial_port.h"
+#include "../utils/bitmap.h"
+#include "../utils/serial_port.h"
 
 serialPort_t serialPort;
 
