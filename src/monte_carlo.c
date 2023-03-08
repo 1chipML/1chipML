@@ -79,7 +79,7 @@ void createChild(Node* child, Board state, Node* node, Action* action) {
  */
 void expandLeaf(Node* node, Game game) {
   // Do not expand leaf if it is a terminal node
-  if (game.getScore(&node->state, node->action.player) > 1) {
+  if ((game.getScore(&node->state, node->action.player) > DRAW) || game.isDone(&node->state)) { // TODO change this (the 1) so that is set by user
     return;
   }
 
@@ -170,7 +170,6 @@ int mcEpisode(Node* node, int initialPlayer, Game* game) {
       varPlayer = -(varPlayer);
     }
   }
-  free(simulationBoard.values);
   return DRAW;
 }
 
@@ -200,9 +199,7 @@ void backpropagate(Node* node, int score) {
  */
 void freeMCTree(Node* node) {
   for (unsigned i = 0; i < node->nChildren; ++i) {
-    if ((&node->children[i])->nChildren != 0) {
-      freeMCTree(&node->children[i]);
-    }
+    freeMCTree(&node->children[i]);
   }
   free(node->state.values);
   free(node->children);
@@ -236,7 +233,7 @@ Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
   int iterations = 0;
   while ((node.nVisits < minSim ||
           calcUCB(findMaxUCB(node.children, node.nChildren)) < goalValue) &&
-         node.nVisits < maxSim) {
+         node.nVisits <= maxSim) {
     Node* selectedNode = selectChildren(&node);
     expandLeaf(selectedNode, game);
     int score = mcEpisode(selectedNode, player, &game);
@@ -244,6 +241,10 @@ Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
     iterations++;
   }
 
+  for (int i = 0; i < node.nChildren; ++i) {
+    printf("Child %d, UCB: %f, nVisits: %d, action: [%d, %d]\n", i, calcUCB(&node.children[i]), node.children[i].nVisits, node.children[i].action.xPos, node.children[i].action.yPos);
+  }
+  Action action = findMaxUCB(node.children, node.nChildren)->action;
   freeMCTree(&node);
-  return findMaxUCB(node.children, node.nChildren)->action;
+  return action;
 }

@@ -1,4 +1,4 @@
-#include <monte_carlo.h>
+#include "../src/monte_carlo.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +53,15 @@ int getNumPossibleActions(Board board) {
 
 int getBoardSize() { return 9; }
 
+bool isDone(Board* board) {
+  for (int i = 0; i < 9; ++i) {
+    if (board->values[i] == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * If there is a line of X or O's
  * 1 = draw
@@ -61,7 +70,7 @@ int getBoardSize() { return 9; }
  */
 int getScore(Board* board, int player) {
   // Check rows
-  for (int i = 0; i < 9; i += 3) {
+  for (int i = 0; i < 7; i += 3) {
     if (board->values[i] == player && board->values[i + 1] == player &&
         board->values[i + 2] == player) {
       int nPlays = 0;
@@ -124,7 +133,7 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 
   Game game = {
       isValidAction,         playAction,   getScore,     getPossibleActions,
-      getNumPossibleActions, removeAction, getBoardSize,
+      getNumPossibleActions, removeAction, getBoardSize, isDone,
   };
 
   Action action =
@@ -140,8 +149,31 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 }
 
 int main() {
-  const int minSimul = 9;
-  const int maxSimul = 300;
-  const mc_real targetScore = 4;
-  testMC(minSimul, maxSimul, targetScore);
+  const int minSimul = 10;
+  const int maxSimul = 10;
+  const mc_real targetScore = 5;
+  // testMC(minSimul, maxSimul, targetScore);
+
+  Board board;
+  board.values = calloc(9, sizeof(int));
+  board.values[5] = 1;
+  board.values[4] = -1;
+  // board.values[4] = 1;
+  // board.values[5] = -1;
+  // board.values[8] = 1;
+  // board.values[7] = -1;
+  // board.values[5] = 1;
+  // board.values[7] = -1;
+  // board.values[1] = 1;
+  board.nPlayers = 2;
+
+  Game game = {
+      isValidAction,         playAction,   getScore,     getPossibleActions,
+      getNumPossibleActions, removeAction, getBoardSize, isDone,
+  };
+
+  Action action =
+      mcGame(board, 1, game, minSimul, maxSimul, targetScore);
+  
+  printf("Best action with %d simulations: Player: %d, [%d, %d]\n", maxSimul, action.player, action.xPos, action.yPos);
 }

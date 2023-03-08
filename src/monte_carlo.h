@@ -35,6 +35,7 @@ typedef struct {
   int (*getNumPossibleActions)(Board);
   void (*removeAction)(int, Action*, int);
   int (*getBoardSize)(void);
+  bool (*isDone)(Board*);
 } Game;
 
 typedef struct Node {
@@ -54,6 +55,7 @@ typedef void (*getPossibleActionsType)(Board, Action*);
 typedef int (*getNumPossibleActionsType)(void);
 typedef void (*removeActionType)(int, Action*, int);
 typedef int (*getBoardSizeType)(void);
+typedef bool (*isDoneType)(Board*);
 
 mc_real calcUCB(Node* node);
 Node* findMaxUCB(Node* children, unsigned nChildren);
