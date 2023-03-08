@@ -6,10 +6,10 @@
 
 
 float epsilon = 0.0001;
-float mutationRate = 1;
+float mutationRate = 0.1;
 uint16_t populationSize =  25;
-uint16_t tourneySize = 5;
-uint16_t maxIterations = 100000;
+uint16_t tourneySize = 3;
+uint32_t maxIterations = 1000000;
 
 uint16_t testSize = 9;
 float testCoords[]  =  {0,1,4,9,16,25,36,49, 64};
@@ -23,7 +23,7 @@ for (int i = 0; i < testSize; i++) {
 
     fitness += fabs(parameters[0] * i + parameters[1] * pow(i, 2) +
                     parameters[2] * pow(i, 3) - testCoords[i] +
-                    parameters[3]*sin(i));
+                    parameters[3]* sin(i));
   }
   return fitness;
 }

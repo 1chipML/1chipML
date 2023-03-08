@@ -473,6 +473,7 @@ static void calculateAndStoreFitness(
     genetic_int* secondBestValues, genetic_real* secondBestFitness,
     const unsigned int dimensions, const unsigned int populationSize) {
 
+  // We reset these values to prevent the same value from being chosen twice
   *bestFit = FLT_MAX;
   *secondBestFitness = FLT_MAX;
 
