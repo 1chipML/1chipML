@@ -252,6 +252,8 @@ static speed_t getBaudRateCode(const unsigned baudRate) {
     return B115200;
   case 230400:
     return B230400;
+
+#if !defined(__APPLE__) && !defined(__MACH__)
   case 460800:
     return B460800;
   case 500000:
@@ -276,6 +278,8 @@ static speed_t getBaudRateCode(const unsigned baudRate) {
     return B3500000;
   case 4000000:
     return B4000000;
+#endif
+
   }
 
   return -1;

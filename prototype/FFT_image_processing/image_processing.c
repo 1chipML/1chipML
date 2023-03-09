@@ -354,15 +354,6 @@ int main() {
     printf("Convolution matrix FFT result %d\n", exitCode);
   }
 
-  unsigned char* kernelRealsImage = malloc(height * width);
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
-      kernelRealsImage[i * width + j] = (unsigned char) (kernelReals[i][j] > 0 ? 255 : 0);
-    }
-  }
-  generateBitmapImageGrey((unsigned char*) kernelRealsImage, height, width, "kernel.bmp");
-  free(kernelRealsImage);
-
   // Element-wise multiplication between the kernel and the image
   for(int i = 0; i < height; ++i) {
     for(int j = 0; j < width; ++j) {
@@ -384,8 +375,8 @@ int main() {
   unsigned char imageGreyScaleI[height][width][GREY_BYTES];
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      imageGreyScaleR[i][j][0] = (unsigned char) abs(imageReals[i][j]);
-      imageGreyScaleI[i][j][0] = (unsigned char) abs(imageImgs[i][j]);
+      imageGreyScaleR[i][j][0] = (unsigned char) fabs(imageReals[i][j]);
+      imageGreyScaleI[i][j][0] = (unsigned char) fabs(imageImgs[i][j]);
     }
   }
 
