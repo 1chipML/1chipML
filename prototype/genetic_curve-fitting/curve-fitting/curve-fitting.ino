@@ -1,10 +1,9 @@
 
 #include "genetic.h"
 
-
 void setup() {
 
-   Serial.begin(115200, SERIAL_8N1);
+   Serial.begin(115200);
    pinMode(LED_BUILTIN, OUTPUT);
    digitalWrite(LED_BUILTIN, LOW);
   }
@@ -16,15 +15,17 @@ void setup() {
 
 
 
-  float coordinates [20];
-  const unsigned int parameterCount = 4;
-
-  float bestValues[parameterCount];
-  float epsilon = 0.0001;
-  float mutationRate = 0.01;
-  unsigned int populationSize =  25;
+  float * coordinatesY;
+  float * coordinatesX;
+  float *  bestValues ;
+  
+  float epsilon = 0.0;
+  float mutationRate = 0.1;
+  unsigned int populationSize =  50;
   unsigned int tourneySize = 5;
-  unsigned int maxIterations = 1000;
+  unsigned int maxIterations = 500;
+
+  unsigned int polynomialDegree = 2;
 
 
 
@@ -34,53 +35,78 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
+  
   if (Serial.available()){
 
+  
+  digitalWrite(LED_BUILTIN, HIGH);
   
   readElement(&epsilon,sizeof(epsilon));
   readElement(&mutationRate,sizeof(mutationRate));
   readElement(&populationSize, sizeof(populationSize));
+ 
   readElement(&tourneySize, sizeof(tourneySize));
   readElement(&maxIterations, sizeof(maxIterations));
   readElement(&coordinatesSize, sizeof(coordinatesSize));
-
+  
+  // delay(2000);  
+  // readElement(&polynomialDegree, sizeof(polynomialDegree));
+  
 
   
-  digitalWrite(LED_BUILTIN, HIGH);
-  readArray(coordinatesSize, coordinates, sizeof(float));
+
+  
+  
+  coordinatesX = realloc(coordinatesX, coordinatesSize * sizeof(*coordinatesX));
+  coordinatesY = realloc(coordinatesY, coordinatesSize * sizeof(*coordinatesY));
+  bestValues = realloc(bestValues, (polynomialDegree+1) * sizeof(float));
+
+  
+
+
+  readArray(coordinatesSize, coordinatesX, sizeof(float));
+  readArray(coordinatesSize, coordinatesY, sizeof(float));
+
+
   digitalWrite(LED_BUILTIN, LOW);
 
   
-  float value = geneticAlgorithm(bestValues, parameterCount, epsilon,
+  float value = geneticAlgorithm(bestValues, polynomialDegree+1, epsilon,
                                  mutationRate, populationSize, tourneySize,
                                  maxIterations, evaluationFunction, 0);
-  
+                                 
+  digitalWrite(LED_BUILTIN, HIGH);
+
+  writeElement(&value,sizeof(value));
+  writeArray((polynomialDegree+1),bestValues,sizeof(float));
 
   
-  writeElement(&coordinatesSize, sizeof(coordinatesSize));
-  writeElement(&value,sizeof(float));
-  writeArray(parameterCount,bestValues,sizeof(float));
 
   
   
   }
-  
+
 
 
 }
 
 float evaluationFunction(float *parameters) {
 
-float fitness = 0;
+  float fitness = 0;
+  float maxValues [polynomialDegree+1] = {1. ,1.,1.};
+  for(unsigned int i = 0 ; i < coordinatesSize ; i++ ){
 
-for (int i = 0; i < coordinatesSize; i++) {
-
-
-    fitness += fabs(parameters[0] * i + parameters[1] * pow(i, 2) +
-                    parameters[2] * pow(i, 3) - coordinates[i] +
-                    parameters[3]*sin(i));
+    float sum = 0;      
+    sum += maxValues[0]*parameters[0];      
+    for (unsigned int j = 1 ; j <= polynomialDegree ; j++){
+      sum += maxValues[j]*parameters[j]*pow(coordinatesX[i],j);
+    }
+    sum = fabs(sum - coordinatesY[i]);     
+    fitness+=sum;
   }
-  return fitness;
+   return  fabs(fitness) ;
+
+  
 }
 
 
@@ -117,9 +143,9 @@ void writeArray(const uint32_t arraySize, float* array,
  * @param element The element to read.
  * @param sizeOfElement The size of the element to read.
  */
-void readElement(void* element, const uint32_t sizeOfElement) {
+void readElement(void* element, const uint16_t sizeOfElement) {
   unsigned char* readElement = (unsigned char*)element;
-  for (uint32_t i = 0; i < sizeOfElement; ++i) {
+  for (uint16_t i = 0; i < sizeOfElement; ++i) {
     while (Serial.available() < 1); // Wait for element
     Serial.readBytes(&readElement[i], sizeof(unsigned char));
     
