@@ -38,13 +38,6 @@ DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_ge
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-image_processing: ./src/FFT.c \
-	./prototype/FFT_image_processing/image_processing.c \
-	./prototype/utils/bitmap.c ./prototype/utils/bitmap.h \
-	./prototype/utils/serial_port.c ./prototype/utils/serial_port.h
-	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $^ -o ./prototype/FFT_image_processing/$@.out $(LDLIBS)
-
-
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out
