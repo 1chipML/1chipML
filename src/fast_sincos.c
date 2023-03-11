@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "fast_sincos.h"
+#include "utils.h"
 
 
 static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int sinDegree);
@@ -41,24 +42,24 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
         clampedAngle = -clampedAngle;
     }
     
-    clampedAngle = fmod(clampedAngle, FAST_PI_TIMES_2);
+    clampedAngle = fmod(clampedAngle, PI_TIMES_2);
     
-    if (clampedAngle >= FAST_PI) {
-        clampedAngle -= FAST_PI;
+    if (clampedAngle >= M_PI) {
+        clampedAngle -= M_PI;
         negativeFactor ^= 1;
     }
 
-    if(clampedAngle >= FAST_PI_DIV_2) {
-        clampedAngle = FAST_PI - clampedAngle;
+    if(clampedAngle >= M_PI_2) {
+        clampedAngle = M_PI - clampedAngle;
     }
 
     // Chose the appropriate approximation depending on the
     // accepted range.
     fast_sincos_real returnedValue;
-    if(clampedAngle < FAST_PI_DIV_4) {
+    if(clampedAngle < M_PI_4) {
         returnedValue = fastSinChebyshev(clampedAngle, degree);
     } else {
-        returnedValue = fastCosChebyshev(FAST_PI_DIV_2 - clampedAngle, degree);
+        returnedValue = fastCosChebyshev(M_PI_2 - clampedAngle, degree);
     }
 
     return negativeFactor ? -returnedValue : returnedValue;
@@ -92,25 +93,25 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
         clampedAngle = -clampedAngle;
     }
     
-    clampedAngle = fmod(clampedAngle, FAST_PI_TIMES_2);
+    clampedAngle = fmod(clampedAngle, PI_TIMES_2);
     
-    if (clampedAngle >= FAST_PI) {
-        clampedAngle -= FAST_PI;
+    if (clampedAngle >= M_PI) {
+        clampedAngle -= M_PI;
         negativeFactor ^= 1;
     }
 
-    if(clampedAngle >= FAST_PI_DIV_2) {
-        clampedAngle = FAST_PI - clampedAngle;
+    if(clampedAngle >= M_PI_2) {
+        clampedAngle = M_PI - clampedAngle;
         negativeFactor ^= 1;
     }
 
     // Chose the appropriate approximation depending on the
     // accepted range.
     fast_sincos_real returnedValue;
-    if(clampedAngle < FAST_PI_DIV_4) {
+    if(clampedAngle < M_PI_4) {
         returnedValue = fastCosChebyshev(clampedAngle, degree);
     } else {
-        returnedValue = fastSinChebyshev(FAST_PI_DIV_2 - clampedAngle, degree);
+        returnedValue = fastSinChebyshev(M_PI_2 - clampedAngle, degree);
     }
 
     return negativeFactor ? -returnedValue : returnedValue;
