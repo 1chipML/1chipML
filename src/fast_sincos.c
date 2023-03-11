@@ -3,7 +3,6 @@
 #include "fast_sincos.h"
 #include "utils.h"
 
-
 static fast_sincos_real fastSinChebyshev(const fast_sincos_real angleRadians, const int sinDegree);
 static fast_sincos_real fastCosChebyshev(const fast_sincos_real angleRadians, const int sinDegree);
 static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians);
@@ -304,7 +303,7 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
 
   // basic rounding
   long roundedAngle = lroundf(scaledAngle);
-  uint16_t index = roundedAngle & (LOOKUP_INDEX_MASK);  // This & replaces fmod
+  uint16_t index = roundedAngle & LOOKUP_INDEX_MASK;  // This & replaces fmod
 
   // Isolate the angle in the first quandrant
   if (index >= QUADRANT_SIZE_2) {
