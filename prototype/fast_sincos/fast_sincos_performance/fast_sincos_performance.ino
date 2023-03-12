@@ -4,7 +4,10 @@ int degree = 1;
 uint32_t totalTime = 0;
 int iterator = 0;
 volatile float x;
-volatile int y;
+
+const uint16_t readTable(const uint16_t* address) {
+  return pgm_read_word_near(address);
+}
 
 static const uint16_t sineTable[129] PROGMEM = {
     0,  804, 1608, 2412, 3216, 4019, 4821, 5623,
@@ -27,6 +30,9 @@ static const uint16_t sineTable[129] PROGMEM = {
 };
 
 void setup() {
+
+  // Set for PROGMEM
+  setTableAccessFunction(readTable);
 
   Serial.begin(115200);
   while (!Serial);

@@ -9,8 +9,25 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
 static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians);
 static fast_sincos_real lookupCos(const fast_sincos_real angleRadians);
 static fast_sincos_real lookupSin(const fast_sincos_real angleRadians);
-
 static inline fast_sincos_real scaleValueToRadians(const fast_sincos_real value);
+
+
+// Table access logic
+static const uint16_t defaultTableAccess(const uint16_t* address) {
+  return *address;
+}
+static tableAccessType tableAccessFunction = defaultTableAccess;
+#define ACCESS_TABLE(index) tableAccessFunction(sineTable + index)
+
+/**
+ * @brief Set the sine table access method
+ * @param tableAccess The method for accessing the sine table
+*/
+void setTableAccessFunction(tableAccessType tableAccess) {
+  tableAccessFunction = tableAccess;
+}
+
+
 
 /**
  * @brief Fast sine computation.
@@ -230,9 +247,9 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians
   }
 
   // extended for the multiplication that is about to occur and keep the precision
-  uint32_t currentValue = sineTable[index]; 
+  uint32_t currentValue = ACCESS_TABLE(index); 
   if (remainder > 0) {
-    currentValue = currentValue + (((sineTable[index + 1] - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
+    currentValue = currentValue + (((ACCESS_TABLE(index + 1) - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
   }
 
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
@@ -276,11 +293,11 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
   uint32_t currentValue;
   if (remainder > 0) 
   {
-    currentValue = sineTable[QUADRANT_SIZE_MINUS_1 - index]; 
+    currentValue = ACCESS_TABLE(QUADRANT_SIZE_MINUS_1 - index); 
     remainder = LOOKUP_REMAINDER_SIZE - remainder;
-    currentValue = currentValue + (((sineTable[QUADRANT_SIZE - index] - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
+    currentValue = currentValue + (((ACCESS_TABLE(QUADRANT_SIZE - index) - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
   } else {
-    currentValue = sineTable[QUADRANT_SIZE - index]; 
+    currentValue = ACCESS_TABLE(QUADRANT_SIZE - index); 
   }
   
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
@@ -302,7 +319,7 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
   }
 
   // basic rounding
-  long roundedAngle = lroundf(scaledAngle);
+  uint32_t roundedAngle = lroundf(scaledAngle);
   uint16_t index = roundedAngle & LOOKUP_INDEX_MASK;  // This & replaces fmod
 
   // Isolate the angle in the first quandrant
@@ -315,7 +332,8 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
     index = QUADRANT_SIZE_2 - index;
   }
 
-  fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)sineTable[index]);
+  fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)ACCESS_TABLE(index));
+  //fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)tableAccessFunction(sineTable + index));
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
@@ -346,7 +364,7 @@ static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
     negativeFactor ^= 1;
   }
 
-  fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)sineTable[QUADRANT_SIZE - index]);
+  fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)ACCESS_TABLE(QUADRANT_SIZE - index));
   return negativeFactor ? -returnedValue : returnedValue;
 }
 

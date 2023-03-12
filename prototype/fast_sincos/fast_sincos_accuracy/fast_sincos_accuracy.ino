@@ -2,7 +2,10 @@
 
 uint32_t start, stop;
 volatile float x;
-volatile int y;
+
+const uint16_t readTable(const uint16_t* address) {
+  return pgm_read_word_near(address);
+}
 
 static const uint16_t sineTable[129] PROGMEM = {
     0,  804, 1608, 2412, 3216, 4019, 4821, 5623,
@@ -25,6 +28,9 @@ static const uint16_t sineTable[129] PROGMEM = {
 };
 
 void setup() {
+
+  // Set for PROGMEM
+  setTableAccessFunction(readTable);
 
   Serial.begin(115200);
   while (!Serial);
@@ -112,7 +118,7 @@ char* title, double(*actualFunc)(double), double(*approxFunc)(double, int)) {
     }
 
     char buffer[20];
-    Serial.println(String(title) + ": Error with degree" + String(degree));
+    Serial.println(String(title) + ": Error with degree " + String(degree));
     String precision = dtostre(avgAbsoluteError, buffer, 10, 0);
     Serial.println("Average absolute error = " + precision);
     precision = dtostre(avgRelativeError, buffer, 10, 0);
