@@ -367,7 +367,6 @@ static fast_sincos_real lookupSin(const fast_sincos_real angleRadians) {
   }
 
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)ACCESS_TABLE(index));
-  //fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)tableAccessFunction(sineTable + index));
   return negativeFactor ? -returnedValue : returnedValue;
 }
 
