@@ -4,16 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-Board playAction(Board board, Action* action) {
-  Board childBoard;
-  childBoard.values = malloc(9 * sizeof(int));
-  memcpy(childBoard.values, board.values, 9 * sizeof(int));
-  childBoard.values[action->xPos * 3 + action->yPos] = action->player;
-  childBoard.nPlayers = 2;
-  return childBoard;
+void playAction(Board* board, Action* action) {
+  board->values[action->xPos * 3 + action->yPos] = action->player;
 }
 
-bool isValidAction(Board* board, Action* action, int player) {
+static bool isValidAction(Board* board, Action* action, int player) {
   if (action->player == player &&
       board->values[action->xPos * 3 + action->yPos] == 0) {
     return 1;
@@ -39,7 +34,7 @@ void getPossibleActions(Board board, Action possibleActions[]) {
   }
 }
 
-int getNumPossibleActions(Board board) {
+static int getNumPossibleActions(Board board) {
   int nActions = 0;
   for (int x = 0; x < 3; ++x) {
     for (int y = 0; y < 3; ++y) {
@@ -51,9 +46,9 @@ int getNumPossibleActions(Board board) {
   return nActions * board.nPlayers;
 }
 
-int getBoardSize() { return 9; }
+static int getBoardSize() { return 9; }
 
-bool isDone(Board* board) {
+static bool isDone(Board* board) {
   for (int i = 0; i < 9; ++i) {
     if (board->values[i] == 0) {
       return false;
@@ -138,6 +133,7 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 
   Action action =
       mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
+  free(board.values);
   if (action.xPos == 0 && action.yPos == 2) {
     printf("Success : %s()\n", __func__);
     return 0;
@@ -150,30 +146,21 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 
 int main() {
   const int minSimul = 10;
-  const int maxSimul = 10;
+  const int maxSimul = 500;
   const mc_real targetScore = 5;
-  // testMC(minSimul, maxSimul, targetScore);
+  testMC(minSimul, maxSimul, targetScore);
 
-  Board board;
-  board.values = calloc(9, sizeof(int));
-  board.values[5] = 1;
-  board.values[4] = -1;
-  // board.values[4] = 1;
-  // board.values[5] = -1;
-  // board.values[8] = 1;
-  // board.values[7] = -1;
-  // board.values[5] = 1;
-  // board.values[7] = -1;
-  // board.values[1] = 1;
-  board.nPlayers = 2;
+  // Board board;
+  // board.values = calloc(9, sizeof(int));
 
-  Game game = {
-      isValidAction,         playAction,   getScore,     getPossibleActions,
-      getNumPossibleActions, removeAction, getBoardSize, isDone,
-  };
+  // Game game = {
+  //     isValidAction,         playAction,   getScore,     getPossibleActions,
+  //     getNumPossibleActions, removeAction, getBoardSize, isDone,
+  // };
 
-  Action action =
-      mcGame(board, 1, game, minSimul, maxSimul, targetScore);
-  
-  printf("Best action with %d simulations: Player: %d, [%d, %d]\n", maxSimul, action.player, action.xPos, action.yPos);
+  // Action action =
+  //     mcGame(board, 1, game, minSimul, maxSimul, targetScore);
+
+  // printf("Best action with %d simulations: Player: %d, [%d, %d]\n", maxSimul,
+  // action.player, action.xPos, action.yPos);
 }
