@@ -32,30 +32,11 @@
 #define LOOKUP_REMAINDER_BITS 16 // The number of bits allocated for the remainder
 #define LOOKUP_ELEMENTS_BITS_NEGATIVE -16 // Number of bits allocated for each element in the lookup table, times -1
 
-/**
- * Sine table used for sine and cosine approximation
- * This sine table only contains the first quadrant
- * The size of this table is "QUADRANT_SIZE + 1"
- * The "+ 1" allows for interpolation
- * 
- * It is recommended to put this table in the
- * program memory (flash) instead of the SRAM, as
- * it can take a lot of space.
- * With Arduino, this can be done by using the PROGMEM keyword
- * Using PROGMEM requires special methods to access the data,
- * such as pgm_read_word_near
- * 
- * Below is the definition of the table to instantiate
- * in the program memory
-*/
-extern const uint16_t sineTable[129];
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef const uint16_t (*tableAccessType)(const uint16_t*);
-void setTableAccessFunction(tableAccessType tableAccess);
 fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree);
 fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree);
 

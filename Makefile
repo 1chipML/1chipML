@@ -38,9 +38,8 @@ DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_ge
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-
 fast_sincos: ./tests/test_fast_sincos.c ./src/fast_sincos.c
-	$(CC) $(CFLAGS) -DUSE_DEFAULT_SINE_TABLE $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out

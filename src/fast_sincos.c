@@ -11,8 +11,39 @@ static fast_sincos_real lookupCos(const fast_sincos_real angleRadians);
 static fast_sincos_real lookupSin(const fast_sincos_real angleRadians);
 static inline fast_sincos_real scaleValueToRadians(const fast_sincos_real value);
 
-#ifdef USE_DEFAULT_SINE_TABLE
-const uint16_t sineTable[129] = {
+
+// Configure sine table management
+#if defined  __has_attribute
+  // Define table storage and access mode
+  #if __has_attribute (__progmem__)
+    #include <avr/pgmspace.h>
+    #define ACCESS_TABLE(index) pgm_read_word_near(sineTable + index)
+  #else
+    #define PROGMEM
+    #define ACCESS_TABLE(index) sineTable[index]
+  #endif
+#else
+  #define PROGMEM
+  #define ACCESS_TABLE(index) sineTable[index]
+#endif
+
+/**
+ * Sine table used for sine and cosine approximation
+ * This sine table only contains the first quadrant
+ * The size of this table is "QUADRANT_SIZE + 1"
+ * The "+ 1" allows for interpolation
+ * 
+ * It is recommended to put this table in the
+ * program memory (flash) instead of the SRAM, as
+ * it can take a lot of space.
+ * With Arduino, this can be done by using the PROGMEM keyword
+ * Using PROGMEM requires special methods to access the data,
+ * such as pgm_read_word_near
+ * 
+ * Below is the definition of the table to instantiate
+ * in the program memory
+*/
+static const uint16_t sineTable[129] PROGMEM = {
     0,  804, 1608, 2412, 3216, 4019, 4821, 5623,
  6424, 7223, 8022, 8820, 9616,10411,11204,11996,
 12785,13573,14359,15142,15924,16703,17479,18253,
@@ -31,24 +62,6 @@ const uint16_t sineTable[129] = {
 65219,65293,65357,65412,65456,65491,65515,65530,
 65535
 };
-#endif // USE_DEFAULT_SINE_TABLE
-
-// Table access logic
-static const uint16_t defaultTableAccess(const uint16_t* address) {
-  return *address;
-}
-static tableAccessType tableAccessFunction = defaultTableAccess;
-#define ACCESS_TABLE(index) tableAccessFunction(sineTable + index)
-
-/**
- * @brief Set the sine table access method
- * @param tableAccess The method for accessing the sine table
-*/
-void setTableAccessFunction(tableAccessType tableAccess) {
-  tableAccessFunction = tableAccess;
-}
-
-
 
 /**
  * @brief Fast sine computation.
