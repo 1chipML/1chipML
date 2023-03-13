@@ -131,7 +131,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
 
   // Deep copy of board
   Board simulationBoard;
-  int boardValues[game->getBoardSize()];
+  simulationBoard.values = malloc(game->getBoardSize() * sizeof(int8_t));
   for (int i = 0; i < game->getBoardSize(); ++i) {
     simulationBoard.values[i] = board->values[i];
   }
@@ -156,6 +156,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
       game->removeAction(randomActionIdx, possibleActions, nPossibleActions);
       int score = game->getScore(&simulationBoard, varPlayer);
       if (score > 1) {
+        free(simulationBoard.values);
         if (varPlayer == initialPlayer) {
           return score;
         } else {
@@ -165,6 +166,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
       varPlayer = -(varPlayer);
     }
   }
+  free(simulationBoard.values);
   return DRAW;
 }
 
