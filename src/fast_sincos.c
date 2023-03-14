@@ -33,6 +33,9 @@ static inline fast_sincos_real scaleValueToRadians(const fast_sincos_real value)
  * The size of this table is "QUADRANT_SIZE + 1"
  * The "+ 1" allows for interpolation
  * 
+ * The table is scaled from 0 to 65536, despite the
+ * fact that the maximum number is 65535
+ * 
  * It is recommended to put this table in the
  * program memory (flash) instead of the SRAM, as
  * it can take a lot of space.
@@ -170,22 +173,13 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
 /**
  * 0 is 0
  * 2Pi is 2^25 (arbitrary choice for easier initial calculations wihtout overflow)
+ * 1<<25 = 33 554 432
 */
 fast_sincos_real fastFixedSin(const uint32_t fixedAngle) {
-  //const uint32_t limit = 2147483648;//(1 << 31); // 0x7FFF FFFF
-  //fixedAngle &= ~limit; // only get 31 bits
-  //const uint32_t limit = 0x7FFFFFFF;
-  //uint32_t inputAngle = fixedAngle; // & limit;
 
-  // 1<<25 = 33 554 432
-
-  // 22 + 9 = 31
-  const uint16_t RemainderMask = 0xFFFF; // 16 lsb bits
   const uint16_t indexMask = 0x1FF; // 9 last bits
 
-  //uint16_t remainder = (fixedAngle >> 6) & RemainderMask; // 22 lsb bits
-  //uint16_t index = (((uint16_t*)&fixedAngle)[1] >> 6) & indexMask;  // 9 last bits
-  uint16_t remainder = (((uint16_t*)&fixedAngle)[0]) & RemainderMask; // 16 lsb bits
+  uint16_t remainder = (((uint16_t*)&fixedAngle)[0]); // 16 lsb bits
   uint16_t index = (((uint16_t*)&fixedAngle)[1]) & indexMask;  // 9 last bits
 
   // Isolate the angle in the first quandrant
@@ -205,12 +199,12 @@ fast_sincos_real fastFixedSin(const uint32_t fixedAngle) {
     }
   }
 
-  // extended for the multiplication that is about to occur and keep the precision
   uint16_t currentValue = ACCESS_TABLE(index); 
   if (remainder) {
-    uint32_t temporaryResult = ((uint32_t)(ACCESS_TABLE(index + 1) - currentValue)) * remainder;
-    //currentValue = currentValue +  (((ACCESS_TABLE(index + 1) - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
-    currentValue += ((uint16_t*)&temporaryResult)[1];
+    // extended for the multiplication that is about to occur and keep the precision
+    uint32_t difference = ACCESS_TABLE(index + 1) - currentValue;
+    uint32_t temporaryResult = difference * remainder;
+    currentValue += ((uint16_t*)&temporaryResult)[1]; // Equivalent of dividing by LOOKUP_REMAINDER_BITS
   }
 
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
@@ -335,7 +329,7 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians
   uint16_t currentValue = ACCESS_TABLE(index); 
   if (remainder > 0) {
     uint32_t temporaryResult = ((uint32_t)(ACCESS_TABLE(index + 1) - currentValue)) * remainder;
-    currentValue += ((uint16_t*)&temporaryResult)[1];
+    currentValue += ((uint16_t*)&temporaryResult)[1]; // Equivalent of dividing by LOOKUP_REMAINDER_BITS
   }
 
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
@@ -385,7 +379,7 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
     remainder = LOOKUP_REMAINDER_SIZE - remainder;
 
     uint32_t temporaryResult = ((uint32_t)(ACCESS_TABLE(QUADRANT_SIZE - index) - currentValue)) * remainder;
-    currentValue += ((uint16_t*)&temporaryResult)[1];
+    currentValue += ((uint16_t*)&temporaryResult)[1]; // Equivalent of dividing by LOOKUP_REMAINDER_BITS
   } else {
     currentValue = ACCESS_TABLE(QUADRANT_SIZE - index); 
   }
@@ -460,13 +454,8 @@ static fast_sincos_real lookupCos(const fast_sincos_real angleRadians) {
 /** 
  * @brief Converts a value obtained from a lookup table to radians
  * Divide the current value by the maximum value of the elements
- * in the lookup table, plus 1,
+ * in the lookup table,
  * which is (2^LOOKUP_ELEMENTS_BITS_NEGATIVE).
- * The Actual division should be by the real maximum value of the 
- * elements in the lookup table, but it is faster to
- * divide by a power of 2. 
- * The error is slightly increased because of this choice
- * e.g.: Dividing by 65536 instead of 65535
  * @param value The value to scale.
  * @return The scaled value, as a real number.
  */ 
