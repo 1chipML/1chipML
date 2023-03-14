@@ -415,7 +415,54 @@ where $x_i \in V_j$.
 Work in progress.
 \subsection{The Jacobi method}
 
-Work in progress.
+The Jacobi method is an iterative algorithm for approximating the eigenvalues and eigenvectors of a symmetrical matrix. \\
+
+It works by applying multiple orthogonal similarity transformations to the original matrix. These transformations, called \textit{Jacobi} rotations are chosen so that, over time, the sum of the squares of the off-diagonal elements is minimized. The algorithm accumulates these transformations until the resulting matrix is diagonal. The product of all transformations gives then the eigenvectors of the matrix. \\
+
+The algorithm starts by choosing an element to annihilate. To choose that algorithm, two variants are given in the library. First, the \textit{cyclic Jacobi method} chooses the elements in the order that they are given in the matrix starting with the first off diagonal element ($S_{0,1}$, $S_{0,2}$, ...). The other variant simply chooses the element that has the highest absolute value in the matrix. \\
+
+Once the element $a_{pq}$ to annihilate is chosen, a rotation matrix $P_{pq}$ is then created using the following formulas :
+\begin{align*}
+    \tau &= \frac{a_{qq} - a_{pp}}{2a_{pq}} \\
+    t &= -\tau +/- \sqrt{1 - \tau^2}
+\end{align*}
+Then, choosing the root with the biggest absolute value :
+\begin{align*}
+    c &= \frac{1}{\sqrt{1 + t^2}}, \; \; s = ct \\
+    P_{pq} &=
+        \begin{bmatrix}
+            1 & & & & & & \\
+            & \ldots & & & & & \\
+            & & c & \ldots & s & \\
+            & & \vdots & 1 & \vdots & \\
+            & & -s & \ldots & c & \\
+            & & & & & \ldots & \\
+            & & & & & & 1 \\
+        \end{bmatrix}
+\end{align*}
+
+Once the matrix $P_{pq}$ is computed, the element can be annihilated by multiplying $P_{pq}$ with the input matrix $A$. The algorithm is be described in the following pseudo-code where $A$ is the input matrix: \\
+
+\begin{algorithm}
+  \caption{Jacobi Algorithm}
+  \begin{algorithmic}[1]
+    \State $V \gets \text{Identity Matrix}$
+    \For{$i = 0; i \leq \text{numberOfIterations}; i++$}
+        \State $p, q \gets \text{chooseElementToAnnihilate()}$ \Comment{Cyclic or classical method}
+        \State $P_{pq} \gets \text{createRotationMatrix(p, q)}$
+        \State $A \gets P_{pq}^{T} \cdot A \cdot P_{pq}$
+        \State $V \gets V \cdot P_{pq}$
+    \EndFor
+    \Comment{V will contain the eigenvectors and A the eigenvalues}
+  \end{algorithmic}
+\end{algorithm}
+
+Multiple optimizations are made in the library to take into account the machine's precision. To do that, the concept of a \textit{sweep} is defined. Given a matrix of size $n$ x $n$, a \textit{sweep} is defined as $n (n - 1) / 2$ Jacobi rotations. To optimize the algorithm to skip useless rotations, in the first three sweeps, the rotation matrix is carried out only if :
+\begin{align*}
+    |a_{pq}| &> \frac{1}{5}\frac{\sum_{r<s}|a_{rs}|}{n^2}
+\end{align*}
+After that, the algorithm sets $a_{pq}$ to 0 if $|a_{pq}| < 10^{-(D+2)}|a_{pp}|$ and $|a_{pq}| < 10^{-(D+2)}|a_{qq}|$ where D is the machine's precision (number of decimal digits).
+
 \subsection{The Lanczos method}
 
 The lanczos method is an iterative algorithm for approximating the eigenvalues and eigenvectors of a symmetrical, sparse matrix.
