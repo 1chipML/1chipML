@@ -52,7 +52,26 @@ void setup() {
     iterator += step;
   }
 
-  Serial.print("FASTSIN: \t");
+  Serial.print("FAST SIN: \t");
+  Serial.print(totalTime / iterations);
+  Serial.println(" us");
+  delay(10);
+
+  totalTime = 0;
+  iterator = lowerBound;
+  while (iterator < upperBound) {
+    float input = iterator * factor;
+    uint32_t input2 = input * 2147483648.0 / (2 * M_PI);
+
+    uint32_t start = micros();
+    x = fastFixedSin(input2);
+    uint32_t stop = micros();
+
+    totalTime += stop - start;
+    iterator += step;
+  }
+
+  Serial.print("FAST FIXED SIN:\t");
   Serial.print(totalTime / iterations);
   Serial.println(" us");
   delay(10);
@@ -89,7 +108,26 @@ void setup() {
     iterator += step;
   }
 
-  Serial.print("FASTCOS: \t");
+  Serial.print("FAST COS: \t");
+  Serial.print(totalTime / iterations);
+  Serial.println(" us");
+  delay(10);
+
+  totalTime = 0;
+  iterator = lowerBound;
+  while (iterator < upperBound) {
+    float input = iterator * factor;
+    uint32_t input2 = input * 2147483648.0 / (2 * M_PI);
+
+    uint32_t start = micros();
+    x = fastFixedCos(input2);
+    uint32_t stop = micros();
+
+    totalTime += stop - start;
+    iterator += step;
+  }
+
+  Serial.print("FAST FIXED COS:\t");
   Serial.print(totalTime / iterations);
   Serial.println(" us");
   delay(10);
