@@ -1,4 +1,4 @@
-#include "../src/monte_carlo.h"
+#include <monte_carlo.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,8 +69,8 @@ int getScore(Board* board, int player) {
     if (board->values[i] == player && board->values[i + 1] == player &&
         board->values[i + 2] == player) {
       int nPlays = 0;
-      for (int i = 0; i < 9; ++i) {
-        if (board->values[i] == player) {
+      for (int j = 0; j < 9; ++j) {
+        if (board->values[j] == player) {
           ++nPlays;
         }
       }
@@ -82,8 +82,8 @@ int getScore(Board* board, int player) {
     if (board->values[i] == player && board->values[i + 3] == player &&
         board->values[i + 6] == player) {
       int nPlays = 0;
-      for (int i = 0; i < 9; ++i) {
-        if (board->values[i] == player) {
+      for (int j = 0; j < 9; ++j) {
+        if (board->values[j] == player) {
           ++nPlays;
         }
       }
@@ -93,11 +93,11 @@ int getScore(Board* board, int player) {
   // Check diagonals
   if ((board->values[0] == player && board->values[4] == player &&
        board->values[8] == player) ||
-      board->values[2] == player && board->values[4] == player &&
-          board->values[6] == player) {
+      (board->values[2] == player && board->values[4] == player &&
+          board->values[6] == player)) {
     int nPlays = 0;
-    for (int i = 0; i < 9; ++i) {
-      if (board->values[i] == player) {
+    for (int j = 0; j < 9; ++j) {
+      if (board->values[j] == player) {
         ++nPlays;
       }
     }
@@ -128,7 +128,7 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 
   Game game = {
       isValidAction,         playAction,   getScore,     getPossibleActions,
-      getNumPossibleActions, removeAction, getBoardSize, isDone,
+      getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1
   };
 
   Action action =
