@@ -4,6 +4,7 @@ static double getFastSinError(int lowerBound, int upperBound, int step, double m
 static double getFastCosError(int lowerBound, int upperBound, int step, double multFactor, int degree);
 static double getGenericError(int lowerBound, int upperBound, int step, double multFactor, int degree, 
 char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sincos_real, int));
+static double GetFixedError();
 
 int main() {
     int isErrorExpected = 1;
@@ -13,6 +14,18 @@ int main() {
     int step = 1;
     fast_sincos_real multFactor = 0.1;
 
+    printf("Fixed point: \n");
+    unsigned fastInput = 65535;
+    double actualInput = (double)fastInput * (2 * M_PI) / 33554432.0;
+
+    double fastRes = fastFixedSin(fastInput);
+    double actualRes = sin(actualInput);
+    GetFixedError();
+
+    //printf("fastRes = %f\n", fastRes);
+    //printf("actualRes = %f\n", actualRes);
+    printf("\n");
+    printf("Floating point: \n");
     printf("Sine \n");
     isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 1) < 9e-03;
     isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 2) < 9e-05;
@@ -81,6 +94,32 @@ char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sin
     printf("Average relative error = %.10e\n", avgRelativeError);
     printf("Max absolute error = %.10e\n", maxAbsoluteError);
     printf("Max relative error = %.10e\n", maxRelativeError);
+
+    return avgAbsoluteError;
+}
+
+static double GetFixedError() {
+    double maxAbsoluteError = 0.0;
+
+    double avgAbsoluteError = 0.0;
+
+    const uint32_t upperBound = 33554432;
+    for(uint32_t i = 0; i < upperBound; ++i) { // < 2^25
+        double actualInput = (double)i * (2 * M_PI) / 33554432.0;
+
+        double actual = sin(actualInput);
+        double approx = fastFixedSin(i);
+
+        double absoluteError = fabs(actual - approx);
+        avgAbsoluteError += absoluteError;
+        maxAbsoluteError = fmax(maxAbsoluteError, absoluteError);
+    }
+
+    avgAbsoluteError /= (double)upperBound;
+
+    printf("Fixed sine error:\n");
+    printf("Average absolute error = %.10e\n", avgAbsoluteError);
+    printf("Max absolute error = %.10e\n", maxAbsoluteError);
 
     return avgAbsoluteError;
 }

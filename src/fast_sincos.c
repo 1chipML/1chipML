@@ -167,6 +167,56 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
     return negativeFactor ? -returnedValue : returnedValue;
 }
 
+/**
+ * 0 is 0
+ * 2Pi is 2^25 (arbitrary choice for easier initial calculations wihtout overflow)
+*/
+fast_sincos_real fastFixedSin(const uint32_t fixedAngle) {
+  //const uint32_t limit = 2147483648;//(1 << 31); // 0x7FFF FFFF
+  //fixedAngle &= ~limit; // only get 31 bits
+  //const uint32_t limit = 0x7FFFFFFF;
+  //uint32_t inputAngle = fixedAngle; // & limit;
+
+  // 1<<25 = 33 554 432
+
+  // 22 + 9 = 31
+  const uint32_t RemainderMask = 0xFFFF; // 16 lsb bits
+  const uint32_t indexMask = 0x1FF; // 9 last bits
+
+  //uint16_t remainder = (fixedAngle >> 6) & RemainderMask; // 22 lsb bits
+  //uint16_t index = (((uint16_t*)&fixedAngle)[1] >> 6) & indexMask;  // 9 last bits
+  uint16_t remainder = fixedAngle & RemainderMask; // 16 lsb bits
+  uint16_t index = (((uint16_t*)&fixedAngle)[1]) & indexMask;  // 9 last bits
+
+  // Isolate the angle in the first quandrant
+  int negativeFactor = 0;
+  if (index >= QUADRANT_SIZE_2) {
+    index -= QUADRANT_SIZE_2;
+    negativeFactor = 1;
+  }
+
+  if (index >= QUADRANT_SIZE) {
+    if (remainder) {
+      index = QUADRANT_SIZE_2_MINUS_1 - index;
+      remainder = LOOKUP_REMAINDER_SIZE - remainder;
+    }
+    else {
+      index = QUADRANT_SIZE_2 - index;
+    }
+  }
+
+  // extended for the multiplication that is about to occur and keep the precision
+  uint16_t currentValue = ACCESS_TABLE(index); 
+  if (remainder) {
+    uint32_t temporaryResult = ((uint32_t)(ACCESS_TABLE(index + 1) - currentValue)) * remainder;
+    //currentValue = currentValue +  (((ACCESS_TABLE(index + 1) - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
+    currentValue += ((uint16_t*)&temporaryResult)[1];
+  }
+
+  fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
+  return negativeFactor ? -returnedValue : returnedValue;
+}
+
 
 /**
  * The Chebyshev approximation is used to compute the sine of the angle.
