@@ -1,2 +1,2 @@
 local/*
-test_*.out
+tests/build*

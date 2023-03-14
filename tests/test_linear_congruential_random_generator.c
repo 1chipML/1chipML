@@ -15,10 +15,18 @@ int main(void) {
   int i, n = 100;
 
   printf("linear congruential random generator\n");
-  for (i = 0; i < n; i++)
-    printf("%1.3f ", linear_congruential_random_generator());
-  printf("\n");
-  return (0);
+  for (i = 0; i < n; i++) {
+    const double value = linear_congruential_random_generator();
+
+    if (fabs(value) > 1) {
+      printf("Error! : Generated number is not between 0 and 1 is %f \n",
+             value);
+      return 1;
+    }
+  }
+  printf("Success : linear_congruential_random_generator \n");
+
+  return 0;
 }
 
 /* -- End of file -- */

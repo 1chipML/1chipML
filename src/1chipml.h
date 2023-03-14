@@ -16,6 +16,9 @@
 
 /* Include 1chipML methods below */
 #include "./gauss_elimination.h"
+#include "./genetic.h"
 #include "./linear_congruential_random_generator.h"
+#include "./DFT.h"
+#include "./FFT.h"
 
 /* -- End of file -- */
