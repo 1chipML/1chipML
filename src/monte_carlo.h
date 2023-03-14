@@ -37,6 +37,8 @@ typedef struct {
   void (*removeAction)(int, Action*, int);
   int (*getBoardSize)(void);
   bool (*isDone)(Board*);
+  int8_t lossValue;
+  int8_t drawValue;
 } Game;
 
 typedef struct Node {

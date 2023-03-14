@@ -3,14 +3,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
-#ifndef DRAW
-#define DRAW 1
-#endif
-#ifndef LOSS
-#define LOSS 0
-#endif
 
 /**
  * This method calculates the UCB value for a node.
@@ -79,7 +71,7 @@ void createChild(Node* child, Node* node, Action* action) {
  */
 void expandLeaf(Node* node, Game game, Board* board) {
   // Do not expand leaf if it is a terminal node
-  if ((game.getScore(board, node->action.player) > DRAW) ||
+  if ((game.getScore(board, node->action.player) > game.drawValue) ||
       game.isDone(board)) { // TODO change this (the 1) so that is set by user
     return;
   }
@@ -115,7 +107,7 @@ void expandLeaf(Node* node, Game game, Board* board) {
  * @param player The current player.
  * @param game The definition of the game played, the environment in which the
  * the machine learns.
- * @return The result of the random playout, LOSS, WIN or DRAW.
+ * @return The result of the random playout.
  */
 int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
   int score = game->getScore(board, node->action.player);
@@ -123,7 +115,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
     if (node->action.player == initialPlayer) {
       return score;
     } else {
-      return LOSS;
+      return game->lossValue;
     }
   }
 
@@ -160,14 +152,14 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
         if (varPlayer == initialPlayer) {
           return score;
         } else {
-          return LOSS;
+          return game->lossValue;
         }
       }
       varPlayer = -(varPlayer);
     }
   }
   free(simulationBoard.values);
-  return DRAW;
+  return game->drawValue;
 }
 
 /**
@@ -223,7 +215,6 @@ Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
                .nChildren = 0,
                .children = NULL,
                .parent = NULL};
-  set_linear_congruential_generator_seed(time(NULL));
 
   Board tempBoard;
   tempBoard.values = malloc(game.getBoardSize() * sizeof(int8_t));
@@ -243,11 +234,6 @@ Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
   }
   free(tempBoard.values);
 
-  for (int i = 0; i < node.nChildren; ++i) {
-    printf("Child %d, UCB: %f, nVisits: %d, action: [%d, %d]\n", i,
-           calcUCB(&node.children[i]), node.children[i].nVisits,
-           node.children[i].action.xPos, node.children[i].action.yPos);
-  }
   Action action = findMaxUCB(node.children, node.nChildren)->action;
   freeMCTree(&node);
   return action;
