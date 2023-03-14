@@ -322,18 +322,20 @@ static fast_sincos_real lookupSinInterpolate(const fast_sincos_real angleRadians
   }
 
   if (index >= QUADRANT_SIZE) {
-    index = QUADRANT_SIZE_2 - index;
-
     if (remainder) {
+      index = QUADRANT_SIZE_2_MINUS_1 - index;
       remainder = LOOKUP_REMAINDER_SIZE - remainder;
-      --index;
+    }
+    else {
+      index = QUADRANT_SIZE_2 - index;
     }
   }
 
   // extended for the multiplication that is about to occur and keep the precision
-  uint32_t currentValue = ACCESS_TABLE(index); 
+  uint16_t currentValue = ACCESS_TABLE(index); 
   if (remainder > 0) {
-    currentValue = currentValue + (((ACCESS_TABLE(index + 1) - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
+    uint32_t temporaryResult = ((uint32_t)(ACCESS_TABLE(index + 1) - currentValue)) * remainder;
+    currentValue += ((uint16_t*)&temporaryResult)[1];
   }
 
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
@@ -365,21 +367,25 @@ static fast_sincos_real lookupCosInterpolate(const fast_sincos_real angleRadians
   }
 
   if (index >= QUADRANT_SIZE) {
-    index = QUADRANT_SIZE_2 - index;
     negativeFactor ^= 1;
     if (remainder) {
+      index = QUADRANT_SIZE_2_MINUS_1 - index;
       remainder = -remainder;
-      --index;
+    }
+    else {
+      index = QUADRANT_SIZE_2 - index;
     }
   }
 
   // extended for the multiplication that is about to occur and keep the precision
-  uint32_t currentValue;
+  uint16_t currentValue;
   if (remainder > 0) 
   {
     currentValue = ACCESS_TABLE(QUADRANT_SIZE_MINUS_1 - index); 
     remainder = LOOKUP_REMAINDER_SIZE - remainder;
-    currentValue = currentValue + (((ACCESS_TABLE(QUADRANT_SIZE - index) - currentValue) * remainder) >> LOOKUP_REMAINDER_BITS);
+
+    uint32_t temporaryResult = ((uint32_t)(ACCESS_TABLE(QUADRANT_SIZE - index) - currentValue)) * remainder;
+    currentValue += ((uint16_t*)&temporaryResult)[1];
   } else {
     currentValue = ACCESS_TABLE(QUADRANT_SIZE - index); 
   }
