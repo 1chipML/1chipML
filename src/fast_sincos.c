@@ -171,15 +171,17 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
 }
 
 /**
- * 0 is 0
- * 2Pi is 2^25 (arbitrary choice for easier initial calculations wihtout overflow)
- * 1<<25 = 33 554 432
+ * @brief Fast sine approximation in fixed point.
+ * In this fixed point representation, the original range 
+ * 0 to 2PI is now 0 to 2^25.
+ * @param fixedAngle The angle in fixed point.
+ * @return A sine approximation of the angle.
 */
 fast_sincos_real fastFixedSin(const uint32_t fixedAngle) {
 
   const uint16_t indexMask = 0x1FF; // 9 last bits
 
-  uint16_t remainder = (((uint16_t*)&fixedAngle)[0]); // 16 lsb bits
+  uint16_t remainder = fixedAngle; // 16 lsb bits
   uint16_t index = (((uint16_t*)&fixedAngle)[1]) & indexMask;  // 9 last bits
 
   // Isolate the angle in the first quandrant
@@ -205,6 +207,55 @@ fast_sincos_real fastFixedSin(const uint32_t fixedAngle) {
     uint32_t difference = ACCESS_TABLE(index + 1) - currentValue;
     uint32_t temporaryResult = difference * remainder;
     currentValue += ((uint16_t*)&temporaryResult)[1]; // Equivalent of dividing by LOOKUP_REMAINDER_BITS
+  }
+
+  fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);
+  return negativeFactor ? -returnedValue : returnedValue;
+}
+
+/**
+ * @brief Fast cosine approximation in fixed point.
+ * In this fixed point representation, the original range 
+ * 0 to 2PI is now 0 to 2^25.
+ * @param fixedAngle The angle in fixed point.
+ * @return A sine approximation of the angle.
+*/
+fast_sincos_real fastFixedCos(const uint32_t fixedAngle) {
+
+  const uint16_t indexMask = 0x1FF; // 9 last bits
+
+  uint16_t remainder = fixedAngle; // 16 lsb bits
+  uint16_t index = (((uint16_t*)&fixedAngle)[1]) & indexMask;  // 9 last bits
+
+  int negativeFactor = 0;
+  if (index >= QUADRANT_SIZE_2) {
+    index -= QUADRANT_SIZE_2;
+    negativeFactor ^= 1;
+  }
+
+  if (index >= QUADRANT_SIZE) {
+    negativeFactor ^= 1;
+    if (remainder) {
+      index = QUADRANT_SIZE_2_MINUS_1 - index;
+      remainder = -remainder;
+    }
+    else {
+      index = QUADRANT_SIZE_2 - index;
+    }
+  }
+
+ 
+  uint16_t currentValue;
+  if (remainder > 0) 
+  {
+    currentValue = ACCESS_TABLE(QUADRANT_SIZE_MINUS_1 - index); 
+    remainder = LOOKUP_REMAINDER_SIZE - remainder;
+    // extended for the multiplication that is about to occur and keep the precision
+    uint32_t difference = ACCESS_TABLE(QUADRANT_SIZE - index) - currentValue;
+    uint32_t temporaryResult = difference * remainder;
+    currentValue += ((uint16_t*)&temporaryResult)[1]; // Equivalent of dividing by LOOKUP_REMAINDER_BITS
+  } else {
+    currentValue = ACCESS_TABLE(QUADRANT_SIZE - index); 
   }
 
   fast_sincos_real returnedValue = scaleValueToRadians((fast_sincos_real)currentValue);

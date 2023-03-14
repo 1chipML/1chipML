@@ -33,6 +33,8 @@
 #define LOOKUP_REMAINDER_BITS 16 // The number of bits allocated for the remainder
 #define LOOKUP_ELEMENTS_BITS_NEGATIVE -16 // Number of bits allocated for each element in the lookup table, times -1
 
+#define FIXED_PI 16777216 // 2^24
+#define FIXED_2_PI 33554432 // 2^25
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +43,7 @@ extern "C" {
 fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree);
 fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree);
 fast_sincos_real fastFixedSin(const uint32_t fixedAngle);
+fast_sincos_real fastFixedCos(const uint32_t fixedAngle);
 
 #ifdef __cplusplus
 }

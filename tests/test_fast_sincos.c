@@ -4,26 +4,22 @@ static double getFastSinError(int lowerBound, int upperBound, int step, double m
 static double getFastCosError(int lowerBound, int upperBound, int step, double multFactor, int degree);
 static double getGenericError(int lowerBound, int upperBound, int step, double multFactor, int degree, 
 char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sincos_real, int));
-static double GetFixedError();
+static double GetFixedError(char* title, double(*actualFunc)(double), 
+fast_sincos_real(*approxFunc)(uint32_t));
 
 int main() {
     int isErrorExpected = 1;
+
+    printf("Fixed point: \n");
+    isErrorExpected &= GetFixedError("sine", sin, fastFixedSin) < 9e-05;
+    isErrorExpected &= GetFixedError("cosine", cos, fastFixedCos) < 9e-05;
+    return 0;
 
     int lowerBound = -100;
     int upperBound = 100;
     int step = 1;
     fast_sincos_real multFactor = 0.1;
 
-    printf("Fixed point: \n");
-    unsigned fastInput = 65535;
-    double actualInput = (double)fastInput * (2 * M_PI) / 33554432.0;
-
-    double fastRes = fastFixedSin(fastInput);
-    double actualRes = sin(actualInput);
-    GetFixedError();
-
-    //printf("fastRes = %f\n", fastRes);
-    //printf("actualRes = %f\n", actualRes);
     printf("\n");
     printf("Floating point: \n");
     printf("Sine \n");
@@ -98,17 +94,19 @@ char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sin
     return avgAbsoluteError;
 }
 
-static double GetFixedError() {
+static double GetFixedError(char* title, 
+double(*actualFunc)(double), 
+fast_sincos_real(*approxFunc)(uint32_t)) {
     double maxAbsoluteError = 0.0;
 
     double avgAbsoluteError = 0.0;
 
-    const uint32_t upperBound = 33554432;
+    const uint32_t upperBound = FIXED_2_PI;
     for(uint32_t i = 0; i < upperBound; ++i) { // < 2^25
-        double actualInput = (double)i * (2 * M_PI) / 33554432.0;
+        double actualInput = (double)i * (2.0 * M_PI) / FIXED_2_PI;
 
-        double actual = sin(actualInput);
-        double approx = fastFixedSin(i);
+        double actual = actualFunc(actualInput);
+        double approx = approxFunc(i);
 
         double absoluteError = fabs(actual - approx);
         avgAbsoluteError += absoluteError;
@@ -117,7 +115,7 @@ static double GetFixedError() {
 
     avgAbsoluteError /= (double)upperBound;
 
-    printf("Fixed sine error:\n");
+    printf("Fixed %s error:\n", title);
     printf("Average absolute error = %.10e\n", avgAbsoluteError);
     printf("Max absolute error = %.10e\n", maxAbsoluteError);
 
