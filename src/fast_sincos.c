@@ -180,12 +180,12 @@ fast_sincos_real fastFixedSin(const uint32_t fixedAngle) {
   // 1<<25 = 33 554 432
 
   // 22 + 9 = 31
-  const uint32_t RemainderMask = 0xFFFF; // 16 lsb bits
-  const uint32_t indexMask = 0x1FF; // 9 last bits
+  const uint16_t RemainderMask = 0xFFFF; // 16 lsb bits
+  const uint16_t indexMask = 0x1FF; // 9 last bits
 
   //uint16_t remainder = (fixedAngle >> 6) & RemainderMask; // 22 lsb bits
   //uint16_t index = (((uint16_t*)&fixedAngle)[1] >> 6) & indexMask;  // 9 last bits
-  uint16_t remainder = fixedAngle & RemainderMask; // 16 lsb bits
+  uint16_t remainder = (((uint16_t*)&fixedAngle)[0]) & RemainderMask; // 16 lsb bits
   uint16_t index = (((uint16_t*)&fixedAngle)[1]) & indexMask;  // 9 last bits
 
   // Isolate the angle in the first quandrant
