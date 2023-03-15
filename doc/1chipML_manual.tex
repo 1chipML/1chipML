@@ -502,9 +502,42 @@ $\epsilon$-greedy method, UCB (upper confidence bound) method, gradient bandit m
 
 \subsection{Monte Carlo methods}
 
-On-policy methods, Off-policy methods.
+The Monte Carlo algorithm learns which action is best to execute next in a certain environment. It iterates through an action tree, playing out random episodes and receiving rewards based on how well it has performed. The algorithm can iterate until the value of a following action reaches a certain threshold, chosen by the user. Once it reaches that threshold, it returns the next action with the best value depending on the rewards received and its' number of visits.
 
+The Monte Carlo method is divided into 4 steps :
 
+The first step is to select the node to expand. The selection traverses the tree and selects the node based on its' value. The node with the highest value will be selected to be expanded next.
+
+Next comes the expansion of the selected node. From the selected node, the algorithm expands the children of the selected node.
+
+The next step is the random playout of an episode. From the expanded node, the algorithm playouts an episode, choosing randomly the next action to execute. The playout finishes once the tree reaches a terminal node. When it is done, it returns the result of the episode. The result can be WIN, LOSS or DRAW.
+
+The last step of the Monte Carlo algorithm is to backpropagate the result of the episode. The result is thus propagated to the parent of the current node, until it reaches the root node.
+
+The algorithm executes these 4 steps iteratively until the value of a following action reaches a certain threshold chosen by the user, or a maximum number of simulations. 
+
+The UCB method was chosen to calculate the value of the node depending on the number of visits and the value returned from the simulations.
+
+Here is a pseudo-code of the method :
+
+\begin{algorithm}
+  \caption{Monte Carlo Method}
+  \begin{algorithmic}[1]
+    \State $\textit{rootNode} \gets \text{Initial state}$
+  \While{\texttt{UCBScore < k}} \Comment{k is the threshold for the UCB score}
+    \State $\textit{childNode} \gets \text{selectChild(\textit{rootNode})}$
+    \State $\text{expandChild}$
+    \State $\textit{score} \gets\text{mcEpisode}$
+    \State $\text{backpropagate(\textit{score})}$
+  \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+The biggest limitation of the execution of this method on an MCU is the size of the tree of actions and rewards. Indeed, the number of nodes that can be expanded is limited to the size of the memory of the MCU. Therefore, the nodes have been optimized such that a maximum of them can be expanded, resulting in a limited number of simulations. While executing this method, keep in mind the memory size of the MCU on which the method is used. 
+
+The Monte Carlo method has been written in order for it to be as configurable as possible by the user. To accomplish this goal, many functions must be written by the user and passed as argument to the method. 
+
+The methods that must be implemented by the user are the ones specific to the context and environment in which the Monte Carlo method is applied.
 
 \chapter{Hardware applications}
 
