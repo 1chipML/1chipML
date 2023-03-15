@@ -4,16 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-Board playAction(Board board, Action* action) {
-  Board childBoard;
-  childBoard.values = malloc(9 * sizeof(int));
-  memcpy(childBoard.values, board.values, 9 * sizeof(int));
-  childBoard.values[action->xPos * 3 + action->yPos] = action->player;
-  childBoard.nPlayers = 2;
-  return childBoard;
+void playAction(Board* board, Action* action) {
+  board->values[action->xPos * 3 + action->yPos] = action->player;
 }
 
-bool isValidAction(Board* board, Action* action, int player) {
+static bool isValidAction(Board* board, Action* action, int player) {
   if (action->player == player &&
       board->values[action->xPos * 3 + action->yPos] == 0) {
     return 1;
@@ -39,7 +34,7 @@ void getPossibleActions(Board board, Action possibleActions[]) {
   }
 }
 
-int getNumPossibleActions(Board board) {
+static int getNumPossibleActions(Board board) {
   int nActions = 0;
   for (int x = 0; x < 3; ++x) {
     for (int y = 0; y < 3; ++y) {
@@ -51,7 +46,16 @@ int getNumPossibleActions(Board board) {
   return nActions * board.nPlayers;
 }
 
-int getBoardSize() { return 9; }
+static int getBoardSize() { return 9; }
+
+static bool isDone(Board* board) {
+  for (int i = 0; i < 9; ++i) {
+    if (board->values[i] == 0) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /**
  * If there is a line of X or O's
@@ -61,12 +65,12 @@ int getBoardSize() { return 9; }
  */
 int getScore(Board* board, int player) {
   // Check rows
-  for (int i = 0; i < 9; i += 3) {
+  for (int i = 0; i < 7; i += 3) {
     if (board->values[i] == player && board->values[i + 1] == player &&
         board->values[i + 2] == player) {
       int nPlays = 0;
-      for (int i = 0; i < 9; ++i) {
-        if (board->values[i] == player) {
+      for (int j = 0; j < 9; ++j) {
+        if (board->values[j] == player) {
           ++nPlays;
         }
       }
@@ -78,8 +82,8 @@ int getScore(Board* board, int player) {
     if (board->values[i] == player && board->values[i + 3] == player &&
         board->values[i + 6] == player) {
       int nPlays = 0;
-      for (int i = 0; i < 9; ++i) {
-        if (board->values[i] == player) {
+      for (int j = 0; j < 9; ++j) {
+        if (board->values[j] == player) {
           ++nPlays;
         }
       }
@@ -89,11 +93,11 @@ int getScore(Board* board, int player) {
   // Check diagonals
   if ((board->values[0] == player && board->values[4] == player &&
        board->values[8] == player) ||
-      board->values[2] == player && board->values[4] == player &&
-          board->values[6] == player) {
+      (board->values[2] == player && board->values[4] == player &&
+          board->values[6] == player)) {
     int nPlays = 0;
-    for (int i = 0; i < 9; ++i) {
-      if (board->values[i] == player) {
+    for (int j = 0; j < 9; ++j) {
+      if (board->values[j] == player) {
         ++nPlays;
       }
     }
@@ -124,11 +128,12 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 
   Game game = {
       isValidAction,         playAction,   getScore,     getPossibleActions,
-      getNumPossibleActions, removeAction, getBoardSize,
+      getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1
   };
 
   Action action =
       mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
+  free(board.values);
   if (action.xPos == 0 && action.yPos == 2) {
     printf("Success : %s()\n", __func__);
     return 0;
@@ -140,8 +145,22 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
 }
 
 int main() {
-  const int minSimul = 9;
-  const int maxSimul = 300;
-  const mc_real targetScore = 4;
+  const int minSimul = 10;
+  const int maxSimul = 500;
+  const mc_real targetScore = 5;
   testMC(minSimul, maxSimul, targetScore);
+
+  // Board board;
+  // board.values = calloc(9, sizeof(int));
+
+  // Game game = {
+  //     isValidAction,         playAction,   getScore,     getPossibleActions,
+  //     getNumPossibleActions, removeAction, getBoardSize, isDone,
+  // };
+
+  // Action action =
+  //     mcGame(board, 1, game, minSimul, maxSimul, targetScore);
+
+  // printf("Best action with %d simulations: Player: %d, [%d, %d]\n", maxSimul,
+  // action.player, action.xPos, action.yPos);
 }

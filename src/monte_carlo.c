@@ -3,14 +3,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
-#ifndef DRAW
-#define DRAW 1
-#endif
-#ifndef LOSS
-#define LOSS 0
-#endif
 
 /**
  * This method calculates the UCB value for a node.
@@ -47,10 +39,11 @@ Node* findMaxUCB(Node* children, unsigned nChildren) {
  * @param node The current node from which the next node is selected.
  * @return The selected node.
  */
-Node* selectChildren(Node* node) {
+Node* selectChildren(Node* node, Board* board, Game* game) {
   Node* currNode = node;
   while (currNode->children) {
     currNode = findMaxUCB(currNode->children, currNode->nChildren);
+    game->playAction(board, &currNode->action);
     if (calcUCB(currNode) == UCB_MAX) {
       return currNode;
     }
@@ -58,10 +51,9 @@ Node* selectChildren(Node* node) {
   return currNode;
 }
 
-void createChild(Node* child, Board state, Node* node, Action* action) {
+void createChild(Node* child, Node* node, Action* action) {
   child->nVisits = 0;
   child->score = 0;
-  child->state = state;
   child->action.player = action->player;
   child->action.xPos = action->xPos;
   child->action.yPos = action->yPos;
@@ -77,34 +69,32 @@ void createChild(Node* child, Board state, Node* node, Action* action) {
  * @param game The definition of the game played, the environment in which the
  * the machine learns.
  */
-void expandLeaf(Node* node, Game game) {
+void expandLeaf(Node* node, Game game, Board* board) {
   // Do not expand leaf if it is a terminal node
-  if (game.getScore(&node->state, node->action.player) > 1) {
+  if ((game.getScore(board, node->action.player) > game.drawValue) ||
+      game.isDone(board)) { // TODO change this (the 1) so that is set by user
     return;
   }
 
-  int nPossibleActions = game.getNumPossibleActions(node->state);
+  int nPossibleActions = game.getNumPossibleActions(*board);
   Action possibleActions[nPossibleActions];
-  game.getPossibleActions(node->state, possibleActions);
+  game.getPossibleActions(*board, possibleActions);
 
   int nValidActions = 0;
   for (unsigned i = 0; i < nPossibleActions; i++) {
-    if (game.isValidAction(&(node->state), &possibleActions[i],
-                           -node->action.player)) {
+    if (game.isValidAction(board, &possibleActions[i], -node->action.player)) {
       nValidActions++;
     }
   }
 
   // Deep copy of parent
-  node->children = (struct Node*)malloc(nValidActions * sizeof(struct Node));
+  node->children =
+      (struct Node*)malloc(nValidActions * sizeof(node->children[0]));
 
   nValidActions = 0;
   for (unsigned i = 0; i < nPossibleActions; ++i) {
-    if (game.isValidAction(&(node->state), &possibleActions[i],
-                           -node->action.player)) {
-      createChild(&node->children[nValidActions],
-                  game.playAction(node->state, &possibleActions[i]), node,
-                  &possibleActions[i]);
+    if (game.isValidAction(board, &possibleActions[i], -node->action.player)) {
+      createChild(&node->children[nValidActions], node, &possibleActions[i]);
       nValidActions++;
       node->nChildren++;
     }
@@ -117,15 +107,15 @@ void expandLeaf(Node* node, Game game) {
  * @param player The current player.
  * @param game The definition of the game played, the environment in which the
  * the machine learns.
- * @return The result of the random playout, LOSS, WIN or DRAW.
+ * @return The result of the random playout.
  */
-int mcEpisode(Node* node, int initialPlayer, Game* game) {
-  int score = game->getScore(&node->state, node->action.player);
+int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
+  int score = game->getScore(board, node->action.player);
   if (score > 1) {
     if (node->action.player == initialPlayer) {
       return score;
     } else {
-      return LOSS;
+      return game->lossValue;
     }
   }
 
@@ -133,12 +123,11 @@ int mcEpisode(Node* node, int initialPlayer, Game* game) {
 
   // Deep copy of board
   Board simulationBoard;
-  int boardValues[game->getBoardSize()];
+  simulationBoard.values = malloc(game->getBoardSize() * sizeof(int8_t));
   for (int i = 0; i < game->getBoardSize(); ++i) {
-    boardValues[i] = node->state.values[i];
+    simulationBoard.values[i] = board->values[i];
   }
-  simulationBoard.values = boardValues;
-  simulationBoard.nPlayers = node->state.nPlayers;
+  simulationBoard.nPlayers = board->nPlayers;
 
   int nPossibleActions = game->getNumPossibleActions(simulationBoard);
   Action possibleActions[nPossibleActions];
@@ -149,29 +138,28 @@ int mcEpisode(Node* node, int initialPlayer, Game* game) {
     // Pick random action
     int randomActionIdx =
         linear_congruential_random_generator() * nPossibleActions;
-    if (game->isValidAction(&node->state, &possibleActions[randomActionIdx],
+    if (game->isValidAction(board, &possibleActions[randomActionIdx],
                             varPlayer)) {
       // Play action
-      simulationBoard =
-          game->playAction(simulationBoard, &possibleActions[randomActionIdx]);
+      game->playAction(&simulationBoard, &possibleActions[randomActionIdx]);
 
       // Remove action from possible actions
       nPossibleActions -= simulationBoard.nPlayers;
       game->removeAction(randomActionIdx, possibleActions, nPossibleActions);
       int score = game->getScore(&simulationBoard, varPlayer);
-      free(simulationBoard.values);
       if (score > 1) {
+        free(simulationBoard.values);
         if (varPlayer == initialPlayer) {
           return score;
         } else {
-          return LOSS;
+          return game->lossValue;
         }
       }
       varPlayer = -(varPlayer);
     }
   }
   free(simulationBoard.values);
-  return DRAW;
+  return game->drawValue;
 }
 
 /**
@@ -200,12 +188,10 @@ void backpropagate(Node* node, int score) {
  */
 void freeMCTree(Node* node) {
   for (unsigned i = 0; i < node->nChildren; ++i) {
-    if ((&node->children[i])->nChildren != 0) {
-      freeMCTree(&node->children[i]);
-    }
+    freeMCTree(&node->children[i]);
   }
-  free(node->state.values);
   free(node->children);
+  node->children = NULL;
 }
 
 /**
@@ -221,29 +207,34 @@ void freeMCTree(Node* node) {
  */
 Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
               mc_real goalValue) {
-  Node node;
-  node.nVisits = 0;
-  node.score = 0;
-  node.state = board;
-  node.action.player = -player;
-  node.action.xPos = 0; // Default value
-  node.action.yPos = 0; // Default value
-  node.nChildren = 0;
-  node.children = NULL;
-  node.parent = NULL;
-  set_linear_congruential_generator_seed(time(NULL));
+  Node node = {.nVisits = 0,
+               .score = 0,
+               .action.player = -player,
+               .action.xPos = 0,
+               .action.yPos = 0,
+               .nChildren = 0,
+               .children = NULL,
+               .parent = NULL};
 
+  Board tempBoard;
+  tempBoard.values = malloc(game.getBoardSize() * sizeof(int8_t));
   int iterations = 0;
   while ((node.nVisits < minSim ||
           calcUCB(findMaxUCB(node.children, node.nChildren)) < goalValue) &&
-         node.nVisits < maxSim) {
-    Node* selectedNode = selectChildren(&node);
-    expandLeaf(selectedNode, game);
-    int score = mcEpisode(selectedNode, player, &game);
+         node.nVisits <= maxSim) {
+    for (int i = 0; i < game.getBoardSize(); ++i) {
+      tempBoard.values[i] = board.values[i];
+    }
+    tempBoard.nPlayers = board.nPlayers;
+    Node* selectedNode = selectChildren(&node, &tempBoard, &game);
+    expandLeaf(selectedNode, game, &tempBoard);
+    int score = mcEpisode(selectedNode, player, &game, &tempBoard);
     backpropagate(selectedNode, score);
     iterations++;
   }
+  free(tempBoard.values);
 
+  Action action = findMaxUCB(node.children, node.nChildren)->action;
   freeMCTree(&node);
-  return findMaxUCB(node.children, node.nChildren)->action;
+  return action;
 }
