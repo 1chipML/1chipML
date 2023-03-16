@@ -49,14 +49,14 @@ def main():
   mutationRate = 0.1
   populationSize = 50
   tourneySize = 5
-  maxIterations = 50
+  maxIterations = 25
   limits = [8.,1.]
 
   print(testXCoordinates)
   print(testYCoordinates)
 
   polynomialDegree = 2
-  cutoffValue =  5.0
+  cutoffValue =  10.0
 
   port = serial.Serial("/dev/ttyACM0", 115200)
   time.sleep(2)
@@ -72,10 +72,14 @@ def main():
     port.write(struct.pack('<H',populationSize))
     port.write(struct.pack('<H',tourneySize))
     port.write(struct.pack('<H',maxIterations))
-    #port.write(struct.pack('<H',polynomialDegree))
+    
     
 
     sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port)
+    #port.write(struct.pack('<H',polynomialDegree))
+    
+    
+    
     fitness,bestValues =  getResults(port,polynomialDegree)
     if (abs(predict(testXCoordinates[minCoordinates],bestValues) - testYCoordinates[minCoordinates]) > cutoffValue):
         anomaly_listX.append(testXCoordinates[minCoordinates])
@@ -108,3 +112,5 @@ def main():
   plt.show()
   port.close()
 
+if __name__ == "__main__":
+  main()
