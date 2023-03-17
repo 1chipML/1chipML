@@ -23,7 +23,7 @@ int main() {
   printf("Fixed point: \n");
   isErrorExpected &= GetFixedError("sine", sin, fastFixedSin, verbose) < 9e-05;
   isErrorExpected &= GetFixedError("cosine", cos, fastFixedCos, verbose) < 9e-05;
-  printf("Is error expceted? %d\n", isErrorExpected);
+  printf("Is error expected? %d\n", isErrorExpected);
 
   int lowerBound = -100;
   int upperBound = 100;
@@ -38,14 +38,14 @@ int main() {
   isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 3, verbose) < 9e-05;
   isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 5, verbose) < 9e-07;
   isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 7, verbose) < 9e-08;
-  printf("Is error expceted? %d\n", isErrorExpected);
+  printf("Is error expected? %d\n", isErrorExpected);
   printf("Cosine \n");
   isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 1, verbose) < 9e-03;
   isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 2, verbose) < 9e-05;
   isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 3, verbose) < 9e-05;
   isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 5, verbose) < 9e-07;
   isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 7, verbose) < 9e-08;
-  printf("Is error expceted? %d\n", isErrorExpected);
+  printf("Is error expected? %d\n", isErrorExpected);
 
   return isErrorExpected ? 0 : 1;
 }
