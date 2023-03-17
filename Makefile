@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic fast_sincos
 
 test: all run_all_tests
 
@@ -50,6 +50,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_DFT.out
 	./$(BUILD_FOLDER)/test_FFT.out
 	./$(BUILD_FOLDER)/test_lanczos.out
+	./$(BUILD_FOLDER)/test_fast_sincos.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)

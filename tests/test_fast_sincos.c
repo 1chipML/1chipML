@@ -1,22 +1,29 @@
 #include <1chipml.h>
 
 static double getFastSinError(int lowerBound, int upperBound, int step,
-                              double multFactor, int degree);
+                              double multFactor, int degree,
+                              int verbose);
 static double getFastCosError(int lowerBound, int upperBound, int step,
-                              double multFactor, int degree);
+                              double multFactor, int degree, 
+                              int verbose);
 static double getGenericError(int lowerBound, int upperBound, 
                 int step, double multFactor,
                 int degree, char* title, double (*actualFunc)(double),
-                fast_sincos_real (*approxFunc)(fast_sincos_real, int));
+                fast_sincos_real (*approxFunc)(fast_sincos_real, int), 
+                int verbose);
 static double GetFixedError(char* title, double (*actualFunc)(double),
-                            fast_sincos_real (*approxFunc)(uint32_t));
+                            fast_sincos_real (*approxFunc)(uint32_t),
+                            int verbose);
 
 int main() {
+  const int verbose = 0;
+
   int isErrorExpected = 1;
 
   printf("Fixed point: \n");
-  isErrorExpected &= GetFixedError("sine", sin, fastFixedSin) < 9e-05;
-  isErrorExpected &= GetFixedError("cosine", cos, fastFixedCos) < 9e-05;
+  isErrorExpected &= GetFixedError("sine", sin, fastFixedSin, verbose) < 9e-05;
+  isErrorExpected &= GetFixedError("cosine", cos, fastFixedCos, verbose) < 9e-05;
+  printf("Is error expceted? %d\n", isErrorExpected);
 
   int lowerBound = -100;
   int upperBound = 100;
@@ -26,38 +33,40 @@ int main() {
   printf("\n");
   printf("Floating point: \n");
   printf("Sine \n");
-  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 1) < 9e-03;
-  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 2) < 9e-05;
-  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 3) < 9e-05;
-  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 5) < 9e-07;
-  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 7) < 9e-08;
+  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 1, verbose) < 9e-03;
+  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 2, verbose) < 9e-05;
+  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 3, verbose) < 9e-05;
+  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 5, verbose) < 9e-07;
+  isErrorExpected &= getFastSinError(lowerBound, upperBound, step, multFactor, 7, verbose) < 9e-08;
+  printf("Is error expceted? %d\n", isErrorExpected);
   printf("Cosine \n");
-  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 1) < 9e-03;
-  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 2) < 9e-05;
-  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 3) < 9e-05;
-  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 5) < 9e-07;
-  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 7) < 9e-08;
-  printf("Is error expcted? %d\n", isErrorExpected);
+  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 1, verbose) < 9e-03;
+  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 2, verbose) < 9e-05;
+  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 3, verbose) < 9e-05;
+  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 5, verbose) < 9e-07;
+  isErrorExpected &= getFastCosError(lowerBound, upperBound, step, multFactor, 7, verbose) < 9e-08;
+  printf("Is error expceted? %d\n", isErrorExpected);
 
   return isErrorExpected ? 0 : 1;
 }
 
 static double getFastSinError(int lowerBound, int upperBound, int step,
-                              double multFactor, int degree) {
+                              double multFactor, int degree, int verbose) {
   return getGenericError(lowerBound, upperBound, step, multFactor, degree,
-                         "FASTSIN", sin, fastSin);
+                         "FASTSIN", sin, fastSin, verbose);
 }
 
 static double getFastCosError(int lowerBound, int upperBound, int step,
-                              double multFactor, int degree) {
+                              double multFactor, int degree, int verbose) {
   return getGenericError(lowerBound, upperBound, step, multFactor, degree,
-                         "FASTCOS", cos, fastCos);
+                         "FASTCOS", cos, fastCos, verbose);
 }
 
 static double
 getGenericError(int lowerBound, int upperBound, int step, double multFactor,
                 int degree, char* title, double (*actualFunc)(double),
-                fast_sincos_real (*approxFunc)(fast_sincos_real, int)) {
+                fast_sincos_real (*approxFunc)(fast_sincos_real, int),
+                int verbose) {
   
   double maxAbsoluteError = 0.0;
   double maxRelativeError = 0.0;
@@ -94,17 +103,20 @@ getGenericError(int lowerBound, int upperBound, int step, double multFactor,
     avgRelativeError /= iterations;
   }
 
-  printf("%s: Error with degree %d\n", title, degree);
-  printf("Average absolute error = %.10e\n", avgAbsoluteError);
-  printf("Average relative error = %.10e\n", avgRelativeError);
-  printf("Max absolute error = %.10e\n", maxAbsoluteError);
-  printf("Max relative error = %.10e\n", maxRelativeError);
+  if (verbose) {
+    printf("%s: Error with degree %d\n", title, degree);
+    printf("Average absolute error = %.10e\n", avgAbsoluteError);
+    printf("Average relative error = %.10e\n", avgRelativeError);
+    printf("Max absolute error = %.10e\n", maxAbsoluteError);
+    printf("Max relative error = %.10e\n", maxRelativeError);
+  }
 
   return avgAbsoluteError;
 }
 
 static double GetFixedError(char* title, double (*actualFunc)(double),
-                            fast_sincos_real (*approxFunc)(uint32_t)) {
+                            fast_sincos_real (*approxFunc)(uint32_t),
+                            int verbose) {
   
   double maxAbsoluteError = 0.0;
   double avgAbsoluteError = 0.0;
@@ -123,9 +135,11 @@ static double GetFixedError(char* title, double (*actualFunc)(double),
 
   avgAbsoluteError /= (double)upperBound;
 
-  printf("Fixed %s error:\n", title);
-  printf("Average absolute error = %.10e\n", avgAbsoluteError);
-  printf("Max absolute error = %.10e\n", maxAbsoluteError);
+  if (verbose) {
+    printf("Fixed %s error:\n", title);
+    printf("Average absolute error = %.10e\n", avgAbsoluteError);
+    printf("Max absolute error = %.10e\n", maxAbsoluteError);
+  }
 
   return avgAbsoluteError;
 }
