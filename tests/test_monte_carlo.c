@@ -149,18 +149,4 @@ int main() {
   const int maxSimul = 500;
   const mc_real targetScore = 5;
   testMC(minSimul, maxSimul, targetScore);
-
-  // Board board;
-  // board.values = calloc(9, sizeof(int));
-
-  // Game game = {
-  //     isValidAction,         playAction,   getScore,     getPossibleActions,
-  //     getNumPossibleActions, removeAction, getBoardSize, isDone,
-  // };
-
-  // Action action =
-  //     mcGame(board, 1, game, minSimul, maxSimul, targetScore);
-
-  // printf("Best action with %d simulations: Player: %d, [%d, %d]\n", maxSimul,
-  // action.player, action.xPos, action.yPos);
 }
