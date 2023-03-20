@@ -138,7 +138,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
     // Pick random action
     int randomActionIdx =
         linear_congruential_random_generator() * nPossibleActions;
-    if (game->isValidAction(board, &possibleActions[randomActionIdx],
+    if (game->isValidAction(&simulationBoard, &possibleActions[randomActionIdx],
                             varPlayer)) {
       // Play action
       game->playAction(&simulationBoard, &possibleActions[randomActionIdx]);
