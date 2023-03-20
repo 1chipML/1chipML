@@ -147,7 +147,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
       nPossibleActions -= simulationBoard.nPlayers;
       game->removeAction(randomActionIdx, possibleActions, nPossibleActions);
       int score = game->getScore(&simulationBoard, varPlayer);
-      if (score > 1) {
+      if (score > game->drawValue) {
         free(simulationBoard.values);
         if (varPlayer == initialPlayer) {
           return score;
