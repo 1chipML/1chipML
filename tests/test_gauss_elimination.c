@@ -43,10 +43,19 @@ int main(void) {
   free(A);
   free(B);
 
+  const gauss_real expectedResults[] = {0.5, -0.5};
+
   /* Print solution on screen */
-  for (i = 0; i < N; i++)
-    printf("sol[%d] = %0.3f\n", i, sol[i]);
-  return (0);
+  for (i = 0; i < N; i++) {
+
+    if (sol[i] != expectedResults[i]) {
+      printf("Error! , %0.3f expected to be equal to %0.3f \n", sol[i],
+             expectedResults[i]);
+      return 1;
+    }
+  }
+  printf("Success : gauss elimination test \n");
+  return 0;
 }
 
 /* -- End of file -- */

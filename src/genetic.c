@@ -489,7 +489,6 @@ static void calculateAndStoreFitness(
     }
 
     const genetic_real fitness = evaluationFunction(parameters);
-
     populationFitness[i] = fitness;
 
     if (fitness < *bestFit) {
@@ -530,6 +529,7 @@ static void calculateFitness(genetic_int* population, genetic_real* bestFit,
                              const unsigned int dimensions,
                              const unsigned int populationSize) {
 
+  // We reset these values to prevent the same value from being chosen twice
   *bestFit = FLT_MAX;
   *secondBestFitness = FLT_MAX;
 
