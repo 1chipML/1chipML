@@ -1,4 +1,5 @@
 
+
 extern "C" {
 #include "genetic.h"
 }
@@ -7,27 +8,29 @@ extern "C" {
 
 
 unsigned int coordinatesSize;
+unsigned int polynomialDegree;
 
 
 
 
-float * coordinatesY;
-float * coordinatesX;
-float *  bestValues ;
+float* coordinatesY;
+float*  coordinatesX ;
+
   
-float epsilon ;
-float mutationRate ;
-unsigned int populationSize ;
+float epsilon;
+float mutationRate;
+unsigned int populationSize;
 unsigned int tourneySize;
 unsigned int maxIterations;
-unsigned int polynomialDegree;
+float*  bestValues;  
+
 
 void setup() {
 
-   Serial.begin(115200);
+   Serial.begin(9600);
    pinMode(LED_BUILTIN, OUTPUT);
    digitalWrite(LED_BUILTIN, LOW);
-  }
+}
 
 
 
@@ -60,59 +63,65 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   
-  if (Serial.available()){
+  // if (Serial.available()){
+
+
 
   
-  // digitalWrite(LED_BUILTIN, HIGH);
-  
   readElement(&epsilon,sizeof(epsilon));
+
+  
+
   readElement(&mutationRate,sizeof(mutationRate));
   readElement(&populationSize, sizeof(populationSize));
  
   readElement(&tourneySize, sizeof(tourneySize));
   readElement(&maxIterations, sizeof(maxIterations));
+  readElement(&polynomialDegree, sizeof(polynomialDegree));
+
+
   readElement(&coordinatesSize, sizeof(coordinatesSize));
   
-  // delay(2000);  
 
 
   
 
   
   
-  coordinatesX = realloc(coordinatesX, coordinatesSize * sizeof(*coordinatesX));
-  coordinatesY = realloc(coordinatesY, coordinatesSize * sizeof(*coordinatesY));
-  bestValues = realloc(bestValues, (polynomialDegree+1) * sizeof(float));
+  coordinatesX = realloc(coordinatesX ,coordinatesSize * sizeof(*coordinatesX));
+  coordinatesY = realloc(coordinatesY,coordinatesSize * sizeof(*coordinatesY));
+  bestValues = realloc(bestValues, sizeof(float)* (polynomialDegree+1));
 
-  
-
+  if (coordinatesX == NULL || coordinatesY == NULL || bestValues == NULL){
+    abort();
+  }
 
   readArray(coordinatesSize, coordinatesX, sizeof(float));
   readArray(coordinatesSize, coordinatesY, sizeof(float));
-  
-  //readElement(&polynomialDegree, sizeof(polynomialDegree));
-
-  srand(tourneySize);
-
-  polynomialDegree = rand()%1 + 2;
-
   digitalWrite(LED_BUILTIN, LOW);
+
+
+
+  digitalWrite(LED_BUILTIN, HIGH);
 
   
   float value = geneticAlgorithm(bestValues, polynomialDegree+1, epsilon,
                                  mutationRate, populationSize, tourneySize,
                                  maxIterations, evaluationFunction, 0);
                                  
-  digitalWrite(LED_BUILTIN, HIGH);
+
+  
+  
+
+
+  digitalWrite(LED_BUILTIN, LOW);
+
 
   writeElement(&value,sizeof(value));
   writeFloatArray((polynomialDegree+1),bestValues);
-
-  
-
   
   
-  }
+  // }
 
 
 }

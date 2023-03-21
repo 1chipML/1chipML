@@ -14,17 +14,20 @@ def sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port):
   port.write(struct.pack('<H',minCoordinates))
   
   
+  
   for x in testXCoordinates[:minCoordinates]:
-    x = float(x) % 2016
+    x = float(x)
     port.write(struct.pack('<f',float(x)))
   
   for y in testYCoordinates[:minCoordinates]:
     port.write(struct.pack('<f',float(y)))
+    
 
 def getResults(port,polynomialDegree):
   fitness = struct.unpack('<f',port.read(4))[0]
 
   print(fitness)
+
 
   values = list()
   for x in range(polynomialDegree+1):
@@ -33,6 +36,10 @@ def getResults(port,polynomialDegree):
 
   print(values)
   return fitness,values
+
+
+    
+
 
 def main():
   testYCoordinates = list()
@@ -49,16 +56,15 @@ def main():
   mutationRate = 0.1
   populationSize = 50
   tourneySize = 5
-  maxIterations = 25
+  maxIterations = 10
   limits = [8.,1.]
 
-  print(testXCoordinates)
-  print(testYCoordinates)
+
 
   polynomialDegree = 2
   cutoffValue =  10.0
 
-  port = serial.Serial("/dev/ttyACM0", 115200)
+  port = serial.Serial("/dev/ttyACM0", 9600)
   time.sleep(2)
 
 
@@ -66,17 +72,22 @@ def main():
   anomaly_listY = list()
 
   while (minCoordinates < coordinatesSize):
+    
+    
 
     port.write(struct.pack('<f',epsilon))
     port.write(struct.pack('<f',mutationRate))
     port.write(struct.pack('<H',populationSize))
     port.write(struct.pack('<H',tourneySize))
+
     port.write(struct.pack('<H',maxIterations))
-    
+    port.write(struct.pack('<H',polynomialDegree))
+
     
 
     sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port)
-    #port.write(struct.pack('<H',polynomialDegree))
+    
+    
     
     
     

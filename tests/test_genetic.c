@@ -22,19 +22,19 @@ static int verifyCoordinates(float *firstSet, float *secondSet,
 int main() {
 
   float epsilon = 0.0001;
-  float mutationRate = 0.01;
+  float mutationRate = 0.1;
   float bestFitValues[2];
   float lowMemoryBestFitValues[2];
   const unsigned int dimensions = 2;
-  const unsigned int maxIterations = 10000;
-  unsigned int populationSize = 100;
-  unsigned int tournamentSize = 20;
+  const unsigned int maxIterations = 100;
+  unsigned int populationSize = 50;
+  unsigned int tournamentSize = 5;
 
   set_linear_congruential_generator_seed(16);
 
   float result = geneticAlgorithm(bestFitValues, dimensions, epsilon,
                                   mutationRate, populationSize, tournamentSize,
-                                  maxIterations, evaluateStrength, 0);
+                                  maxIterations, evaluateStrength, 1);
 
   // We reset the seed
   set_linear_congruential_generator_seed(16);
