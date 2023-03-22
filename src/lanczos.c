@@ -171,7 +171,7 @@ void lanczos(lanczos_real* matrix, uint_least8_t dim, uint_least8_t nbIter,
 
     // Fill the matrix T with the current alpha and beta values
     tMatrix[i * nbIter + i] = alpha;
-    if (i != dim - 1) {
+    if (i != nbIter - 1) {
       tMatrix[(i + 1) * nbIter + i] = beta;
       tMatrix[i * nbIter + i + 1] = beta;
     }
