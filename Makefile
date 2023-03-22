@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic gradient_descent
 
 test: all run_all_tests
 
@@ -37,6 +37,9 @@ DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_ge
 
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
+gradient_descent: ./tests/test_gradient_descent.c ./src/gradient_descent.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
