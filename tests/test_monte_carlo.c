@@ -4,8 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define BOARD_LENGTH 3
+#define BOARD_SIZE 8 // From 0 to 8
+
 void playAction(Board* board, Action* action) {
-  board->values[action->xPos * 3 + action->yPos] = action->player;
+  board->values[action->xPos * BOARD_LENGTH + action->yPos] = action->player;
 }
 
 static bool isValidAction(Board* board, Action* action, int player) {
@@ -19,9 +22,9 @@ static bool isValidAction(Board* board, Action* action, int player) {
 void getPossibleActions(Board board, Action possibleActions[]) {
   int nActions = 0;
   int player = 1;
-  for (int x = 0; x < 3; ++x) {
-    for (int y = 0; y < 3; ++y) {
-      if (board.values[x * 3 + y] == 0) {
+  for (int x = 0; x < BOARD_LENGTH; ++x) {
+    for (int y = 0; y < BOARD_LENGTH; ++y) {
+      if (board.values[x * BOARD_LENGTH + y] == 0) {
         for (int i = 0; i < board.nPlayers; ++i) {
           possibleActions[nActions].player = player;
           possibleActions[nActions].xPos = x;
@@ -36,9 +39,9 @@ void getPossibleActions(Board board, Action possibleActions[]) {
 
 static int getNumPossibleActions(Board board) {
   int nActions = 0;
-  for (int x = 0; x < 3; ++x) {
-    for (int y = 0; y < 3; ++y) {
-      if (board.values[x * 3 + y] == 0) {
+  for (int x = 0; x < BOARD_LENGTH; ++x) {
+    for (int y = 0; y < BOARD_LENGTH; ++y) {
+      if (board.values[x * BOARD_LENGTH + y] == 0) {
         nActions++;
       }
     }
@@ -65,7 +68,7 @@ static bool isDone(Board* board) {
  */
 int getScore(Board* board, int player) {
   // Check rows
-  for (int i = 0; i < 7; i += 3) {
+  for (int i = 0; i < BOARD_SIZE; i += BOARD_LENGTH) {
     if (board->values[i] == player && board->values[i + 1] == player &&
         board->values[i + 2] == player) {
       int nPlays = 0;
@@ -78,8 +81,8 @@ int getScore(Board* board, int player) {
     }
   }
   // Check columns
-  for (int i = 0; i < 3; i++) {
-    if (board->values[i] == player && board->values[i + 3] == player &&
+  for (int i = 0; i < BOARD_LENGTH; i++) {
+    if (board->values[i] == player && board->values[i + BOARD_LENGTH] == player &&
         board->values[i + 6] == player) {
       int nPlays = 0;
       for (int j = 0; j < 9; ++j) {

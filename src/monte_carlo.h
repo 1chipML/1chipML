@@ -27,16 +27,25 @@ typedef struct {
   int8_t player : 4;
 } Action;
 
+typedef void (*playActionType)(Board*, Action*);
+typedef bool (*isValidActionType)(Board*, Action*, int);
+typedef int (*getScoreType)(Board*, int);
+typedef void (*getPossibleActionsType)(Board, Action*);
+typedef int (*getNumPossibleActionsType)(Board);
+typedef void (*removeActionType)(int, Action*, int);
+typedef int (*getBoardSizeType)(void);
+typedef bool (*isDoneType)(Board*);
+
 typedef struct {
   // Methods specific to the game
-  bool (*isValidAction)(Board*, Action*, int);
-  void (*playAction)(Board*, Action*);
-  int (*getScore)(Board*, int);
-  void (*getPossibleActions)(Board, Action*);
-  int (*getNumPossibleActions)(Board);
-  void (*removeAction)(int, Action*, int);
-  int (*getBoardSize)(void);
-  bool (*isDone)(Board*);
+  isValidActionType isValidAction;
+  playActionType playAction;
+  getScoreType getScore;
+  getPossibleActionsType getPossibleActions;
+  getNumPossibleActionsType getNumPossibleActions;
+  removeActionType removeAction;
+  getBoardSizeType getBoardSize;
+  isDoneType isDone;
   int8_t lossValue;
   int8_t drawValue;
 } Game;
@@ -49,15 +58,6 @@ typedef struct Node {
   Action action;
   uint8_t nChildren;
 } Node;
-
-typedef void (*playActionType)(Board*, Action*);
-typedef bool (*isValidActionType)(Board*, Action*, int);
-typedef int (*getScoreType)(Board*, int);
-typedef void (*getPossibleActionsType)(Board, Action*);
-typedef int (*getNumPossibleActionsType)(void);
-typedef void (*removeActionType)(int, Action*, int);
-typedef int (*getBoardSizeType)(void);
-typedef bool (*isDoneType)(Board*);
 
 mc_real calcUCB(Node* node);
 Node* findMaxUCB(Node* children, unsigned nChildren);
