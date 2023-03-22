@@ -5,11 +5,46 @@
 #include <stdlib.h>
 #include <string.h>
 
-void setup() {
-  // Initialize serial
+void readElement(void* element, const size_t sizeOfElement) {
+  unsigned char* readElement = (unsigned char*)element;
+  for (uint32_t i = 0; i < sizeOfElement; ++i) {
+    while (Serial.available() < 1); // Wait for element
+    Serial.readBytes(&readElement[i], sizeof(unsigned char));
+  }
 }
 
-void loop() {}
+void writeElement(void* element, const size_t sizeOfElement) {
+  while (Serial.availableForWrite() < sizeOfElement); // wait for write
+  Serial.write((unsigned char*)element, sizeOfElement);
+  Serial.flush(); // wait until data is sent
+}
+
+void setup() {
+  // Initialize serial
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Receive size of board
+  uint8_t nbValues;
+  readElement(&nbValues, sizeof(nbValues));
+
+  // Receive board
+  int8_t boardValues[nbValues];
+  for(uint16_t i = 0; i < nbValues; ++i)
+  {
+    readElement(&boardValues[i], sizeof(int8_t));
+  }
+  uint8_t nPlayers;
+  readElement(&nPlayers, sizeof(nPlayers));
+
+  Board board = {boardValues, nPlayers};
+  Game game = {isValidAction, playAction, getScore, getPossibleActions, getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1};
+  Action action = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
+
+  uint8_t action[2] = [action.xPos, action.yPos];
+  writeElement() // TODO!
+}
 
 uint8_t totalLength = 0;
 uint8_t initialBoard[9] = {
@@ -18,7 +53,7 @@ uint8_t initialBoard[9] = {
     5,  2,  1 
 };
 
-Board playAction(Board* board, Action* action) {
+void playAction(Board* board, Action* action) {
   totalLength += board->values[action->xPos * 3 + action->yPos];
   for (uint8_t i = 0; i < 3; ++i) {
     for (uint8_t j = 0; j < 3; ++j) {
