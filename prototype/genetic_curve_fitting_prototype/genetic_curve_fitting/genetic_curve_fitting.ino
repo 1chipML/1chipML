@@ -1,7 +1,4 @@
-extern "C" {
 #include "genetic.h"
-}
-
 #include "arduino_serial_port.h"
 
 // Global variables that are used by the evaluation function
@@ -22,12 +19,12 @@ void setup() {
 }
 
 /**
- * @brief THis function is used to evaluate each solution of coordinates
+ * @brief This function is used to evaluate each solution of coordinates
  * 
  * @param parameters the solution of coefficients that needs to be evaluated
  * @return the fitness of the solution
  */
-float evaluationFunction(float *parameters) {
+const float evaluationFunction(float *parameters) {
 
   float fitness = 0;
   for(unsigned int i = 0 ; i < coordinatesSize ; i++ ){
@@ -77,10 +74,6 @@ void loop() {
 
   // Define the array that stores the best coefficients
   float bestValues[dimensions];
-
-  if (coordinatesX == NULL || coordinatesY == NULL || bestValues == NULL){
-    abort();
-  }
 
   // Read all of the arrays from the serial connection
   readArray(coordinatesSize, coordinatesX, sizeof(*coordinatesX));

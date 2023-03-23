@@ -2,7 +2,7 @@
 
 ## Presentation
 
-The current prototype uses a genetic algorithm to estimate the polynomial equation representing a series of coordinates in order to deteect possibles anomalies in the coordinates.
+The current prototype uses a genetic algorithm to estimate the polynomial equation representing a series of coordinates in order to detect possibles anomalies in the coordinates.
 
 ## Requirements
 
