@@ -51,4 +51,3 @@ geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
 #endif
 
 #endif //GENETIC_H
-

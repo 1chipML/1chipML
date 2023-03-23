@@ -6,7 +6,6 @@ import csv
 import matplotlib.pyplot as plt
 
 
-
 """Use calculated coefficiants to estimate the data point
 
 :param x The x data point to estimate ethe value

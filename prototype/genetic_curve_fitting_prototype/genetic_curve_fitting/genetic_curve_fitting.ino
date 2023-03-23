@@ -101,10 +101,3 @@ void loop() {
   writeFloatArray((dimensions),bestValues);
   
 }
-
-
-
-
-
-
-
