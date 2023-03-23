@@ -1,4 +1,4 @@
-name: Build and Tests
+name: Lint, Build and Tests
 
 on:
   push:
@@ -9,8 +9,9 @@ on:
       - main
 
 jobs:
-  run-tests:
-    name: Run tests
+
+  run-lint-build-tests:
+    name: Run Lint, Build and Tests
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -18,9 +19,13 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
+      
+      - name: Verify linting
+        run: clang-format *.c *.h
 
       - name: Build files
         run: make all 
 
       - name: Run tests
         run: make run_all_tests
+  
