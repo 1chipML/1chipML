@@ -11,7 +11,7 @@ static double getGenericError(int lowerBound, int upperBound,
                 int degree, char* title, double (*actualFunc)(double),
                 fast_sincos_real (*approxFunc)(fast_sincos_real, int), 
                 int verbose);
-static double GetFixedError(char* title, double (*actualFunc)(double),
+static double getFixedError(char* title, double (*actualFunc)(double),
                             fast_sincos_real (*approxFunc)(uint32_t),
                             int verbose);
 
@@ -21,8 +21,8 @@ int main() {
   int isErrorExpected = 1;
 
   printf("Fixed point: \n");
-  isErrorExpected &= GetFixedError("sine", sin, fastFixedSin, verbose) < 9e-05;
-  isErrorExpected &= GetFixedError("cosine", cos, fastFixedCos, verbose) < 9e-05;
+  isErrorExpected &= getFixedError("sine", sin, fastFixedSin, verbose) < 9e-05;
+  isErrorExpected &= getFixedError("cosine", cos, fastFixedCos, verbose) < 9e-05;
   printf("Is error expected? %d\n", isErrorExpected);
 
   int lowerBound = -100;
@@ -114,7 +114,7 @@ getGenericError(int lowerBound, int upperBound, int step, double multFactor,
   return avgAbsoluteError;
 }
 
-static double GetFixedError(char* title, double (*actualFunc)(double),
+static double getFixedError(char* title, double (*actualFunc)(double),
                             fast_sincos_real (*approxFunc)(uint32_t),
                             int verbose) {
   
@@ -122,7 +122,7 @@ static double GetFixedError(char* title, double (*actualFunc)(double),
   double avgAbsoluteError = 0.0;
 
   const uint32_t upperBound = FIXED_2_PI;
-  for (uint32_t i = 0; i < upperBound; i += 20) { // < 2^25
+  for (uint32_t i = 0; i < upperBound; i += 20) {
     double actualInput = (double)i * (2.0 * M_PI) / FIXED_2_PI;
 
     double actual = actualFunc(actualInput);

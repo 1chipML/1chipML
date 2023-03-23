@@ -61,10 +61,11 @@ void setup() {
   iterator = lowerBound;
   while (iterator < upperBound) {
     float input = iterator * factor;
-    uint32_t input2 = input * 2147483648.0 / (2 * M_PI);
+    constexpr float conversionFactor = 2147483648.0 / (2 * M_PI);
+    uint32_t fixedInput = input * conversionFactor;
 
     uint32_t start = micros();
-    x = fastFixedSin(input2);
+    x = fastFixedSin(fixedInput);
     uint32_t stop = micros();
 
     totalTime += stop - start;
@@ -117,10 +118,11 @@ void setup() {
   iterator = lowerBound;
   while (iterator < upperBound) {
     float input = iterator * factor;
-    uint32_t input2 = input * 2147483648.0 / (2 * M_PI);
+    constexpr float conversionFactor = 2147483648.0 / (2 * M_PI);
+    uint32_t fixedInput = input * conversionFactor;
 
     uint32_t start = micros();
-    x = fastFixedCos(input2);
+    x = fastFixedCos(fixedInput);
     uint32_t stop = micros();
 
     totalTime += stop - start;

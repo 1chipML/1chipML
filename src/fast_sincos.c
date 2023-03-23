@@ -106,7 +106,7 @@ fast_sincos_real fastSin(const fast_sincos_real angleRadians, const int degree) 
         clampedAngle = M_PI - clampedAngle;
     }
 
-    // Chose the appropriate approximation depending on the
+    // Choose the appropriate approximation depending on the
     // accepted range.
     fast_sincos_real returnedValue;
     if(clampedAngle < M_PI_4) {
@@ -158,7 +158,7 @@ fast_sincos_real fastCos(const fast_sincos_real angleRadians, const int degree) 
         negativeFactor ^= 1;
     }
 
-    // Chose the appropriate approximation depending on the
+    // Choose the appropriate approximation depending on the
     // accepted range.
     fast_sincos_real returnedValue;
     if(clampedAngle < M_PI_4) {

@@ -8,7 +8,7 @@ static void getGenericError(int lowerBound, int upperBound,
                 int step, double multFactor,
                 int degree, char* title, double (*actualFunc)(double),
                 fast_sincos_real (*approxFunc)(fast_sincos_real, int));
-static void GetFixedError(char* title, double (*actualFunc)(double),
+static void getFixedError(char* title, double (*actualFunc)(double),
                             fast_sincos_real (*approxFunc)(uint32_t));
 
 uint32_t start, stop;
@@ -22,8 +22,8 @@ void setup() {
   delay(10);
 
   Serial.println("Fixed point:");
-  GetFixedError("sine", sin, fastFixedSin);
-  GetFixedError("cosine", cos, fastFixedCos);
+  getFixedError("sine", sin, fastFixedSin);
+  getFixedError("cosine", cos, fastFixedCos);
 
   int lowerBound = -100;
   int upperBound = 100;
@@ -119,7 +119,7 @@ char* title, double(*actualFunc)(double), fast_sincos_real(*approxFunc)(fast_sin
     Serial.println("Max relative error = " + precision);
 }
 
-static void GetFixedError(char* title, double (*actualFunc)(double),
+static void getFixedError(char* title, double (*actualFunc)(double),
                             fast_sincos_real (*approxFunc)(uint32_t)) {
   
   double maxAbsoluteError = 0.0;
