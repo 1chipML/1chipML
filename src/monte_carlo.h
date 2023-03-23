@@ -30,8 +30,8 @@ typedef struct {
 typedef void (*playActionType)(Board*, Action*);
 typedef bool (*isValidActionType)(Board*, Action*, int);
 typedef int (*getScoreType)(Board*, int);
-typedef void (*getPossibleActionsType)(Board, Action*);
-typedef int (*getNumPossibleActionsType)(Board);
+typedef void (*getPossibleActionsType)(Board*, Action*);
+typedef int (*getNumPossibleActionsType)(Board*);
 typedef void (*removeActionType)(int, Action*, int);
 typedef int (*getBoardSizeType)(void);
 typedef bool (*isDoneType)(Board*);

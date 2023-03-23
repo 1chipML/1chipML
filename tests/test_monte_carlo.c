@@ -13,19 +13,19 @@ void playAction(Board* board, Action* action) {
 
 static bool isValidAction(Board* board, Action* action, int player) {
   if (action->player == player &&
-      board->values[action->xPos * 3 + action->yPos] == 0) {
-    return 1;
+      board->values[action->xPos * BOARD_LENGTH + action->yPos] == 0) {
+    return true;
   }
-  return 0;
+  return false;
 }
 
-void getPossibleActions(Board board, Action possibleActions[]) {
+void getPossibleActions(Board* board, Action* possibleActions) {
   int nActions = 0;
   int player = 1;
   for (int x = 0; x < BOARD_LENGTH; ++x) {
     for (int y = 0; y < BOARD_LENGTH; ++y) {
-      if (board.values[x * BOARD_LENGTH + y] == 0) {
-        for (int i = 0; i < board.nPlayers; ++i) {
+      if (board->values[x * BOARD_LENGTH + y] == 0) {
+        for (int i = 0; i < board->nPlayers; ++i) {
           possibleActions[nActions].player = player;
           possibleActions[nActions].xPos = x;
           possibleActions[nActions].yPos = y;
@@ -37,22 +37,20 @@ void getPossibleActions(Board board, Action possibleActions[]) {
   }
 }
 
-static int getNumPossibleActions(Board board) {
+static int getNumPossibleActions(Board* board) {
   int nActions = 0;
-  for (int x = 0; x < BOARD_LENGTH; ++x) {
-    for (int y = 0; y < BOARD_LENGTH; ++y) {
-      if (board.values[x * BOARD_LENGTH + y] == 0) {
-        nActions++;
-      }
+  for (int i = 0; i < BOARD_LENGTH * BOARD_LENGTH; ++i) {
+    if (board->values[i] == 0) {
+      nActions++;
     }
   }
-  return nActions * board.nPlayers;
+  return nActions * board->nPlayers;
 }
 
-static int getBoardSize() { return 9; }
+static int getBoardSize() { return BOARD_SIZE + 1; }
 
 static bool isDone(Board* board) {
-  for (int i = 0; i < 9; ++i) {
+  for (int i = 0; i < BOARD_SIZE + 1; ++i) {
     if (board->values[i] == 0) {
       return false;
     }
@@ -82,8 +80,9 @@ int getScore(Board* board, int player) {
   }
   // Check columns
   for (int i = 0; i < BOARD_LENGTH; i++) {
-    if (board->values[i] == player && board->values[i + BOARD_LENGTH] == player &&
-        board->values[i + 6] == player) {
+    if (board->values[i] == player &&
+        board->values[i + BOARD_LENGTH] == player &&
+        board->values[i + 2 * BOARD_LENGTH] == player) {
       int nPlays = 0;
       for (int j = 0; j < 9; ++j) {
         if (board->values[j] == player) {
@@ -97,7 +96,7 @@ int getScore(Board* board, int player) {
   if ((board->values[0] == player && board->values[4] == player &&
        board->values[8] == player) ||
       (board->values[2] == player && board->values[4] == player &&
-          board->values[6] == player)) {
+       board->values[6] == player)) {
     int nPlays = 0;
     for (int j = 0; j < 9; ++j) {
       if (board->values[j] == player) {
@@ -124,15 +123,21 @@ void removeAction(int randomActionIdx, Action* possibleActions,
 
 int testMC(int minSimulation, int maxSimulation, int targetScore) {
   Board board;
-  board.values = calloc(9, sizeof(int));
+  board.values = calloc(9, sizeof(uint8_t));
   board.values[0] = 1;
   board.values[1] = 1;
   board.nPlayers = 2;
 
-  Game game = {
-      isValidAction,         playAction,   getScore,     getPossibleActions,
-      getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1
-  };
+  Game game = {isValidAction,
+               playAction,
+               getScore,
+               getPossibleActions,
+               getNumPossibleActions,
+               removeAction,
+               getBoardSize,
+               isDone,
+               0,
+               1};
 
   Action action =
       mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
@@ -141,8 +146,9 @@ int testMC(int minSimulation, int maxSimulation, int targetScore) {
     printf("Success : %s()\n", __func__);
     return 0;
   } else {
-    printf("Fail : %s(), expected best action to be: Player: %d, [%d, %d]\n",
-           __func__, 1, 0, 2);
+    printf("Fail : %s(), returned best action: Player: %d [%d, %d], expected "
+           "best action to be: Player: %d, [%d, %d]\n",
+           __func__, action.player, action.xPos, action.yPos, 1, 0, 2);
     return 1;
   }
 }

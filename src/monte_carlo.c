@@ -63,9 +63,7 @@ void createChild(Node* child, Node* node, Action* action) {
 }
 
 void copyBoard(Game* game, Board* board, Board* copiedBoard) {
-  for (int i = 0; i < game->getBoardSize(); ++i) {
-    copiedBoard->values[i] = board->values[i];
-  }
+  memcpy(copiedBoard->values, board->values, game->getBoardSize() * sizeof(board->values[0]));
   copiedBoard->nPlayers = board->nPlayers;
 }
 
@@ -83,9 +81,9 @@ void expandLeaf(Node* node, Game game, Board* board) {
     return;
   }
 
-  int nPossibleActions = game.getNumPossibleActions(*board);
+  int nPossibleActions = game.getNumPossibleActions(board);
   Action possibleActions[nPossibleActions];
-  game.getPossibleActions(*board, possibleActions);
+  game.getPossibleActions(board, possibleActions);
 
   int nValidActions = 0;
   for (unsigned i = 0; i < nPossibleActions; i++) {
@@ -133,9 +131,9 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
   simulationBoard.values = malloc(game->getBoardSize() * sizeof(int8_t));
   copyBoard(game, board, &simulationBoard);
 
-  int nPossibleActions = game->getNumPossibleActions(simulationBoard);
+  int nPossibleActions = game->getNumPossibleActions(&simulationBoard);
   Action possibleActions[nPossibleActions];
-  game->getPossibleActions(simulationBoard, possibleActions);
+  game->getPossibleActions(&simulationBoard, possibleActions);
 
   // Random playout
   while (nPossibleActions > 0) {
