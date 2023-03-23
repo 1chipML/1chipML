@@ -19,7 +19,7 @@ def predict(x,parameters,limits, polynomialDegree):
   val = 0
   
   for i in range(polynomialDegree+1):
-    val += parameters[i] * limits[i] * pow(x,i)
+    val += (parameters[i] - 0.5) * 2 * limits[i] * pow(x,i)
   
   return val
 
@@ -78,12 +78,15 @@ def main():
       coordinatesSize+=1
 
   # All of these values are sent to the Arduino and control the execution of the genetic algorithm
+
   minCoordinates = 3
   epsilon = 0.
   mutationRate = 0.1
   populationSize = 50
   tourneySize = 5
   maxIterations = 5
+  
+  # The absolute limits of each coefficient (must be positive)
   limits = [1.,1.,1.]
   polynomialDegree = 2
   cutoffValue =  10.0
@@ -112,7 +115,10 @@ def main():
     _,bestValues =  getResults(port,polynomialDegree)
     
     # We exclude a point if it is very far from the predicted value
-    if (abs(predict(testXCoordinates[minCoordinates], bestValues, limits, polynomialDegree) - testYCoordinates[minCoordinates]) > cutoffValue):
+    
+    prediction = predict(testXCoordinates[minCoordinates], bestValues, limits, polynomialDegree)
+    
+    if (min(abs(prediction - testYCoordinates[minCoordinates]), abs((prediction - testYCoordinates[minCoordinates]) / testYCoordinates[minCoordinates] * 100) ) > cutoffValue):
         anomaly_listX.append(testXCoordinates[minCoordinates])
         anomaly_listY.append(testYCoordinates[minCoordinates])
         testXCoordinates.pop(minCoordinates)
@@ -128,7 +134,7 @@ def main():
   ax1.scatter(testXCoordinates, testYCoordinates, c='b')
   ax1.scatter(anomaly_listX, anomaly_listY, c='r')
   
-  line_x = np.array(testXCoordinates)
+  line_x = np.sort(np.array(testXCoordinates+anomaly_listX))
   line_y = list()
 
   for x in line_x:
