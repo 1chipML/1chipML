@@ -19,31 +19,51 @@ void writeElement(void* element, const size_t sizeOfElement) {
   Serial.flush(); // wait until data is sent
 }
 
+// Test
+int led = 9;         // the PWM pin the LED is attached to
+int brightness = 0;  // how bright the LED is
+int fadeAmount = 5;  // how many points to fade the LED by
+// Test
+
 void setup() {
   // Initialize serial
   Serial.begin(9600);
+
+  // Test
+  // pinMode(LED_BUILTIN, OUTPUT);  
+  // Test
 }
 
 void loop() {
+  // Test
+  // digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+  // delay(1000);                      // wait for a second
+  // digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+  // delay(1000);                      // wait for a second
+  // Test
+
+
   // Receive size of board
   uint8_t nbValues;
   readElement(&nbValues, sizeof(nbValues));
 
   // Receive board
   int8_t boardValues[nbValues];
-  for(uint16_t i = 0; i < nbValues; ++i)
+  for(uint8_t i = 0; i < nbValues; ++i)
   {
     readElement(&boardValues[i], sizeof(int8_t));
   }
   uint8_t nPlayers;
   readElement(&nPlayers, sizeof(nPlayers));
 
+
   Board board = {boardValues, nPlayers};
   Game game = {isValidAction, playAction, getScore, getPossibleActions, getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1};
-  Action action = mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
+  // Action action = mcGame(board, 1, game, 1, 1, 10); // TODO: Fix this: When number of simulations is higher than 2, doesn't work anymore
+  Serial.println("Received all elements!\n");
 
-  uint8_t action[2] = [action.xPos, action.yPos];
-  writeElement() // TODO!
+  // uint8_t action[2] = [action.xPos, action.yPos];
+  // writeElement() // TODO!
 }
 
 uint8_t totalLength = 0;
