@@ -666,7 +666,7 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
       createNextGeneration(population, nextGeneration, populationFitness,
                            generationSize, parameterCount, tourneySize,
                            averageMutationsPerChromosone);
-      
+
       replacePopulation(population, nextGeneration, bestValues,
                         secondBestValues, childArraySize, parameterCount);
 
@@ -685,10 +685,9 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
           population, nextGeneration, evaluationFunction, generationSize,
           parameterCount, tourneySize, averageMutationsPerChromosone);
 
-
-
       replacePopulation(population, nextGeneration, bestValues,
                         secondBestValues, childArraySize, parameterCount);
+
       if (bestFit <= epsilon) {
         break;
       }
