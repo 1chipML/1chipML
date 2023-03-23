@@ -5,7 +5,7 @@
 #include <string.h>
 
 /**
- * This method calculates the UCB value for a node.
+ * @brief This method calculates the UCB value for a node.
  * @param node The node for which the UCB is calculated.
  * @return The UCB value of the node.
  */
@@ -18,7 +18,7 @@ mc_real calcUCB(Node* node) {
 }
 
 /**
- * This method finds the node with the maximum UCB value among all children.
+ * @brief This method finds the node with the maximum UCB value among all children.
  * @param children The array of children from which the max UCB value is
  * determined.
  * @param nChildren The number of children.
@@ -35,7 +35,7 @@ Node* findMaxUCB(Node* children, unsigned nChildren) {
 }
 
 /**
- * This method selects the next node to expand from the current nodes' children.
+ * @brief This method selects the next node to expand from the current nodes' children.
  * @param node The current node from which the next node is selected.
  * @return The selected node.
  */
@@ -62,8 +62,13 @@ void createChild(Node* child, Node* node, Action* action) {
   child->nChildren = 0;
 }
 
+void copyBoard(Game* game, Board* board, Board* copiedBoard) {
+  memcpy(copiedBoard->values, board->values, game->getBoardSize() * sizeof(board->values[0]));
+  copiedBoard->nPlayers = board->nPlayers;
+}
+
 /**
- * This method expands the leaf of the current action tree
+ * @brief This method expands the leaf of the current action tree
  * @param node The current leaf to expand.
  * @param player The current player.
  * @param game The definition of the game played, the environment in which the
@@ -72,13 +77,13 @@ void createChild(Node* child, Node* node, Action* action) {
 void expandLeaf(Node* node, Game game, Board* board) {
   // Do not expand leaf if it is a terminal node
   if ((game.getScore(board, node->action.player) > game.drawValue) ||
-      game.isDone(board)) { // TODO change this (the 1) so that is set by user
+      game.isDone(board)) {
     return;
   }
 
-  int nPossibleActions = game.getNumPossibleActions(*board);
+  int nPossibleActions = game.getNumPossibleActions(board);
   Action possibleActions[nPossibleActions];
-  game.getPossibleActions(*board, possibleActions);
+  game.getPossibleActions(board, possibleActions);
 
   int nValidActions = 0;
   for (unsigned i = 0; i < nPossibleActions; i++) {
@@ -89,7 +94,7 @@ void expandLeaf(Node* node, Game game, Board* board) {
 
   // Deep copy of parent
   node->children =
-      (struct Node*)malloc(nValidActions * sizeof(node->children[0]));
+      malloc(nValidActions * sizeof(Node));
 
   nValidActions = 0;
   for (unsigned i = 0; i < nPossibleActions; ++i) {
@@ -102,7 +107,7 @@ void expandLeaf(Node* node, Game game, Board* board) {
 }
 
 /**
- * This method executes a complete random playout of actions.
+ * @brief This method executes a complete random playout of actions.
  * @param node The root node from which the episode is played out.
  * @param player The current player.
  * @param game The definition of the game played, the environment in which the
@@ -124,14 +129,11 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
   // Deep copy of board
   Board simulationBoard;
   simulationBoard.values = malloc(game->getBoardSize() * sizeof(int8_t));
-  for (int i = 0; i < game->getBoardSize(); ++i) {
-    simulationBoard.values[i] = board->values[i];
-  }
-  simulationBoard.nPlayers = board->nPlayers;
+  copyBoard(game, board, &simulationBoard);
 
-  int nPossibleActions = game->getNumPossibleActions(simulationBoard);
+  int nPossibleActions = game->getNumPossibleActions(&simulationBoard);
   Action possibleActions[nPossibleActions];
-  game->getPossibleActions(simulationBoard, possibleActions);
+  game->getPossibleActions(&simulationBoard, possibleActions);
 
   // Random playout
   while (nPossibleActions > 0) {
@@ -163,7 +165,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
 }
 
 /**
- * This method backpropagates the result of the playout to the root of the
+ * @brief This method backpropagates the result of the playout to the root of the
  * action tree.
  * @param node The leaf node from which the backpropagation begins.
  * @param score The score to backpropagate.
@@ -183,7 +185,7 @@ void backpropagate(Node* node, int score) {
 }
 
 /**
- * This method frees the memory used during the Monte Carlo algorithm.
+ * @brief This method frees the memory used during the Monte Carlo algorithm.
  * @param node The root node from which the function starts freeing the memory.
  */
 void freeMCTree(Node* node) {
@@ -195,7 +197,7 @@ void freeMCTree(Node* node) {
 }
 
 /**
- * This method executes the Monte Carlo algorithm.
+ * @brief This method executes the Monte Carlo algorithm.
  * @param board The board used for the game.
  * @param player The current player.
  * @param game The definition of the game played, the environment in which the
@@ -222,10 +224,7 @@ Action mcGame(Board board, int player, Game game, int minSim, int maxSim,
   while ((node.nVisits < minSim ||
           calcUCB(findMaxUCB(node.children, node.nChildren)) < goalValue) &&
          node.nVisits <= maxSim) {
-    for (int i = 0; i < game.getBoardSize(); ++i) {
-      tempBoard.values[i] = board.values[i];
-    }
-    tempBoard.nPlayers = board.nPlayers;
+    copyBoard(&game, &board, &tempBoard);
     Node* selectedNode = selectChildren(&node, &tempBoard, &game);
     expandLeaf(selectedNode, game, &tempBoard);
     int score = mcEpisode(selectedNode, player, &game, &tempBoard);
