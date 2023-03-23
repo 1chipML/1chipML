@@ -10,10 +10,7 @@ def predict(x,parameters):
 
 def sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port):
   
-  
   port.write(struct.pack('<H',minCoordinates))
-  
-  
   
   for x in testXCoordinates[:minCoordinates]:
     x = float(x)
@@ -22,19 +19,18 @@ def sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port):
   for y in testYCoordinates[:minCoordinates]:
     port.write(struct.pack('<f',float(y)))
     
-
+def sendLimits(limits,port):
+    for x in limits:
+      port.write(struct.pack('<f',x))
+  
 def getResults(port,polynomialDegree):
   fitness = struct.unpack('<f',port.read(4))[0]
 
-  print(fitness)
-
-
   values = list()
-  for x in range(polynomialDegree+1):
+  for _ in range(polynomialDegree+1):
     value = struct.unpack('<f',port.read(4))[0]
     values.append(value)
 
-  print(values)
   return fitness,values
 
 
@@ -51,16 +47,13 @@ def main():
       testXCoordinates.append(float(row[0]))
 
   minCoordinates = 3
-  coordinatesSize = 50
+  coordinatesSize = 30
   epsilon = 0.
   mutationRate = 0.1
   populationSize = 50
   tourneySize = 5
-  maxIterations = 10
-  limits = [8.,1.]
-
-
-
+  maxIterations = 5
+  limits = [1.,1.,1.]
   polynomialDegree = 2
   cutoffValue =  10.0
 
@@ -72,36 +65,26 @@ def main():
   anomaly_listY = list()
 
   while (minCoordinates < coordinatesSize):
-    
-    
-
     port.write(struct.pack('<f',epsilon))
     port.write(struct.pack('<f',mutationRate))
     port.write(struct.pack('<H',populationSize))
     port.write(struct.pack('<H',tourneySize))
-
     port.write(struct.pack('<H',maxIterations))
     port.write(struct.pack('<H',polynomialDegree))
 
-    
-
-    sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port)
-    
+    sendCoordinates(testXCoordinates,testYCoordinates,minCoordinates,port)   
+    sendLimits(limits,port)
     
     
-    
-    
-    fitness,bestValues =  getResults(port,polynomialDegree)
+    _,bestValues =  getResults(port,polynomialDegree)
     if (abs(predict(testXCoordinates[minCoordinates],bestValues) - testYCoordinates[minCoordinates]) > cutoffValue):
         anomaly_listX.append(testXCoordinates[minCoordinates])
         anomaly_listY.append(testYCoordinates[minCoordinates])
         testXCoordinates.pop(minCoordinates)
         testYCoordinates.pop(minCoordinates)
         coordinatesSize-=1
-    minCoordinates+=1
-
-  print(anomaly_listX)
-  print(anomaly_listY)
+    else:
+      minCoordinates+=1
 
   port.close()
 
@@ -109,15 +92,22 @@ def main():
   ax1 = fig.add_subplot(111)
   ax1.scatter(testXCoordinates, testYCoordinates, c='b')
   ax1.scatter(anomaly_listX, anomaly_listY, c='r')
-  line_x = np.array(testXCoordinates + anomaly_listX)
+  
+  line_x = np.array(testXCoordinates)
   line_y = list()
 
   for x in line_x:
     line_y.append(predict(x,bestValues))
 
-  print(line_x)
-  print(bestValues)
-  print(line_y)
+  print("The final equation is:")
+  
+  equation=""
+  exponent = 0
+  for val in bestValues:
+    equation += str(val*limits[exponent])
+    equation += "x^" + str(exponent) + " "
+    exponent += 1     
+  print(equation)
 
   plt.plot(line_x, line_y)
   plt.show()
