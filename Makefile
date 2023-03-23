@@ -6,7 +6,6 @@ CFLAGS += -g # adds debugging information
 CFLAGS += -Wall # turns on most compiler warnings
 CFLAGS += -std=c99# C99
 CFLAGS += -I./src # included header files
-CFLAGS += -O0
 # loaded libraries
 LDLIBS += -lm # Math library
 
