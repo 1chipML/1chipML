@@ -364,7 +364,7 @@ static void createNextGeneration(genetic_int* population,
     encode(mergedParents2, parent2, dimensions);
 
     createChildren(mergedParents1, mergedParents2, firstChildString,
-                  secondChildString, dimensions);
+                   secondChildString, dimensions);
 
     // We apply the mutation operator to both children
     mutate(firstChildString, mergedParentsLength, averageNumberOfMutations);
@@ -375,7 +375,6 @@ static void createNextGeneration(genetic_int* population,
                       firstChildString, dimensions);
     decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
                       secondChildString, dimensions);
-    currentNextGenerationSize++;
   }
 }
 
@@ -661,7 +660,6 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
                                bestValues, evaluationFunction, secondBestValues,
                                &secondBestFitness, parameterCount,
                                generationSize);
-      
 
       createNextGeneration(population, nextGeneration, populationFitness,
                            generationSize, parameterCount, tourneySize,
