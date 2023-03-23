@@ -1,5 +1,3 @@
-
-
 extern "C" {
 #include "genetic.h"
 }

@@ -40,14 +40,16 @@ def getResults(port,polynomialDegree):
 def main():
   testYCoordinates = list()
   testXCoordinates = list()
+  coordinatesSize = 0 
+  
   with open("test3.csv", 'r') as file:
     csvreader = csv.reader(file)
     for row in csvreader:
       testYCoordinates.append(float(row[1]))
       testXCoordinates.append(float(row[0]))
+      coordinatesSize+=1
 
   minCoordinates = 3
-  coordinatesSize = 30
   epsilon = 0.
   mutationRate = 0.1
   populationSize = 50
