@@ -309,7 +309,42 @@ Work in progress.
 
 \subsection{The genetic approach}
 
-Work in progress.
+The genetic algorithm is a probabilistic global optimization metaheuristic. That means that it can be used to optimize solutions with many local optimums.
+It does this by simulating the genetic evolution of a population. The algorithm consists of a sequence of operations that can be run continuously until a solution
+presenting a sufficient accuracy has been created.
+
+
+\begin{enumerate}
+   \item The first step is to randomly initialize a population of solutions
+   \item We then evaluate all of the solutions present in the population and the algorithm returns a solution if its fitness value is small enough
+   \item Each set of parents for the next generation are chosen based off of a tourney approach (a fixed amount of solutions are randomly selected and the best two solutions are
+   chosen to be parents)
+   \item Each parent is then encoded into a table (Each parameter is condensed together to form a string)
+   \item Two children are then created by a uniform crossover method between both encoded parents
+   \item Each child then has a chance to have one value of its table mutated
+   \item The two children are then decoded and added to the next generation
+   \item Steps 3-7 are repeated until the next generation is the same size as the original generation
+   \item The original generation is replaced by the new generation
+   \item Steps 2-9 are repeated until a certain amount of generations has been created or a valid solution has been found.
+   \item The best solution is returned
+\end{enumerate}
+
+There are many methods for selecting the parents. One of the most popular methods is the roulette wheel solution where a solutions chance of being chosen is decided by its fitness
+divided by the sum of the fitnesses of the whole population. Another popular approach is the tournament selection where we randomly select a certain amount of solutions and pick the two
+with the best fitness. There are also many crossover approaches. The one we have chosen is a uniform crossover that means that each character of the encoded parents has an equal chance
+to be present in a child. The simplest approach is a one-point crossover in which an index is chosen for both parents and both encoded arrays representing the parents
+are swapped around those points to create the children.
+
+
+Genetic algorithms present a few problems such as premature convergence. This means that the algorithm can sometimes converge towards a point which is not the global
+optimum. We have implemented a variant of the genetic algorithm called "elitist selection" in order to reduce the likelihood of this happening. This means that the best solutions from a population are directly transferred
+to the next generations without undergoing any genetic operations. This algorithm is not guaranteed to find the global optimum but will generally head in the good direction. They can also consume a lot of memory in order to store all of the population
+and the fitnesses which is why we have also developed a low-memory version of this algorithm where the fitnesses are not stored and are calculated each time they are needed.
+This slows down the execution time but can let us initialize larger populations which could mean better solutions.
+
+
+
+
 
 \section{Numerical derivation and integration}
 
@@ -380,7 +415,54 @@ where $x_i \in V_j$.
 Work in progress.
 \subsection{The Jacobi method}
 
-Work in progress.
+The Jacobi method is an iterative algorithm for approximating the eigenvalues and eigenvectors of a symmetrical matrix. \\
+
+It works by applying multiple orthogonal similarity transformations to the original matrix. These transformations, called \textit{Jacobi} rotations are chosen so that, over time, the sum of the squares of the off-diagonal elements is minimized. The algorithm accumulates these transformations until the resulting matrix is diagonal. The product of all transformations gives then the eigenvectors of the matrix. \\
+
+The algorithm starts by choosing an element to annihilate. To choose that algorithm, two variants are given in the library. First, the \textit{cyclic Jacobi method} chooses the elements in the order that they are given in the matrix starting with the first off diagonal element ($S_{0,1}$, $S_{0,2}$, ...). The other variant simply chooses the element that has the highest absolute value in the matrix. \\
+
+Once the element $a_{pq}$ to annihilate is chosen, a rotation matrix $P_{pq}$ is then created using the following formulas :
+\begin{align*}
+    \tau &= \frac{a_{qq} - a_{pp}}{2a_{pq}} \\
+    t &= -\tau +/- \sqrt{1 - \tau^2}
+\end{align*}
+Then, choosing the root with the biggest absolute value :
+\begin{align*}
+    c &= \frac{1}{\sqrt{1 + t^2}}, \; \; s = ct \\
+    P_{pq} &=
+        \begin{bmatrix}
+            1 & & & & & & \\
+            & \ldots & & & & & \\
+            & & c & \ldots & s & \\
+            & & \vdots & 1 & \vdots & \\
+            & & -s & \ldots & c & \\
+            & & & & & \ldots & \\
+            & & & & & & 1 \\
+        \end{bmatrix}
+\end{align*}
+
+Once the matrix $P_{pq}$ is computed, the element can be annihilated by multiplying $P_{pq}$ with the input matrix $A$. The algorithm is be described in the following pseudo-code where $A$ is the input matrix: \\
+
+\begin{algorithm}
+  \caption{Jacobi Algorithm}
+  \begin{algorithmic}[1]
+    \State $V \gets \text{Identity Matrix}$
+    \For{$i = 0; i \leq \text{numberOfIterations}; i++$}
+        \State $p, q \gets \text{chooseElementToAnnihilate()}$ \Comment{Cyclic or classical method}
+        \State $P_{pq} \gets \text{createRotationMatrix(p, q)}$
+        \State $A \gets P_{pq}^{T} \cdot A \cdot P_{pq}$
+        \State $V \gets V \cdot P_{pq}$
+    \EndFor
+    \Comment{V will contain the eigenvectors and A the eigenvalues}
+  \end{algorithmic}
+\end{algorithm}
+
+Multiple optimizations are made in the library to take into account the machine's precision. To do that, the concept of a \textit{sweep} is defined. Given a matrix of size $n$ x $n$, a \textit{sweep} is defined as $n (n - 1) / 2$ Jacobi rotations. To optimize the algorithm to skip useless rotations, in the first three sweeps, the rotation matrix is carried out only if :
+\begin{align*}
+    |a_{pq}| &> \frac{1}{5}\frac{\sum_{r<s}|a_{rs}|}{n^2}
+\end{align*}
+After that, the algorithm sets $a_{pq}$ to 0 if $|a_{pq}| < 10^{-(D+2)}|a_{pp}|$ and $|a_{pq}| < 10^{-(D+2)}|a_{qq}|$ where D is the machine's precision (number of decimal digits).
+
 \subsection{The Lanczos method}
 
 The lanczos method is an iterative algorithm for approximating the eigenvalues and eigenvectors of a symmetrical, sparse matrix.

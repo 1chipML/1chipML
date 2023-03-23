@@ -1,6 +1,7 @@
 /* This file is part of the 1chipML library. */
 
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,7 +12,7 @@
 #define lcrg_real double
 
 /* Functions are defined below */
-void set_linear_congruential_generator_seed(int num);
-lcrg_real linear_congruential_random_generator(void);
+void set_linear_congruential_generator_seed(uint16_t num);
+lcrg_real linear_congruential_random_generator();
 
 /* -- End of file -- */
