@@ -6,7 +6,7 @@ CFLAGS += -g # adds debugging information
 CFLAGS += -Wall # turns on most compiler warnings
 CFLAGS += -std=c99# C99
 CFLAGS += -I./src # included header files
-CFLAGS += -O0
+
 # loaded libraries
 LDLIBS += -lm # Math library
 
@@ -27,7 +27,7 @@ poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interp
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
-	$(CC) $(CFLAGS) $^  -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 FFT: ./$(TEST_FOLDER)/test_FFT.c ./src/FFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
