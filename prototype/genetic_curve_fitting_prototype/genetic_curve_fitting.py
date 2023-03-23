@@ -68,7 +68,7 @@ def curveFitting():
   coordinatesSize = 0 
   
   #This can be modifieed to read another set of co  ordinates
-  with open("test3.csv", 'r') as file:
+  with open("data.csv", 'r') as file:
     csvreader = csv.reader(file)
     for row in csvreader:
       yCoordinates.append(float(row[1]))

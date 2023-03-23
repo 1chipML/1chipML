@@ -24,7 +24,7 @@ void setup() {
  * @param parameters the solution of coefficients that needs to be evaluated
  * @return the fitness of the solution
  */
-const float evaluationFunction(float *parameters) {
+float evaluationFunction(const float *parameters) {
 
   float fitness = 0;
   for(unsigned int i = 0 ; i < coordinatesSize ; i++ ){
