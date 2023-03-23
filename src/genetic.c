@@ -211,16 +211,8 @@ static void mutate(char* gene, const unsigned int geneLength,
 
   for (unsigned int i = 0; i < numberOfMutations; i++) {
 
-
-    const double random =  abs(linear_congruential_random_generator());
-    if (random < 0){
-        abort();
-
-    }
     const unsigned int mutatedIndex =
-        random * (geneLength - 1);
-
-    
+        linear_congruential_random_generator() * (geneLength - 1);
 
     // We then generate a number between 0 and 9 to replace the chosen digit
     unsigned int newValue = linear_congruential_random_generator() * 10;
@@ -232,7 +224,6 @@ static void mutate(char* gene, const unsigned int geneLength,
 
     // Converts int to char
     gene[mutatedIndex] = intDigitToChar(newValue);
-    
   }
 }
 
@@ -262,7 +253,6 @@ static void decodeAndAddChild(genetic_int* nextGeneration,
     genetic_int value = atoi(parameter);
 
     nextGeneration[basePositionning + i] = value;
-
   }
   (*nextGenerationSize)++;
   basePositionning++;
@@ -380,15 +370,13 @@ static void createNextGeneration(genetic_int* population,
     mutate(firstChildString, mergedParentsLength, averageNumberOfMutations);
     mutate(secondChildString, mergedParentsLength, averageNumberOfMutations);
 
-    // // We decode both children and add them to the next generation
-    // decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
-    //                   firstChildString, dimensions);
-    // decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
-    //                   secondChildString, dimensions);
+    // We decode both children and add them to the next generation
+    decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
+                      firstChildString, dimensions);
+    decodeAndAddChild(nextGeneration, &currentNextGenerationSize,
+                      secondChildString, dimensions);
     currentNextGenerationSize++;
-
   }
-
 }
 
 /**
@@ -667,7 +655,6 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
 
     genetic_real populationFitness[generationSize];
 
-
     for (unsigned int i = 0; i < maximumIterationCount; i++) {
 
       calculateAndStoreFitness(population, populationFitness, &bestFit,
@@ -677,15 +664,11 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
       
 
       createNextGeneration(population, nextGeneration, populationFitness,
-                           generationSize, parameterCount , tourneySize,
+                           generationSize, parameterCount, tourneySize,
                            averageMutationsPerChromosone);
       
-      
-
       replacePopulation(population, nextGeneration, bestValues,
                         secondBestValues, childArraySize, parameterCount);
-
-      
 
       if (bestFit <= epsilon) {
         break;
@@ -709,7 +692,6 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
       if (bestFit <= epsilon) {
         break;
       }
-
     }
   }
 
