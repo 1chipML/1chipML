@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Verify linting
-        run: clang-format *.c *.h
+        run: find ./ -iname *.c -o -iname *.h  -path ./prototype -prune | xargs clang-format --dry-run --Werror
 
       - name: Build files
         run: make all 
