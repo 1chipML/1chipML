@@ -19,30 +19,12 @@ void writeElement(void* element, const size_t sizeOfElement) {
   Serial.flush(); // wait until data is sent
 }
 
-// Test
-int led = 9;         // the PWM pin the LED is attached to
-int brightness = 0;  // how bright the LED is
-int fadeAmount = 5;  // how many points to fade the LED by
-// Test
-
 void setup() {
   // Initialize serial
   Serial.begin(9600);
-
-  // Test
-  // pinMode(LED_BUILTIN, OUTPUT);  
-  // Test
 }
 
 void loop() {
-  // Test
-  // digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-  // delay(1000);                      // wait for a second
-  // digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
-  // delay(1000);                      // wait for a second
-  // Test
-
-
   // Receive size of board
   uint8_t nbValues;
   readElement(&nbValues, sizeof(nbValues));
@@ -59,11 +41,34 @@ void loop() {
 
   Board board = {boardValues, nPlayers};
   Game game = {isValidAction, playAction, getScore, getPossibleActions, getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1};
-  // Action action = mcGame(board, 1, game, 1, 1, 10); // TODO: Fix this: When number of simulations is higher than 2, doesn't work anymore
-  Serial.println("Received all elements!\n");
+  Action action = mcGame(board, 1, game, 10, 48, 10); 
+  Serial.println(action.xPos);
+  Serial.println(action.yPos);
 
+
+  // Return best action
   // uint8_t action[2] = [action.xPos, action.yPos];
-  // writeElement() // TODO!
+  writeElement(&action.xPos, sizeof(uint8_t)); 
+  writeElement(&action.yPos, sizeof(uint8_t)); 
+  Serial.println(freeMemory());
+}
+
+#ifdef __arm__
+// should use uinstd.h to define sbrk but Due causes a conflict
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
+
+int freeMemory() {
+  char top;
+#ifdef __arm__
+  return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
+  return &top - __brkval;
+#else  // __arm__
+  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
+#endif  // __arm__
 }
 
 uint8_t totalLength = 0;
@@ -119,11 +124,11 @@ static bool isValidAction(Board* board, Action* action, int player) {
   return 0;
 }
 
-void getPossibleActions(Board board, Action possibleActions[]) {
+void getPossibleActions(Board* board, Action* possibleActions) {
   int nActions = 0;
   for (int x = 0; x < 3; ++x) {
     for (int y = 0; y < 3; ++y) {
-      if (board.values[x * 3 + y] != -1) {
+      if (board->values[x * 3 + y] != -1) {
         possibleActions[nActions].player = 0;
         possibleActions[nActions].xPos = x;
         possibleActions[nActions].yPos = y;
@@ -133,7 +138,7 @@ void getPossibleActions(Board board, Action possibleActions[]) {
   } 
 }
 
-static int getNumPossibleActions(Board board) {
+static int getNumPossibleActions() {
   return 8;
 }
 
