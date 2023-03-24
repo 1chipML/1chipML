@@ -3,8 +3,8 @@
 
 // Global variables that are used by the evaluation function
 float* coordinatesY;
-float*  coordinatesX;
-float*  limits;  
+float* coordinatesX;
+float* limits;  
   
 unsigned int coordinatesSize;
 unsigned int polynomialDegree;
@@ -31,10 +31,10 @@ float evaluationFunction(const float *parameters) {
 
     float sum = 0;      
     for (unsigned int j = 0 ; j <= polynomialDegree ; j++){
-      sum += limits[j]*((parameters[j]- 0.5) * 2) * pow(coordinatesX[i],j);
+      sum += limits[j] * ((parameters[j]- 0.5) * 2) * pow(coordinatesX[i],j);
     }
     sum = fabs(sum - coordinatesY[i]);     
-    fitness+=sum;
+    fitness += sum;
   }
    return  fabs(fitness) ;
 }
@@ -69,7 +69,7 @@ void loop() {
 
   // We make sure each of the limits are positive
   for (unsigned int i = 0 ; i < dimensions; i++){
-    limits[i] = abs(limits[i]);
+    limits[i] = fabs(limits[i]);
   }
 
   // Define the array that stores the best coefficients
