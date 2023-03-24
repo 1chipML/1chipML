@@ -31,13 +31,15 @@ int openSerialPort(serialPort_t* serialPort) {
     return 1;
   }
 
-  serialPort->fileDescriptor = open(serialPort->serialPortName, O_RDWR | O_NOCTTY | O_SYNC);
+  serialPort->fileDescriptor =
+      open(serialPort->serialPortName, O_RDWR | O_NOCTTY | O_SYNC);
   if (serialPort->fileDescriptor < 0) {
     printf("Error %i from open: %s\n", errno, strerror(errno));
     return 1;
   }
 
-  int setupReturnCode = setupSerialPort(serialPort->fileDescriptor, convertedBaudRate);
+  int setupReturnCode =
+      setupSerialPort(serialPort->fileDescriptor, convertedBaudRate);
   if (setupReturnCode != 0) {
     closeSerialPort(serialPort);
     return setupReturnCode;
@@ -103,8 +105,9 @@ static int setupSerialPort(const int serialPort, const speed_t baudRate) {
 
   // Input modes
   tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Disable software flow control
-  tty.c_iflag &= ~(IGNBRK | BRKINT | ISTRIP | INLCR | IGNCR | ICRNL); // Disable any special handling
-  tty.c_iflag &= ~PARMRK; // Disable parity and framing errors marking
+  tty.c_iflag &= ~(IGNBRK | BRKINT | ISTRIP | INLCR | IGNCR |
+                   ICRNL); // Disable any special handling
+  tty.c_iflag &= ~PARMRK;  // Disable parity and framing errors marking
 
   // Output modes
   // Prevent special interpretation of output bytes (e.g. newline chars)
@@ -118,7 +121,7 @@ static int setupSerialPort(const int serialPort, const speed_t baudRate) {
 
   cfsetospeed(&tty, baudRate); // Output baud rate
   cfsetispeed(&tty, baudRate); // Input baud rate
-  
+
   // Save tty settings
   // Make the change immediatly
   if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
@@ -139,7 +142,8 @@ static int setupSerialPort(const int serialPort, const speed_t baudRate) {
  * @param sizeOfElement The size of the element to read.
  * @return The number of bytes read. -1 if there was an error.
  */
-int readElement(serialPort_t* serialPort, void* element, const unsigned sizeOfElement) {
+int readElement(serialPort_t* serialPort, void* element,
+                const unsigned sizeOfElement) {
   if (serialPort->fileDescriptor < 0) {
     return -1;
   }
@@ -149,9 +153,11 @@ int readElement(serialPort_t* serialPort, void* element, const unsigned sizeOfEl
   int returnValue = -1;
 
   for (unsigned i = 0; i < sizeOfElement; ++i) {
-    returnValue = read(serialPort->fileDescriptor, &readElement[i], sizeof(unsigned char));
+    returnValue = read(serialPort->fileDescriptor, &readElement[i],
+                       sizeof(unsigned char));
     if (returnValue == -1) {
-      printf("Error %i from reading to serial port: %s\n", errno, strerror(errno));
+      printf("Error %i from reading to serial port: %s\n", errno,
+             strerror(errno));
       return returnValue;
     }
     numBytesRead += returnValue;
@@ -170,7 +176,8 @@ int readElement(serialPort_t* serialPort, void* element, const unsigned sizeOfEl
  * @param sizeOfElement The size of the element to write.
  * @return The number of bytes written. -1 if there was an error.
  */
-int writeElement(serialPort_t* serialPort, void* element, const unsigned sizeOfElement) {
+int writeElement(serialPort_t* serialPort, void* element,
+                 const unsigned sizeOfElement) {
   if (serialPort->fileDescriptor < 0) {
     return -1;
   }
@@ -187,16 +194,19 @@ int writeElement(serialPort_t* serialPort, void* element, const unsigned sizeOfE
     }
 
     // Write the data
-    int returnValue = write(serialPort->fileDescriptor, elementStartAddress, sizeToWrite);
+    int returnValue =
+        write(serialPort->fileDescriptor, elementStartAddress, sizeToWrite);
     if (returnValue == -1) {
-      printf("Error %i from writing to serial port: %s\n", errno, strerror(errno));
+      printf("Error %i from writing to serial port: %s\n", errno,
+             strerror(errno));
       return returnValue;
     }
 
     // Wait until all output has actually been sent to the terminal device.
     int drainCode = tcdrain(serialPort->fileDescriptor);
     if (drainCode == -1) {
-      printf("tcdrain error %i during writing to serial port: %s\n", errno, strerror(errno));
+      printf("tcdrain error %i during writing to serial port: %s\n", errno,
+             strerror(errno));
       return drainCode;
     }
     numBytesWritten += returnValue;
@@ -279,7 +289,6 @@ static speed_t getBaudRateCode(const unsigned baudRate) {
   case 4000000:
     return B4000000;
 #endif
-
   }
 
   return -1;

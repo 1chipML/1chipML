@@ -2,13 +2,13 @@
 #include <stdio.h>
 
 // This is a function that we want to optimize
-static float evaluateStrength(float *population) {
+static float evaluateStrength(float* population) {
 
   // We want to minimize this function
   return fabs(4 * population[0] - exp(2 * population[1]) + 2);
 }
 
-static int verifyCoordinates(float *firstSet, float *secondSet,
+static int verifyCoordinates(float* firstSet, float* secondSet,
                              int parameterCount) {
 
   for (unsigned int i = 0; i < parameterCount; i++) {
