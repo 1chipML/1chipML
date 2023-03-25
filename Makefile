@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic gradient_descent fast_sincos monte_carlo
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic gradient_descent fast_sincos monte_carlo lu_decomposition
 
 test: all run_all_tests
 
@@ -47,6 +47,8 @@ monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linea
 fast_sincos: ./$(TEST_FOLDER)/test_fast_sincos.c ./src/fast_sincos.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+lu_decomposition: ./$(TEST_FOLDER)/test_lu_decomposition.c ./src/lu_decomposition.c ./src/matrix.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
@@ -60,6 +62,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_gradient_descent.out
 	./$(BUILD_FOLDER)/test_fast_sincos.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
+	./$(BUILD_FOLDER)/test_lu_decomposition.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)
