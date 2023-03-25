@@ -184,7 +184,7 @@ static Bracket bracketMinimum(f1dimension func, function f,
 
     temp = fa;
     fa = fb;
-    fb = fa;
+    fb = temp;
   }
 
   // Initial guess for c
@@ -198,7 +198,7 @@ static Bracket bracketMinimum(f1dimension func, function f,
     gradient_real r = (bracket.b - bracket.a) * (fb - fc);
     gradient_real q = (bracket.b - bracket.c) * (fb - fa);
     gradient_real diff = q - r;
-    if (diff == 0) {
+    if (fabs(diff) < EPS) {
       diff = EPS; // Prevent division by 0
     }
     gradient_real inflexion = (bracket.b) - ((bracket.b - bracket.c) * q -
