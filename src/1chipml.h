@@ -24,5 +24,6 @@
 #include "./lanczos.h"
 #include "./linear_congruential_random_generator.h"
 #include "./poly_interpolation.h"
+#include "./fast_sincos.h"
 
 /* -- End of file -- */
