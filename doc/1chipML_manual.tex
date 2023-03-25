@@ -346,6 +346,8 @@ Here is the formula for the interpolation using three points $f(a)$, $f(b)$ and 
 
 Once the minimum is broadly bracketed by three points, we can use Brent's algorithm to find the exact abscissa and value of the minimum. This algorithm uses a combination of parabolic interpolation and golden section search to reach the minimum.
 
+It is possible for the gradient descent method to not be able to find a minimum if for example such a minimum does not exist or the initial guess starting point provided does not allow to converge to a minimum. In order to differentiate between successful an unsuccessful descent, a status of either GRADIENT\_SUCCESS or GRADIENT\_ERROR is returned by the function.
+
 \subsection{The genetic approach}
 
 The genetic algorithm is a probabilistic global optimization metaheuristic. That means that it can be used to optimize solutions with many local optimums.

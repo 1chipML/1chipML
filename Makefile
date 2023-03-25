@@ -38,8 +38,8 @@ DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_ge
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-gradient_descent: ./tests/test_gradient_descent.c ./src/gradient_descent.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+gradient_descent: ./$(TEST_FOLDER)/test_gradient_descent.c ./src/gradient_descent.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
@@ -50,6 +50,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_DFT.out
 	./$(BUILD_FOLDER)/test_FFT.out
 	./$(BUILD_FOLDER)/test_lanczos.out
+	./$(BUILD_FOLDER)/test_gradient_descent.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)

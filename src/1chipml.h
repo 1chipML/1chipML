@@ -18,11 +18,11 @@
 #include "./gauss_elimination.h"
 #include "./genetic.h"
 #include "./linear_congruential_random_generator.h"
-<<<<<<< HEAD
 #include "./DFT.h"
 #include "./FFT.h"
-=======
 #include "./gradient_descent.h"
->>>>>>> dc9a1d0... gradient descent prototype
+#include "./lanczos.h"
+#include "./jacobi.h"
+#include "./poly_interpolation.h"
 
 /* -- End of file -- */
