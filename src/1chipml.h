@@ -20,5 +20,6 @@
 #include "./linear_congruential_random_generator.h"
 #include "./DFT.h"
 #include "./FFT.h"
+#include "./fast_sincos.h"
 
 /* -- End of file -- */

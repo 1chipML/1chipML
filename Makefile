@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic fast_sincos
 
 test: all run_all_tests
 
@@ -38,6 +38,9 @@ DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_ge
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+fast_sincos: ./$(TEST_FOLDER)/test_fast_sincos.c ./src/fast_sincos.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out
@@ -47,6 +50,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_DFT.out
 	./$(BUILD_FOLDER)/test_FFT.out
 	./$(BUILD_FOLDER)/test_lanczos.out
+	./$(BUILD_FOLDER)/test_fast_sincos.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)
