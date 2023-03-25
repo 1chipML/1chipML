@@ -1,23 +1,13 @@
 #define mc_real float
 
+#include "arduino_serial_port.h"
 #include "monte_carlo.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
-void readElement(void* element, const size_t sizeOfElement) {
-  unsigned char* readElement = (unsigned char*)element;
-  for (uint32_t i = 0; i < sizeOfElement; ++i) {
-    while (Serial.available() < 1); // Wait for element
-    Serial.readBytes(&readElement[i], sizeof(unsigned char));
-  }
-}
-
-void writeElement(void* element, const size_t sizeOfElement) {
-  while (Serial.availableForWrite() < sizeOfElement); // wait for write
-  Serial.write((unsigned char*)element, sizeOfElement);
-  Serial.flush(); // wait until data is sent
-}
+#define BOARD_LENGTH 3
+#define BOARD_SIZE 8 // 0 to 8
 
 void setup() {
   // Initialize serial
@@ -31,76 +21,57 @@ void loop() {
 
   // Receive board
   int8_t boardValues[nbValues];
-  for(uint8_t i = 0; i < nbValues; ++i)
-  {
+  for (uint8_t i = 0; i < nbValues; ++i) {
     readElement(&boardValues[i], sizeof(int8_t));
   }
   uint8_t nPlayers;
   readElement(&nPlayers, sizeof(nPlayers));
 
+  int minSimulation = 10;
+  int maxSimulation = 48;
+  int targetScore = 10;
 
   Board board = {boardValues, nPlayers};
-  Game game = {isValidAction, playAction, getScore, getPossibleActions, getNumPossibleActions, removeAction, getBoardSize, isDone, 0, 1};
-  Action action = mcGame(board, 1, game, 10, 48, 10); 
-  Serial.println(action.xPos);
-  Serial.println(action.yPos);
-
+  Game game = {isValidAction,
+               playAction,
+               getScore,
+               getPossibleActions,
+               getNumPossibleActions,
+               removeAction,
+               getBoardSize,
+               isDone,
+               0,
+               1};
+  Action action =
+      mcGame(board, 1, game, minSimulation, maxSimulation, targetScore);
 
   // Return best action
-  // uint8_t action[2] = [action.xPos, action.yPos];
-  writeElement(&action.xPos, sizeof(uint8_t)); 
-  writeElement(&action.yPos, sizeof(uint8_t)); 
-  Serial.println(freeMemory());
-}
-
-#ifdef __arm__
-// should use uinstd.h to define sbrk but Due causes a conflict
-extern "C" char* sbrk(int incr);
-#else  // __ARM__
-extern char *__brkval;
-#endif  // __arm__
-
-int freeMemory() {
-  char top;
-#ifdef __arm__
-  return &top - reinterpret_cast<char*>(sbrk(0));
-#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
-  return &top - __brkval;
-#else  // __arm__
-  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
-#endif  // __arm__
+  writeElement(&action.xPos, sizeof(uint8_t));
+  writeElement(&action.yPos, sizeof(uint8_t));
 }
 
 uint8_t totalLength = 0;
-uint8_t initialBoard[9] = {
-    1,  2,  3,
-    1,  2,  4,
-    5,  2,  1 
-};
+uint8_t initialBoard[9] = {1, 2, 3, 1, 2, 4, 5, 2, 1};
 
 void playAction(Board* board, Action* action) {
-  totalLength += board->values[action->xPos * 3 + action->yPos];
-  for (uint8_t i = 0; i < 3; ++i) {
-    for (uint8_t j = 0; j < 3; ++j) {
-      if (board->values[i * 3 + j] == -1) {
-        board->values[i * 3 + j] = initialBoard[i * 3 + j];
-      }
+  totalLength += board->values[action->xPos * BOARD_LENGTH + action->yPos];
+  for (uint8_t i = 0; i < BOARD_SIZE; ++i) {
+    if (board->values[i] == -1) {
+      board->values[i] = initialBoard[i];
     }
   }
-  board->values[action->xPos * 3 + action->yPos] = -1;
+  board->values[action->xPos * BOARD_LENGTH + action->yPos] = -1;
 }
 
 static bool isValidAction(Board* board, Action* action, int player) {
   uint8_t currentPos = 0;
-  for (uint8_t i = 0; i < 3; ++i) {
-    for (uint8_t j = 0; j < 3; ++j) {
-      if (board->values[i * 3 + j] == -1) {
-        currentPos = i * 3 + j;
-        break;
-      }
+  for (uint8_t i = 0; i < BOARD_SIZE; ++i) {
+    if (board->values[i] == -1) {
+      currentPos = i;
+      break;
     }
   }
-  uint8_t actionPos = action->xPos * 3 + action->yPos;
+  uint8_t actionPos = action->xPos * BOARD_LENGTH + action->yPos;
   if (board->values[actionPos] != -1) {
     // Check if action is above or below current position
     if ((currentPos < 3 && currentPos + 3 == actionPos) ||
@@ -126,32 +97,31 @@ static bool isValidAction(Board* board, Action* action, int player) {
 
 void getPossibleActions(Board* board, Action* possibleActions) {
   int nActions = 0;
-  for (int x = 0; x < 3; ++x) {
-    for (int y = 0; y < 3; ++y) {
-      if (board->values[x * 3 + y] != -1) {
+  for (int x = 0; x < BOARD_LENGTH; ++x) {
+    for (int y = 0; y < BOARD_LENGTH; ++y) {
+      if (board->values[x * BOARD_LENGTH + y] != -1) {
         possibleActions[nActions].player = 0;
         possibleActions[nActions].xPos = x;
         possibleActions[nActions].yPos = y;
         nActions++;
       }
     }
-  } 
+  }
 }
 
-static int getNumPossibleActions() {
-  return 8;
-}
+static int getNumPossibleActions() { return BOARD_SIZE; }
 
-int getBoardSize() { return 9; }
+int getBoardSize() { return BOARD_SIZE + 1; }
 
 static bool isDone(Board* board) {
-  int8_t value = board->values[8];
-  if (board->values[8] == -1) return true;
+  int8_t value = board->values[BOARD_SIZE];
+  if (board->values[BOARD_SIZE] == -1)
+    return true;
   return false;
 }
 
 int getScore(Board* board, int player) {
-  if (board->values[8] == -1) {
+  if (board->values[BOARD_SIZE] == -1) {
     if (totalLength == 6)
       return 4; // Best path
     if (totalLength >= 9)
@@ -165,14 +135,14 @@ int getScore(Board* board, int player) {
 void removeAction(int randomActionIdx, Action* possibleActions,
                   int nPossibleActions) {
   int nActions = 0;
-  for (int x = 0; x < 3; ++x) {
-    for (int y = 0; y < 3; ++y) {
-      if (x * 3 + y != randomActionIdx) {
+  for (int x = 0; x < BOARD_LENGTH; ++x) {
+    for (int y = 0; y < BOARD_LENGTH; ++y) {
+      if (x * BOARD_LENGTH + y != randomActionIdx) {
         possibleActions[nActions].player = 0;
         possibleActions[nActions].xPos = x;
         possibleActions[nActions].yPos = y;
         nActions++;
       }
     }
-  } 
+  }
 }
