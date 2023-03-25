@@ -14,11 +14,11 @@ static int isAlmostEqual(const gradient_real *value,
   for (int i = 0; i < n; i++) {
     if (fabs(value[i] - expected[i]) > tolerance) {
       printf("Fail: Expected %f got %f\n", expected[i], value[i]);
-      return 0;
+      return 1;
     }
   }
 
-  return 1;
+  return 0;
 }
 
 // Function (x - 3.5)^2 + (y + 4)^2
@@ -33,17 +33,24 @@ static void dfunc(gradient_real *p, gradient_real *grad) {
 }
 
 int main() {
-  gradient_real min = 0;
+  gradient_real min = 0.0;
   gradient_real point[N] = {3, 5};
   gradient_real expected[N] = {3.5, -4.0};
 
-  min = gradient_descent(func, dfunc, point, N, TOL, ITMAX);
+  int iterations = ITMAX;
 
+  int status = gradient_descent(func, dfunc, &min, point, N, TOL, &iterations);
+  
+  if (status == GRADIENT_ERROR) {
+    return 1;
+  }
+
+  printf("The function to minimize is (x - 3.5)^2 + (y + 4)^2\n");
   printf("The minimum of the function is %f\n", min);
   printf("X: %f\n", point[0]);
   printf("Y: %f\n", point[1]);
 
-  if (!isAlmostEqual(point, expected, N, TOL)) {
+  if (isAlmostEqual(point, expected, N, TOL) == 1) {
     return 1;
   }
 
