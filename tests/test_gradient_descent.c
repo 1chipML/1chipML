@@ -40,7 +40,7 @@ int main() {
   int iterations = ITMAX;
 
   int status = gradient_descent(func, dfunc, &min, point, N, TOL, &iterations);
-  
+
   if (status == GRADIENT_ERROR) {
     return 1;
   }

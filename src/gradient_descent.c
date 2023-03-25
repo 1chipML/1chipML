@@ -1,14 +1,16 @@
 #include "gradient_descent.h"
 
 /**
- * @brief Transforms an N dimension function into a 1 dimension function from the initialPoint along the given direction
- * 
+ * @brief Transforms an N dimension function into a 1 dimension function from
+ * the initialPoint along the given direction
+ *
  * @param func Initial function to transform
  * @param x Value at which to evaluate the function
  * @param initialPoint Initial point to base the movement of
  * @param direction Direction in which to move by x
  * @param n Number of dimensions of the original function
- * @return Function value after moving by x from the initial point in the given direction
+ * @return Function value after moving by x from the initial point in the given
+ * direction
  */
 static gradient_real oneDimension(function func, gradient_real x,
                                   gradient_real initialPoint[],
@@ -24,24 +26,27 @@ static gradient_real oneDimension(function func, gradient_real x,
 }
 
 /**
- * @brief Determines the function minimum from 3 points initially bracketing the minimum. Uses a mix of parabolic interpolation and Golden Section search.
- * 
- * @param xMin Abscissa of the minimum. Will contain the Abscissa of the minimum after function executes
- * @param min Return parameter containing the value of the function at the minimum
+ * @brief Determines the function minimum from 3 points initially bracketing the
+ * minimum. Uses a mix of parabolic interpolation and Golden Section search.
+ *
+ * @param xMin Abscissa of the minimum. Will contain the Abscissa of the minimum
+ * after function executes
+ * @param min Return parameter containing the value of the function at the
+ * minimum
  * @param bracket Initial 3 points bracketing the minimum
- * @param func Function transforming an N dimension function to a 1 dimension function
+ * @param func Function transforming an N dimension function to a 1 dimension
+ * function
  * @param f Function we want to transfor to a 1 dimension function
  * @param initialPoint Initial point to base the movement of
  * @param direction Direction in which to move
  * @param n Number of dimensions of the original function
- * @param tol Tolerance for the minimum estimate. Should be no smaller then the square-root of the machine floating point precision
+ * @param tol Tolerance for the minimum estimate. Should be no smaller then the
+ * square-root of the machine floating point precision
  * @return Value indicating if brent was a succes or an error
- */ 
-static int brent(gradient_real *xMin, gradient_real* min, Bracket bracket,
-                           f1dimension func, function f,
-                           gradient_real initialPoint[],
-                           gradient_real direction[], int n,
-                           gradient_real tol) {
+ */
+static int brent(gradient_real *xMin, gradient_real *min, Bracket bracket,
+                 f1dimension func, function f, gradient_real initialPoint[],
+                 gradient_real direction[], int n, gradient_real tol) {
 
   // Distance moved
   gradient_real distance = 0.0;
@@ -112,9 +117,8 @@ static int brent(gradient_real *xMin, gradient_real* min, Bracket bracket,
     }
 
     // current: Most recent point at which function was evaluated
-    gradient_real current = fabs(distance) >= tol1
-                                ? x + distance
-                                : x + SIGN(tol1, distance);
+    gradient_real current =
+        fabs(distance) >= tol1 ? x + distance : x + SIGN(tol1, distance);
     gradient_real fCurrent = func(f, current, initialPoint, direction, n);
 
     // Form a more precise bracket for the minimum
@@ -156,9 +160,11 @@ static int brent(gradient_real *xMin, gradient_real* min, Bracket bracket,
 }
 
 /**
- * @brief Initially brackets the minimum between 3 points (a, b, c). Uses parabolic interpolation to find the bracket
- * 
- * @param func Function transforming an N dimension function to a 1 dimension function
+ * @brief Initially brackets the minimum between 3 points (a, b, c). Uses
+ * parabolic interpolation to find the bracket
+ *
+ * @param func Function transforming an N dimension function to a 1 dimension
+ * function
  * @param f Function we want to transfor to a 1 dimension function
  * @param initialPoint Initial point to base the movement of
  * @param direction Direction in which to move
@@ -282,19 +288,23 @@ static Bracket bracketMinimum(f1dimension func, function f,
 }
 
 /**
- * @brief Applies linear search to find the minimum of a function in a given direction
- * 
- * @param point Initial point to base the movement of. Will contain the minimum after the function executes
- * @param min Return parameter containing the value of the function at the minimum
+ * @brief Applies linear search to find the minimum of a function in a given
+ * direction
+ *
+ * @param point Initial point to base the movement of. Will contain the minimum
+ * after the function executes
+ * @param min Return parameter containing the value of the function at the
+ * minimum
  * @param direction Direction in which to move
  * @param n Number of dimensions of the original function
  * @param func Function we want to minimize
- * @param tol Tolerance for the minimum estimate. Should be no smaller then the square-root of the machine floating point precision
+ * @param tol Tolerance for the minimum estimate. Should be no smaller then the
+ * square-root of the machine floating point precision
  * @return Value indicating if brent was a succes or an error
  */
-static int lineSearch(gradient_real point[], gradient_real* min,
-                                gradient_real direction[], int n, function func,
-                                gradient_real tol) {
+static int lineSearch(gradient_real point[], gradient_real *min,
+                      gradient_real direction[], int n, function func,
+                      gradient_real tol) {
 
   // Initially bracket the minimum between 3 points
   Bracket bracket = bracketMinimum(oneDimension, func, point, direction, n);
@@ -305,7 +315,8 @@ static int lineSearch(gradient_real point[], gradient_real* min,
 
   // It is possible for brent to not be able to find the minimum
   // In that case we stop de descent and return an error
-  int status = brent(&xmin, &value, bracket, oneDimension, func, point, direction, n, tol);
+  int status = brent(&xmin, &value, bracket, oneDimension, func, point,
+                     direction, n, tol);
   if (status == GRADIENT_ERROR) {
     return GRADIENT_ERROR;
   }
@@ -320,20 +331,25 @@ static int lineSearch(gradient_real point[], gradient_real* min,
 }
 
 /**
- * @brief Applies the conjugate gradient descent method to find the minimum of a provided function
- * 
+ * @brief Applies the conjugate gradient descent method to find the minimum of a
+ * provided function
+ *
  * @param func Function to minimize
  * @param dfunc Derivative of the function to minimize
- * @param min Return parameter containing the value of the function at the minimum
- * @param guess Initial guess from which to start the search. Return parameter containing the minimum point
+ * @param min Return parameter containing the value of the function at the
+ * minimum
+ * @param guess Initial guess from which to start the search. Return parameter
+ * containing the minimum point
  * @param n Number of dimensions of the function
- * @param tol Tolerance for the estimate of the minimum. Should be no smaller then the square-root of the machine floating point precision
- * @param iterations Maximum number of iterations before stoping the search. Return parameter containing the number of iterations done
+ * @param tol Tolerance for the estimate of the minimum. Should be no smaller
+ * then the square-root of the machine floating point precision
+ * @param iterations Maximum number of iterations before stoping the search.
+ * Return parameter containing the number of iterations done
  * @return Value indicating if the descent was a succes or an error
  */
-int gradient_descent(function func, derivative dfunc, gradient_real* min,
-                               gradient_real guess[], int n, gradient_real tol,
-                               int* iterations) {
+int gradient_descent(function func, derivative dfunc, gradient_real *min,
+                     gradient_real guess[], int n, gradient_real tol,
+                     int *iterations) {
   // Gradient of the function
   gradient_real gradient[n];
   gradient_real nextGradient[n];
@@ -366,7 +382,8 @@ int gradient_descent(function func, derivative dfunc, gradient_real* min,
     }
 
     // Checks if we have reached a minimum
-    if (2.0 * fabs(minValue - value) <= tol * (fabs(minValue) + fabs(value) + EPS)) {
+    if (2.0 * fabs(minValue - value) <=
+        tol * (fabs(minValue) + fabs(value) + EPS)) {
       *iterations = its;
       *min = minValue;
       return GRADIENT_SUCCESS;

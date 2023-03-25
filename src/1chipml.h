@@ -15,14 +15,14 @@
 #include <stdlib.h>
 
 /* Include 1chipML methods below */
-#include "./gauss_elimination.h"
-#include "./genetic.h"
-#include "./linear_congruential_random_generator.h"
 #include "./DFT.h"
 #include "./FFT.h"
+#include "./gauss_elimination.h"
+#include "./genetic.h"
 #include "./gradient_descent.h"
-#include "./lanczos.h"
 #include "./jacobi.h"
+#include "./lanczos.h"
+#include "./linear_congruential_random_generator.h"
 #include "./poly_interpolation.h"
 
 /* -- End of file -- */
