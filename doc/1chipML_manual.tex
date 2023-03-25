@@ -502,11 +502,11 @@ $\epsilon$-greedy method, UCB (upper confidence bound) method, gradient bandit m
 
 \subsection{Monte Carlo methods}
 
-The Monte Carlo algorithm learns which action is best to execute next in a certain environment. It iterates through an action tree, playing out random episodes and receiving rewards based on how well it has performed. The algorithm can iterate until the value of a following action reaches a certain threshold, chosen by the user. Once it reaches that threshold, it returns the next action with the best value depending on the rewards received and its' number of visits.
+The Monte Carlo algorithm learns which action is best to execute next in a certain environment. It iterates through an action tree, playing out random episodes and receiving rewards based on how well it has performed. The algorithm can iterate until the value of a following action reaches a certain threshold, chosen by the user. Once it reaches that threshold, it returns the next action with the best value depending on the rewards received and it's number of visits.
 
 The Monte Carlo method is divided into 4 steps :
 
-The first step is to select the node to expand. The selection traverses the tree and selects the node based on its' value. The node with the highest value will be selected to be expanded next.
+The first step is to select the node to expand. The selection traverses the tree and selects the node based on it's value. The node with the highest value will be selected to be expanded next.
 
 Next comes the expansion of the selected node. From the selected node, the algorithm expands the children of the selected node.
 
