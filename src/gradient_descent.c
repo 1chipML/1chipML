@@ -207,7 +207,7 @@ static Bracket bracketMinimum(f1dimension func, function f,
     if (fabs(diff) < EPS) {
       diff = EPS; // Prevent division by 0
     }
-    gradient_real inflexion = (bracket.b) - ((bracket.b - bracket.c) * q -
+    gradient_real inflexion = bracket.b - ((bracket.b - bracket.c) * q -
                                              (bracket.b - bracket.a) * r) /
                                                 (2.0 * diff);
 
