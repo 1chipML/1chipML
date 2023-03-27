@@ -9,7 +9,6 @@ on:
       - main
 
 jobs:
-
   run-lint-build-tests:
     name: Run Lint, Build and Tests
     runs-on: ubuntu-22.04
@@ -28,4 +27,3 @@ jobs:
 
       - name: Run tests
         run: make run_all_tests
-  
