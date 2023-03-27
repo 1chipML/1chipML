@@ -13,22 +13,15 @@
 
 #include "lanczos.h"
 #include "jacobi.h"
+#include "arduino_serial_port.h"
 
-void readElement(void* element, const size_t sizeOfElement) {
-  unsigned char* readElement = (unsigned char*)element;
-  for (uint32_t i = 0; i < sizeOfElement; ++i) {
-    while (Serial.available() < 1); // Wait for element
-    Serial.readBytes(&readElement[i], sizeof(unsigned char));
-  }
-}
-
-void writeElement(void* element, const size_t sizeOfElement) {
-  while (Serial.availableForWrite() < sizeOfElement); // wait for write
-  Serial.write((unsigned char*)element, sizeOfElement);
-  Serial.flush(); // wait until data is sent
-}
-
-
+/**
+* @brief Computes the mean of a column in an array
+* @param the array
+* @param the number of elements in the array
+* @param the column number
+* @param the number of columns
+**/
 double findMean(uint8_t* ptr, uint16_t nbValues, uint16_t offset, uint8_t stride)
 {
   double mean = 0;
@@ -39,7 +32,14 @@ double findMean(uint8_t* ptr, uint16_t nbValues, uint16_t offset, uint8_t stride
   return mean / nbValues;
 }
 
-
+/**
+* @brief computes the covariance matrix of a dataset
+* @param A pointer to the dataset
+* @param the number of columns in the dataset
+* @param the number of rows in the dataset
+* @param A pointer to store the covariance matrix
+* The size must be nbElemsCov * nbElemsCov
+**/
 void computeCovarianceMatrix(uint8_t* ptr, uint8_t nbElemsCov, uint8_t nbElems, double* output)
 {
   double means[nbElemsCov];
@@ -64,8 +64,10 @@ void computeCovarianceMatrix(uint8_t* ptr, uint8_t nbElemsCov, uint8_t nbElems, 
 }
 
 /**
-  Get the 2 highest indexes on the diagonal
-  Values are returned in the returnArray
+  @brief Get the 2 highest indexes on the diagonal
+  @param array a pointer to the matrix
+  @param arraySize the size of the matrix
+  @param returnArray a pointer of size 2 where the indexes will be stored
 **/
 void get2HighestIndexes(double* array, uint8_t arraySize, uint8_t* returnArray)
 {
@@ -89,6 +91,15 @@ void get2HighestIndexes(double* array, uint8_t arraySize, uint8_t* returnArray)
   } 
 }
 
+/**
+* @brief Computes a matrix multiplication on one index
+* @param sample A pointer to the first matrix
+* @param wMatrix A pointer to the second matrix
+* @param x The x pos in the matrix
+* @param y the y pos in the final matrix
+* @param size a pointer with the following sizes inside:
+* [nbRows first matrix, nb columns first matrix, nb columns second matrix]
+**/
 double applyTransformation(uint8_t* sample, double* wMatrix, uint8_t x, uint8_t y, uint8_t *size)
 {
   double output = 0;

@@ -2,7 +2,7 @@
 
 ## Presentation
 
-This prototype showcase the application of a principal component analysis (PCA) on a classification dataset. 
+This prototype showcases the application of a principal component analysis (PCA) on a classification dataset. 
 The prototype reads a cvs file containing multiple entries with flower's caracteristics. 
 It then applies a PCA to reduce the dimensionality of the data and displays the final result on a 2D graph.  
 

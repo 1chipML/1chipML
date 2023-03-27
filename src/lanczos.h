@@ -29,8 +29,7 @@ void vectorSubstract(lanczos_real* vector1, lanczos_real* vector2,
 void matrixMultiply(lanczos_real* firstMatrix, lanczos_real* secondMatrix,
                     uint_least8_t size[3], lanczos_real* output);
 void makeUnitVector(lanczos_real* vector, uint_least8_t nbElements);
-void transpose(lanczos_real* input, lanczos_real* output,
-                      uint_least8_t* dims);
+void transpose(lanczos_real* input, lanczos_real* output, uint_least8_t* dims);
 #ifdef __cplusplus
 }
 #endif
