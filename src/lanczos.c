@@ -25,8 +25,7 @@ void matrixMultiply(lanczos_real* firstMatrix, lanczos_real* secondMatrix,
   }
 }
 
-static void transpose(lanczos_real* input, lanczos_real* output,
-                      uint_least8_t* dims) {
+void transpose(lanczos_real* input, lanczos_real* output, uint_least8_t* dims) {
   for (uint_least8_t i = 0; i < dims[0]; ++i) {
     for (uint_least8_t j = 0; j < dims[1]; ++j) {
       output[j * dims[0] + i] = input[i * dims[1] + j];
