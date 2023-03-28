@@ -34,8 +34,10 @@ typedef struct BitmapInfoHeader {
   uint32_t biClrImportant;  // number of colors that are important
 } BitmapInfoHeader;
 
-unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int numberOfPixels);
-unsigned char* readBitmapImage(char *filename, BitmapInfoHeader *bitmapInfoHeader);
+unsigned char* convertRGBtoGrey(unsigned char* imageData,
+                                const unsigned int numberOfPixels);
+unsigned char* readBitmapImage(char* filename,
+                               BitmapInfoHeader* bitmapInfoHeader);
 
 void generateBitmapImageRGB(unsigned char* image, const unsigned int height,
                             const unsigned int width, char* imageFileName);

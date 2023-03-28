@@ -1,14 +1,13 @@
+#include <gradient_descent.h>
 #include <math.h>
 #include <stdio.h>
-
-#include <gradient_descent.h>
 
 #define TOL 2.0e-4
 #define ITMAX 10
 #define N 2
 
-static int isAlmostEqual(const gradient_real *value,
-                         const gradient_real *expected, int n,
+static int isAlmostEqual(const gradient_real* value,
+                         const gradient_real* expected, int n,
                          double tolerance) {
 
   for (int i = 0; i < n; i++) {
@@ -22,12 +21,12 @@ static int isAlmostEqual(const gradient_real *value,
 }
 
 // Function (x - 3.5)^2 + (y + 4)^2
-static gradient_real func(gradient_real *p) {
+static gradient_real func(gradient_real* p) {
   return pow(p[0] - 3.5, 2) + pow(p[1] + 4, 2);
 }
 
 // Gradient of (x - 3.5)^2 + (y + 4)^2
-static void dfunc(gradient_real *p, gradient_real *grad) {
+static void dfunc(gradient_real* p, gradient_real* grad) {
   grad[0] = 2 * (p[0] - 3.5);
   grad[1] = 2 * (p[1] + 4);
 }

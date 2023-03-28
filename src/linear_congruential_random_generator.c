@@ -9,7 +9,8 @@
    returns a pseudo-random real number in the range [0, 1.0]. */
 
 /* Variables and pointers declarations */
-uint16_t ISEED = 16; /* Default value in case the user does not specify the seed */
+uint16_t ISEED =
+    16; /* Default value in case the user does not specify the seed */
 #define LINEAR_RAND_MAX pow(2, sizeof(ISEED) * 8)
 
 void set_linear_congruential_generator_seed(uint16_t num) { ISEED = num; }

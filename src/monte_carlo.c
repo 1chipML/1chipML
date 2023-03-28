@@ -18,7 +18,8 @@ mc_real calcUCB(Node* node) {
 }
 
 /**
- * @brief This method finds the node with the maximum UCB value among all children.
+ * @brief This method finds the node with the maximum UCB value among all
+ * children.
  * @param children The array of children from which the max UCB value is
  * determined.
  * @param nChildren The number of children.
@@ -35,7 +36,8 @@ Node* findMaxUCB(Node* children, unsigned nChildren) {
 }
 
 /**
- * @brief This method selects the next node to expand from the current nodes' children.
+ * @brief This method selects the next node to expand from the current nodes'
+ * children.
  * @param node The current node from which the next node is selected.
  * @return The selected node.
  */
@@ -63,7 +65,8 @@ void createChild(Node* child, Node* node, Action* action) {
 }
 
 void copyBoard(Game* game, Board* board, Board* copiedBoard) {
-  memcpy(copiedBoard->values, board->values, game->getBoardSize() * sizeof(board->values[0]));
+  memcpy(copiedBoard->values, board->values,
+         game->getBoardSize() * sizeof(board->values[0]));
   copiedBoard->nPlayers = board->nPlayers;
 }
 
@@ -93,8 +96,7 @@ void expandLeaf(Node* node, Game game, Board* board) {
   }
 
   // Deep copy of parent
-  node->children =
-      malloc(nValidActions * sizeof(Node));
+  node->children = malloc(nValidActions * sizeof(Node));
 
   nValidActions = 0;
   for (unsigned i = 0; i < nPossibleActions; ++i) {
@@ -165,8 +167,8 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
 }
 
 /**
- * @brief This method backpropagates the result of the playout to the root of the
- * action tree.
+ * @brief This method backpropagates the result of the playout to the root of
+ * the action tree.
  * @param node The leaf node from which the backpropagation begins.
  * @param score The score to backpropagate.
  */

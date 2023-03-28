@@ -7,10 +7,12 @@
  * Uses the Gold and Rader's bit reversal algorithm
  * @param length The length of the input vectors. Must be a power of 2
  * @param realArray 1D array containing the real part of the incoming vector.
- * @param imaginaryArray 1D array containing the imaginary part of the incoming vector.
+ * @param imaginaryArray 1D array containing the imaginary part of the incoming
+ * vector.
  */
-static void goldRaderBitReversal(unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
-  
+static void goldRaderBitReversal(unsigned length, fft_real* realArray,
+                                 fft_real* imaginaryArray) {
+
   const unsigned N2 = length >> 1;
   unsigned j = 0;
   for (unsigned i = 0; i < length - 1; ++i) {
@@ -49,7 +51,8 @@ static inline int isPowerOfTwo(const unsigned value) {
  * @return 1 if an error occured, 0 otherwise
  *
  */
-int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, const int dir) {
+int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray,
+        const int dir) {
   if (!isPowerOfTwo(length) || realArray == NULL || imaginaryArray == NULL) {
     return 1;
   }
@@ -72,9 +75,11 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, co
 
     fft_real wReal = 1.0;
     fft_real wImaginary = 0.0;
-    for (unsigned branchElement = 0; branchElement < nElements; ++branchElement) { // branch element
+    for (unsigned branchElement = 0; branchElement < nElements;
+         ++branchElement) { // branch element
 
-      for (unsigned branch = branchElement; branch < length; branch += depth) { // current group on depth level
+      for (unsigned branch = branchElement; branch < length;
+           branch += depth) { // current group on depth level
 
         // Complex multiplications, using a butterfly operation
         unsigned i1 = branch + nElements;
@@ -82,7 +87,8 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, co
         fft_real imaginaryArrayi1 = imaginaryArray[i1];
 
         fft_real tReal = wReal * realArrayi1 - wImaginary * imaginaryArrayi1;
-        fft_real tImaginary = wReal * imaginaryArrayi1 + wImaginary * realArrayi1;
+        fft_real tImaginary =
+            wReal * imaginaryArrayi1 + wImaginary * realArrayi1;
         realArray[i1] = realArray[branch] - tReal;
         imaginaryArray[i1] = imaginaryArray[branch] - tImaginary;
         realArray[branch] += tReal;

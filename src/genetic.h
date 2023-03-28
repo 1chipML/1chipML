@@ -30,7 +30,7 @@
 #define genetic_int uint16_t
 #endif
 
-typedef genetic_real (*fitness_evaluation_function)(genetic_real *);
+typedef genetic_real (*fitness_evaluation_function)(genetic_real*);
 
 
 #ifdef __cplusplus
@@ -39,7 +39,7 @@ extern "C" {
 
 
 genetic_real
-geneticAlgorithm(genetic_real *bestFitValues, const unsigned int parameterCount,
+geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
                  const genetic_real epsilon, const genetic_real mutationChance,
                  unsigned int generationSize, unsigned int tourneySize,
                  const unsigned int maximumIterationCount,
