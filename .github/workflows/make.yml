@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Verify linting
-        run: find ./ -iname *.c -o -iname *.h  -path ./prototype/mnist -prune | xargs clang-format --dry-run --Werror
+        run: find ./ -path ./prototype/mnist -prune -iname *.c -o -iname *.h   | xargs clang-format --dry-run --Werror
 
       - name: Build files
         run: make all 
