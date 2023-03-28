@@ -1,9 +1,9 @@
 #ifndef GENETIC_H
 #define GENETIC_H
 
+#include "linear_congruential_random_generator.h"
 #include <float.h>
 #include <limits.h>
-#include "linear_congruential_random_generator.h"
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
@@ -32,11 +32,9 @@
 
 typedef genetic_real (*fitness_evaluation_function)(genetic_real*);
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 genetic_real
 geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
@@ -50,4 +48,4 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
 }
 #endif
 
-#endif //GENETIC_H
+#endif // GENETIC_H
