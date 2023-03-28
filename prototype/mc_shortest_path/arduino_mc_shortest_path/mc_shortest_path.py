@@ -23,8 +23,6 @@ def main():
 
     xPos = struct.unpack('<b', port.read(1))[0]
     yPos = struct.unpack('<b', port.read(1))[0]
-    # xPos = int.from_bytes(xPos, "little")
-    # yPos = int.from_bytes(yPos, "little")
 
     port.close()
 
