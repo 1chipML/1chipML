@@ -1,5 +1,3 @@
-#define mc_real float
-
 #include "arduino_serial_port.h"
 #include "monte_carlo.h"
 #include <stdbool.h>
@@ -78,21 +76,21 @@ static bool isValidAction(Board* board, Action* action, int player) {
         (currentPos < 6 &&
          (currentPos + 3 == actionPos || currentPos - 1 == actionPos)) ||
         (currentPos >= 6 && currentPos - 3 == actionPos)) {
-      return 1;
+      return true;
     }
     // Check if action is right or left from current position
     else if ((currentPos == 0 || currentPos == 3 || currentPos == 6) &&
              (currentPos + 1 == actionPos)) {
-      return 1;
+      return true;
     } else if ((currentPos == 1 || currentPos == 4 || currentPos == 7) &&
                (currentPos + 1 == actionPos || currentPos - 1 == actionPos)) {
-      return 1;
+      return true;
     } else if ((currentPos == 2 || currentPos == 5 || currentPos == 8) &&
                (currentPos - 1 == actionPos)) {
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 void getPossibleActions(Board* board, Action* possibleActions) {

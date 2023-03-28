@@ -19,13 +19,12 @@ def main():
     nPlayers = 0
     port.write(struct.pack('<B', nPlayers))
 
-#Retrieve eigenvalues and eigenvectors
     print('Trying to read from port')
 
-    xPos = port.read()
-    yPos = port.read()
-    xPos = int.from_bytes(xPos, "little")
-    yPos = int.from_bytes(yPos, "little")
+    xPos = struct.unpack('<b', port.read(1))[0]
+    yPos = struct.unpack('<b', port.read(1))[0]
+    # xPos = int.from_bytes(xPos, "little")
+    # yPos = int.from_bytes(yPos, "little")
 
     port.close()
 
