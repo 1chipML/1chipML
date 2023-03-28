@@ -26,7 +26,8 @@ static int validateEigenValue(double* tMatrix, double eigenValue) {
   vectorSubstract(&tCopy[0][0], &identity[0][0], nbIter * nbIter);
   double determinant = computeDeterminant2X2(&tCopy[0][0]);
   if (isAlmostZero(&determinant) != 0) {
-    printf("Fail : %s(), expected determinant to be 0 but got %f", __func__, determinant);
+    printf("Fail : %s(), expected determinant to be 0 but got %f", __func__,
+           determinant);
     return 1;
   }
   return 0;
@@ -58,7 +59,8 @@ int testLanczos(double* initialMatrix, double* tMatrix, double* vMatrix,
       // Using diff here since we have floating point values
       double diff = output[i] - output[i + 1];
       if (isAlmostZero(&diff) != 0) {
-        printf("Fail : %s(), expected %f == %f\n", __func__, output[i], output[i + 1]);
+        printf("Fail : %s(), expected %f == %f\n", __func__, output[i],
+               output[i + 1]);
         return 1;
       }
     }
@@ -75,5 +77,6 @@ int main() {
   double initialVector[size] = {1.0, 2.0, 3.0};
   const double expectedEigenValue = 3.0;
 
-  return testLanczos(initialMatrix[0], tMatrix[0], vMatrix[0], initialVector, expectedEigenValue);
+  return testLanczos(initialMatrix[0], tMatrix[0], vMatrix[0], initialVector,
+                     expectedEigenValue);
 }

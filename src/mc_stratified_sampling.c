@@ -61,8 +61,7 @@ void monteCarloEstimateSTD(double lowBound, double upBound, int iterations,
 
   while (iter < iterations - 1) {
 
-    double randNum =
-        lowBound + (float)rand() / RAND_MAX * (upBound - lowBound);
+    double randNum = lowBound + (float)rand() / RAND_MAX * (upBound - lowBound);
 
     double functionVal = myFunction(randNum);
 

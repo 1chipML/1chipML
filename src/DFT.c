@@ -12,7 +12,8 @@
  * DFT
  * @param dir Direction of the DFT. 1 for the DFT, -1 for the inverse DFT
  */
-void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, const int dir) {
+void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray,
+         const int dir) {
 
   dft_real outputReals[length];
   dft_real outputImaginaries[length];
@@ -27,7 +28,8 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, c
       dft_real wCos = cos(k * exponentBase); // real part
       dft_real wSin = sin(k * exponentBase); // imaginary part
       outputReals[i] += realArray[k] * wCos - imaginaryArray[k] * wSin; // real
-      outputImaginaries[i] += realArray[k] * wSin + imaginaryArray[k] * wCos; // imaginary
+      outputImaginaries[i] +=
+          realArray[k] * wSin + imaginaryArray[k] * wCos; // imaginary
     }
   }
 

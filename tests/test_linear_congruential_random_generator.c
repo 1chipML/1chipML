@@ -4,11 +4,10 @@
  * Last modified : 14 Feb 2022, Montreal, QC, Canada *
  * ************************************************* */
 
+#include "../src/1chipml.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "../src/1chipml.h"
 
 int main(void) {
   /* Variables and pointers declarations */
