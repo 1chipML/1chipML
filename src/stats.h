@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #ifndef EPISLON
     #define EPSILON 0.01
@@ -40,22 +41,17 @@ typedef struct {
 real_number max(real_number* array, vec_size size);
 real_number min(real_number* array, vec_size size);
 real_number mean(real_number* array, vec_size size);
-real_number varianceSample(real_number* array, vec_size size);
-real_number variancePopulation(real_number* array, vec_size size);
-real_number standardDeviationSample(real_number* array, vec_size size);
-real_number standardDeviationPopulation(real_number* array, vec_size size);
-real_number absAverageDeviationSample(real_number* array, vec_size size);
-real_number absAverageDeviationPopulation(real_number* array, vec_size size);
-real_number covarianceSample(real_number* x, real_number* y, vec_size size);
-real_number covariancePopulation(real_number* x, real_number* y, vec_size size);
-vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments, vec_size sample);
+real_number variance(real_number* array, vec_size size);
+real_number standardDeviation(real_number* array, vec_size size);
+real_number absAverageDeviation(real_number* array, vec_size size);
+real_number covariance(real_number* x, real_number* y, vec_size size);
+vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments);
 
 // Fitting curves
 void simpleLinearRegression(real_number* x, real_number* y, vec_size size, real_number* a, real_number* b);
 
 // Clustering
 void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids, vec_size* assignations);
-vec_size closest(real_number* data, vec_size dimensions, real_number* points, vec_size nbPoints);
 
 #ifdef __cplusplus
 }
