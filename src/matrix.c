@@ -61,11 +61,7 @@ void matrixMultiply(const matrix_real_number* firstMatrix,
 void createIdentityMatrix(const matrix_size size, matrix_real_number* output) {
   const matrix_size sizeSquared = size * size;
   for (matrix_size i = 0; i < sizeSquared; ++i) {
-    if (isDiagonal(i, size)) {
-      output[i] = 1;
-    } else {
-      output[i] = 0;
-    }
+    output[i] = isDiagonal(i, size) ? 1 : 0;
   }
 }
 
@@ -81,7 +77,7 @@ void matrixTranspose(matrix_real_number* input, matrix_real_number* output,
                      matrix_size* dims) {
   for (matrix_size i = 0; i < dims[0]; ++i) {
     for (matrix_size j = 0; j < dims[1]; ++j) {
-      output[j * dims[0] + i] = input[i * dims[1] + j];
+      output[coordToIndex(j, i, dims[0])] = input[coordToIndex(i, j, dims[1])];
     }
   }
 }
