@@ -2,6 +2,38 @@
 #include "linear_congruential_random_generator.h"
 
 /**
+ * @brief Calculates the maximum element of an array
+ * @param array array containing the values needed to calculate the maximum
+ * @param size  size of the array
+*/
+real_number max(real_number* array, vec_size size) {
+
+    real_number max = -__DBL_MIN__;
+    for (vec_size i = 0; i < size; ++i) {
+        if (array[i] > max) {
+            max = array[i];        
+        }
+    }
+    return max;
+}
+
+/**
+ * @brief Calculates the minimum element of an array
+ * @param array array containing the values needed to calculate the minimum
+ * @param size  size of the array
+*/
+real_number min(real_number* array, vec_size size) {
+
+    real_number max = __DBL_MAX__;
+    for (vec_size i = 0; i < size; ++i) {
+        if (array[i] < max) {
+            max = array[i];        
+        }
+    }
+    return max;
+}
+
+/**
  * @brief Calculates the mean of a given array
  * @param array array containing the values needed to calculate the mean
  * @param size  size of the array
@@ -285,22 +317,22 @@ vec_size closest(real_number* data, vec_size dimensions, real_number* points, ve
     return maxIndex;
 }
 
-void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids) {
+void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids, vec_size* assignations) {
     // centroids is expected to be an array of size : nbClusters * dimensions
     // data is expected to be an array of size : size * dimensions
+    // assignations is expected to be an array of size : size
 
     // Initialize centroids to random positions
+    real_number maxPoint = max(data, size * dimensions);
+    real_number minPoint = min(data, size * dimensions);
+    real_number range = (maxPoint - minPoint);  
     for (vec_size i = 0; i < nbClusters; ++i) {
-        real_number randomNumber = linear_congruential_random_generator();
-        vec_size initCentroid = (vec_size) fmax(0, (randomNumber * size) - 1);
-        
+        // vec_size initCentroid = (vec_size) fmax(0, (randomNumber * size) - 1);
         for (vec_size j = 0; j < dimensions; ++j) {
-            centroids[i * dimensions + j] = data[initCentroid * size + j];
+            real_number randomNumber = (linear_congruential_random_generator() * range) + minPoint;        
+            centroids[i * dimensions + j] = randomNumber;
         }
     }
-
-    // Array containing the assignation of every point to a cluster
-    vec_size clusters[size]; 
 
     // Array containing the number of points in each cluster (needed for optimization)
     vec_size clustersSize[nbClusters];
@@ -308,7 +340,7 @@ void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbCl
 
     for (vec_size i = 0; i < size; ++i) {
         // We initialize every point to the first cluster
-        clusters[i] = 0;
+        assignations[i] = 0;
     }
 
     clustersSize[0] = size;
@@ -323,13 +355,13 @@ void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbCl
         for (vec_size i = 0; i < size; ++i) {
             vec_size cluster = closest(&data[i * dimensions], dimensions, centroids, nbClusters);
             
-            if (clusters[i] != cluster) {
+            if (assignations[i] != cluster) {
                 // cluster has changed
                 clustersChanged = 1;
             }
 
-            vec_size oldCluster = clusters[i];
-            clusters[i] = cluster;
+            vec_size oldCluster = assignations[i];
+            assignations[i] = cluster;
 
             clustersSize[cluster]++;
             clustersSize[oldCluster]--;
@@ -341,21 +373,18 @@ void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbCl
             memset(newCentroid, 0, sizeof(real_number) * dimensions);
 
             for (vec_size j = 0; j < size; ++j) {
-                if (clusters[j] == i) {
+                if (assignations[j] == i) {
                     for (vec_size dim = 0; dim < dimensions; ++dim) {
                         newCentroid[dim] += data[j * dimensions + dim];
                     }
                 }
             }
 
-
-
+            // If no points were assigned to this cluster, do not recalculate the mean
             if (clustersSize[i] != 0) {
                 for (vec_size dim = 0; dim < dimensions; ++dim) {
-                    centroids[i * nbClusters + dim] = newCentroid[dim] / clustersSize[i];
+                    centroids[i * dimensions + dim] = newCentroid[dim] / clustersSize[i];
                 }
-            } else {
-                memset(&centroids[i * nbClusters], 0, sizeof(real_number) * dimensions);
             }
         }
 

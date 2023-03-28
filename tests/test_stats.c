@@ -129,7 +129,7 @@ void testClosest() {
     };    
 
     real_number data[2] = {
-        35, 19
+        -4, -4
     };
 
     vec_size result = closest(data, 2, points, 7);
@@ -149,11 +149,16 @@ int testKMeans() {
     };
 
     real_number centroids[6];
+    vec_size assignations[6];
 
-    kmeans(data, 6, 2, 3, centroids);
+    kmeans(data, 6, 2, 3, centroids, assignations);
+
+    for (vec_size i = 0; i < 6; ++i) {
+        printf("assignations (%f, %f) : %d -> %d\n", data[i * 2], data[i * 2 + 1], i, assignations[i]);
+    }
 
     for (vec_size i = 0; i < 3; ++i) {
-        printf("%f, %f\n", centroids[i * 2], centroids[i * 2 + 1]);
+        printf("centroids : %f, %f\n", centroids[i * 2], centroids[i * 2 + 1]);
     }
 
     return 0;

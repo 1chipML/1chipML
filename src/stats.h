@@ -37,6 +37,8 @@ typedef struct {
 } DataSummary;
 
 // Simple analyze of data
+real_number max(real_number* array, vec_size size);
+real_number min(real_number* array, vec_size size);
 real_number mean(real_number* array, vec_size size);
 real_number varianceSample(real_number* array, vec_size size);
 real_number variancePopulation(real_number* array, vec_size size);
@@ -52,7 +54,7 @@ vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments, ve
 void simpleLinearRegression(real_number* x, real_number* y, vec_size size, real_number* a, real_number* b);
 
 // Clustering
-void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids);
+void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids, vec_size* assignations);
 vec_size closest(real_number* data, vec_size dimensions, real_number* points, vec_size nbPoints);
 
 #ifdef __cplusplus
