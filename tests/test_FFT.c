@@ -1,11 +1,12 @@
 #include <1chipml.h>
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
-static int compareFT(const unsigned length, fft_real* incomingReals, 
-  fft_real* incomingImgs, fft_real* expectedReals, fft_real* expectedImgs) {
+static int compareFT(const unsigned length, fft_real* incomingReals,
+                     fft_real* incomingImgs, fft_real* expectedReals,
+                     fft_real* expectedImgs) {
 
   const fft_real epsilon = 1e-10;
 
@@ -21,7 +22,8 @@ static int compareFT(const unsigned length, fft_real* incomingReals,
 
 static int randomTestingFFT(const unsigned maxLengthPower) {
 
-  const unsigned length = (unsigned)pow(2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
+  const unsigned length = (unsigned)pow(
+      2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
 
   // allocate arrays for testing
   fft_real fftReals[length];
@@ -51,16 +53,15 @@ static int randomTestingFFT(const unsigned maxLengthPower) {
   end = clock();
   algorithmTime = (double)(end - start) / CLOCKS_PER_SEC;
   printf("The elapsed time for the DFT is %f seconds\n", algorithmTime);
-  
+
   int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
-  
+
   printf("Random testing FFT: is the FFT working as intended? ");
   int returnCode = 0;
   if (isSimilar == 0) {
     printf("true\n");
     returnCode = 0;
-  }
-  else {
+  } else {
     printf("false\n");
     returnCode = 1;
   }
@@ -69,7 +70,8 @@ static int randomTestingFFT(const unsigned maxLengthPower) {
 
 static int randomTestingFFTI(const unsigned maxLengthPower) {
 
-  const unsigned length = (unsigned)pow(2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
+  const unsigned length = (unsigned)pow(
+      2, (unsigned)(linear_congruential_random_generator() * maxLengthPower));
 
   // allocate arrays for testing
   fft_real reals[length];
@@ -86,69 +88,61 @@ static int randomTestingFFTI(const unsigned maxLengthPower) {
 
   DFT(length, fftReals, fftImgs, 1);
   FFT(length, fftReals, fftImgs, -1);
-  
+
   int isSimilar = compareFT(length, reals, imgs, fftReals, fftImgs);
-  
+
   printf("Random testing inverse FFT: is the FFT working as intended? ");
   int returnCode = 0;
   if (isSimilar == 0) {
     printf("true\n");
     returnCode = 0;
-  }
-  else {
+  } else {
     printf("false\n");
     returnCode = 1;
   }
   return returnCode;
-  
 }
 
-static int knownTestingFFT(const unsigned length,
-  fft_real* inputReals,
-  fft_real* inputImaginaries,
-  fft_real* expectedReals, 
-  fft_real* expectedImaginaries) {
+static int knownTestingFFT(const unsigned length, fft_real* inputReals,
+                           fft_real* inputImaginaries, fft_real* expectedReals,
+                           fft_real* expectedImaginaries) {
 
   FFT(length, inputReals, inputImaginaries, 1);
 
-  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
+  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals,
+                            expectedImaginaries);
 
   printf("Known testing FFT: is the FFT working as intended? ");
   int returnCode = 0;
   if (isSimilar == 0) {
     printf("true\n");
     returnCode = 0;
-  }
-  else {
+  } else {
     printf("false\n");
     returnCode = 1;
   }
   return returnCode;
-
 }
 
-static int knownTestingFFTI(const unsigned length,
-  fft_real* inputReals,
-  fft_real* inputImaginaries,
-  fft_real* expectedReals, 
-  fft_real* expectedImaginaries) {
+static int knownTestingFFTI(const unsigned length, fft_real* inputReals,
+                            fft_real* inputImaginaries, fft_real* expectedReals,
+                            fft_real* expectedImaginaries) {
 
   FFT(length, inputReals, inputImaginaries, -1);
 
-  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals, expectedImaginaries);
+  int isSimilar = compareFT(length, inputReals, inputImaginaries, expectedReals,
+                            expectedImaginaries);
 
   printf("Known testing inverse FFT: is the FFT working as intended? ");
   int returnCode = 0;
   if (isSimilar == 0) {
     printf("true\n");
     returnCode = 0;
-  }
-  else {
+  } else {
     printf("false\n");
     returnCode = 1;
   }
   return returnCode;
-
 }
 
 int main() {
@@ -168,13 +162,15 @@ int main() {
   fft_real FFTinputImgs[] = {0, 0, 0, 0};
   fft_real FFTexpectedReals[] = {20, 0, 12, 0};
   fft_real FFTexpectedImgs[] = {0, -4, 0, 4};
-  returnCode |= knownTestingFFT(length, FFTinputReals, FFTinputImgs, FFTexpectedReals, FFTexpectedImgs);
+  returnCode |= knownTestingFFT(length, FFTinputReals, FFTinputImgs,
+                                FFTexpectedReals, FFTexpectedImgs);
 
   fft_real FFTIinputReals[] = {20, 0, 12, 0};
   fft_real FFTIinputImgs[] = {0, -4, 0, 4};
   fft_real FFTIexpectedReals[] = {8, 4, 8, 0};
   fft_real FFTIexpectedImgs[] = {0, 0, 0, 0};
-  returnCode |= knownTestingFFTI(length, FFTIinputReals, FFTIinputImgs, FFTIexpectedReals, FFTIexpectedImgs);
+  returnCode |= knownTestingFFTI(length, FFTIinputReals, FFTIinputImgs,
+                                 FFTIexpectedReals, FFTIexpectedImgs);
 
   return returnCode;
 }
