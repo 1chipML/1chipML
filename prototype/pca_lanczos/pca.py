@@ -1,13 +1,14 @@
-import csv, struct, serial, time, array
+from serial_port import CustomSerial
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
-def wait_for_arduino(port, nbValues):
-    nbDims = struct.unpack('<b', port.read(1))[0]
+def wait_for_arduino(port: CustomSerial, nbValues):
+    nbDims = port.readElement('<b', 1)
     new_dataset = [[0 for x in range(nbDims)] for y in range(nbValues)] 
     for i in range(nbValues):
         for j in range(nbDims):
-            new_dataset[i][j] = struct.unpack('<f', port.read(4))[0] / 10
+            new_dataset[i][j] = port.readElement('<f', 4) / 10
     return  new_dataset
 
 def display_results(dataset):
@@ -25,20 +26,20 @@ def display_results(dataset):
     plt.tight_layout()
     plt.show()
 
-def send_data_through_serial(port, dataset):
+def send_data_through_serial(port: CustomSerial, dataset):
     nb_entries = len(dataset)
     nb_caract_per_entry = len(dataset[0])
     print(f"We need to send {nb_entries} entries")
     print(f"Each entry is composed of {nb_caract_per_entry} caracteristics")
     
-    port.write(struct.pack('<B', nb_entries))
-    port.write(struct.pack('<B', nb_caract_per_entry))
+    port.writeElement('<B', nb_entries)
+    port.writeElement('<B', nb_caract_per_entry)
 
     for entry in dataset:
         for value in entry:
             # Value is a float. We multiply it by 10 to normalize the data
             # between 0 and 100.
-            port.write(struct.pack('<B', int(float(value) * 10)))
+            port.writeElement('<B', int(float(value) * 10))
 
 
 def load_dataset() :
@@ -47,13 +48,14 @@ def load_dataset() :
         return list(csv_reader)
 
 def main():
-    port = serial.Serial('/dev/ttyACM0', 9600)
-    time.sleep(2)
+    port: CustomSerial = CustomSerial('/dev/ttyACM0', 9600)
 
     data = load_dataset()
     send_data_through_serial(port, data)
     new_dataset = wait_for_arduino(port, len(data))
     display_results(new_dataset)
+
+    port.closeSerial()
 
 if __name__ == "__main__":
     main()

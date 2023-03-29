@@ -45,8 +45,7 @@ void writeArray(const unsigned arraySize,
 
 /**
  * @brief Read an element of an arbitrary size
- * One byte is read at a time
- * This function will block until all elements are read.
+ * This function will block until the element is read.
  * @param element The element to read.
  * @param sizeOfElement The size of the element to read.
  */
