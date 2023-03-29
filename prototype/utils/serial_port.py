@@ -10,7 +10,7 @@ class CustomSerial:
     """Custom serial class for communication
     """
 
-    def __init__(self, address: str, baudRate: int, openNow: bool = True):
+    def __init__(self, address: str, baudRate: int):
         """Constructor of the serial communication. Opens the serial communication by default
 
         Args:
@@ -18,8 +18,7 @@ class CustomSerial:
             baudRate (int): The communication baud rate. e.g.: 115200
         """
         self.port: serial.Serial = None
-        if openNow:
-            self.openSerial(address, baudRate)
+        self.openSerial(address, baudRate)
 
     def __del__(self):
         self.closeSerial()
