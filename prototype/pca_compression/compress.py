@@ -1,6 +1,4 @@
-import struct
-import time
-import serial
+from serial_port import CustomSerial
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -14,8 +12,7 @@ def main():
     size_of_image = 8
     size_of_float_arduino_uno = 4
 
-    port = serial.Serial('/dev/ttyACM0', 9600)
-    time.sleep(2)
+    port: CustomSerial = CustomSerial('/dev/ttyACM0', 9600)
 
     # Read img
     img = np.array(Image.open(f'seven_{size_of_image}.bmp').convert('L'))
@@ -34,27 +31,26 @@ def main():
     print('Size : ', size)
     print('Data : ', data, '\n')
 
-    port.write(struct.pack('<i', size)) # Make sure that size in the arduino program is a 4 byte integer
-    for d in data:
-        port.write(struct.pack('<f', d))
+    port.writeElement('<i', size) # Make sure that size in the arduino program is a 4 byte integer
+    port.writeArray('<f', data)
 
     # Retrieve eigenvalues and eigenvectors
     print('Trying to read from port')
 
     eig_vec = np.zeros((size * size))
     for i in range(size * size):
-        eig_vec[i] = round(struct.unpack('<f', port.read(size_of_float_arduino_uno))[0], 3)
+        eig_vec[i] = round(port.readElement('<f', size_of_float_arduino_uno), 3)
     eig_vec = eig_vec.reshape((size, size))
 
     eig_val = np.zeros((size * size))
     for i in range(size * size):
-        eig_val[i] = round(struct.unpack('<f', port.read(size_of_float_arduino_uno))[0], 3)
+        eig_val[i] = round(port.readElement('<f', size_of_float_arduino_uno), 3)
     eig_val = eig_val.reshape((size, size))
     
 
     print('Vectors : ', eig_vec)
     print('Values : ', eig_val)
-    port.close()
+    port.closeSerial()
 
     # Sort eigenvalues and eigenvectors on descending order and take only k components
     for components in range(1, size_of_image + 1, size_of_image // 8):
