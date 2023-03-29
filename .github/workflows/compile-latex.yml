@@ -13,7 +13,7 @@ on:
       - 'doc/1chipML_manual.tex'
 
 jobs:
-  run-tests:
+  compile-latex:
     name: Compile and Add Latex
     runs-on: ubuntu-22.04
     env: 
