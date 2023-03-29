@@ -17,7 +17,7 @@ The current prototype uses a Monte Carlo RL approach to find the shortest path t
 Follow these steps for a quick launch:
 1. Open the Arduino project folder [arduino_mc_shortest_path](./arduino_mc_shortest_path) with Arduino IDE.
 2. From [arduino_mc_shortest_path.ino](./arduino_mc_shortest_path/arduino_mc_shortest_path.ino) Upload the project unto the Arduino board.
-3. Open [mc_shortest_path.py](mc_shortest_path.py). In the main function, change the `serial.Serial` port to your board serial port. By default, it is set to `/dev/tty.usbmodem2101`.
+3. Open [mc_shortest_path.py](mc_shortest_path.py). In the main function, change the `serial.Serial` port to your board serial port.
 4. (Optional) Open [mc_shortest_path.py](mc_shortest_path.py). In the main function, change the values of the board to change the weights of each node.
 6. In the current folder [mc_shortest_path](.), launch the prototype with the following command:
 ```bash

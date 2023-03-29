@@ -6,8 +6,8 @@ import numpy as np
 def main():
     np.set_printoptions(suppress=True) # Prevents from printing in scientific notation
 
-    port = serial.Serial('/dev/tty.usbmodem2101', 9600)
-    time.sleep(2)
+    port = serial.Serial('/dev/tty.usbmodem101', 9600)
+    time.sleep(2) # Arduino takes time to initialize the serial connection
 
     size = 9
     port.write(struct.pack('<B', size)) # Make sure that size in the arduino program is of 1 byte
