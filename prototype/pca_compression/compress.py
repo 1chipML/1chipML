@@ -14,7 +14,7 @@ def main():
     size_of_image = 8
     size_of_float_arduino_uno = 4
 
-    port = serial.Serial('/dev/cu.usbmodem11101', 9600)
+    port = serial.Serial('/dev/ttyACM0', 9600)
     time.sleep(2)
 
     # Read img

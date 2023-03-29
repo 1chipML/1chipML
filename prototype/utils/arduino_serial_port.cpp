@@ -31,7 +31,7 @@ void readArray(const unsigned arraySize, void* outArray,
  * This function will block until all elements are written.
  * @param arraySize The size of the array to read.
  * @param array The array containing the data to be written.
- * @param array The size of each element in the array.
+ * @param sizeOfElement The size of each element in the array.
  */
 void writeArray(const unsigned arraySize, 
                               void* array, 
