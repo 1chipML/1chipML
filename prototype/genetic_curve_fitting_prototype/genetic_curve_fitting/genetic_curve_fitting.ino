@@ -36,7 +36,7 @@ float evaluationFunction(const float *parameters) {
     sum = fabs(sum - coordinatesY[i]);     
     fitness += sum;
   }
-   return  fabs(fitness) ;
+   return fitness;
 }
 
  
