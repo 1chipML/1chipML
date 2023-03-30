@@ -610,7 +610,7 @@ replacePopulation(genetic_int* population, genetic_int* newGeneration,
  * @param maximumIterationCount the maximum amount of generations that will be
  * created
  * @param tourneySize the number of solutions that are chosen in the tourney ,
- * must be smallere than the population size
+ * must be smaller than the population size
  * @param evaluationFunction the function that is used to
  * @param lowMemoryMode if set to 1 the algorithm will be slower and call the
  * evaluation function more often
@@ -638,7 +638,7 @@ geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
   const unsigned int arraySize = generationSize * parameterCount;
   // We created a seperate size because the child array will be two smaller than
   // the population because of the two elite values that are reinjected
-  const unsigned int childArraySize = arraySize - 2;
+  const unsigned int childArraySize = arraySize - 2 * parameterCount;
 
   genetic_int population[arraySize];
   genetic_int nextGeneration[childArraySize];
