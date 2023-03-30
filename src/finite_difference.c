@@ -1,9 +1,9 @@
-#include "finite_difference.h"
+#include <finite_difference.h>
 #include <stdio.h>
 #include <string.h>
 
-/// @brief Approximates the gradient of a function using the finite difference
-/// method
+/// @brief Approximates the gradient of a function using the first order finite
+/// difference method.
 
 /// @param func The function for which to approximate the gradient
 /// @param point The point at which to appriximate the gradient
@@ -22,8 +22,9 @@ void gradientApproximation(function func, real point[], real grad[], int n,
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   real h_next[n];
   real h_prev[n];
+  volatile real temp;
   for (int i = 0; i < n; i++) {
-    volatile real temp = point[i] + eps;
+    temp = point[i] + eps;
     h_next[i] = temp - point[i];
 
     temp = point[i] - eps;

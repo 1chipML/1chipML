@@ -1,4 +1,4 @@
-#include "../src/finite_difference.h"
+#include <finite_difference.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -41,7 +41,7 @@ int main() {
          gradient[1]);
 
   gradientApproximation(func, point, approxGradient, N, EPS, Forward);
-  printf("Using Foward approximation");
+  printf("Using Foward approximation\n");
   printf("The approximate gradient of the function is : X = %f Y = %f\n",
          approxGradient[0], approxGradient[1]);
 
@@ -50,7 +50,7 @@ int main() {
   }
 
   gradientApproximation(func, point, approxGradient, N, EPS, Backward);
-  printf("Using Backward approximation");
+  printf("Using Backward approximation\n");
   printf("The approximate gradient of the function is : X = %f Y = %f\n",
          approxGradient[0], approxGradient[1]);
 
@@ -59,7 +59,7 @@ int main() {
   }
 
   gradientApproximation(func, point, approxGradient, N, EPS, Central);
-  printf("Using Central approximation");
+  printf("Using Central approximation\n");
   printf("The approximate gradient of the function is : X = %f Y = %f\n",
          approxGradient[0], approxGradient[1]);
 
