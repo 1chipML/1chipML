@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic gradient_descent fast_sincos monte_carlo
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic gradient_descent fast_sincos monte_carlo finite_difference
 
 test: all run_all_tests
 
