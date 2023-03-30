@@ -1,4 +1,4 @@
-#include <finite_difference.h>
+#include "finite_difference.h"
 #include <stdio.h>
 #include <string.h>
 
