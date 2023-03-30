@@ -19,7 +19,7 @@ def computeRegression(port: serial.Serial, x: "list[float]", y: "list[float]", d
 
     port.write(struct.pack('<i', degree))
 
-    # Grab de coefficients of the regression from the arduino
+    # Receive the coefficients of the regression from the arduino
     coeff: list[float] = []
     for _ in range(degree + 1):
         coeff.append(struct.unpack('<f', port.read(ctypes.sizeof(ctypes.c_float)))[0])
@@ -78,5 +78,5 @@ def detectAnomaly(filename: str, degree: int, treshold: int):
     port.close()
 
 if __name__ == "__main__":
-    detectAnomaly("data/Linear_20%_outliers.csv", 1, 300)
+    detectAnomaly("data/Linear.csv", 1, 300)
     #detectAnomaly("data/Cubic_20%_outliers.csv", 3, 3000)
