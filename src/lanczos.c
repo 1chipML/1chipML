@@ -1,64 +1,9 @@
 #include "lanczos.h"
 #include "linear_congruential_random_generator.h"
+#include "matrix.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-
-/**
- * Multiply 2 matrices together
- * using this equation : output = firstMatrix x secondMatrix
- * The input parameter size is composed of 3 values :
- *  The number of rows of the first matrix
- *  The number of column of the first matrix
- *  The number of column of the second matrix
- */
-void matrixMultiply(lanczos_real* firstMatrix, lanczos_real* secondMatrix,
-                    uint_least8_t size[3], lanczos_real* output) {
-  for (uint_least8_t i = 0; i < size[0]; ++i) {
-    for (uint_least8_t j = 0; j < size[2]; ++j) {
-      output[i * size[2] + j] = 0;
-      for (uint_least8_t k = 0; k < size[1]; ++k) {
-        output[i * size[2] + j] +=
-            firstMatrix[i * size[1] + k] * secondMatrix[k * size[2] + j];
-      }
-    }
-  }
-}
-
-void transpose(lanczos_real* input, lanczos_real* output, uint_least8_t* dims) {
-  for (uint_least8_t i = 0; i < dims[0]; ++i) {
-    for (uint_least8_t j = 0; j < dims[1]; ++j) {
-      output[j * dims[0] + i] = input[i * dims[1] + j];
-    }
-  }
-}
-
-static lanczos_real computeNorm(lanczos_real* vector, uint_least8_t length) {
-  lanczos_real tmp = 0;
-  for (uint_least8_t i = 0; i < length; ++i) {
-    tmp += vector[i] * vector[i];
-  }
-  return sqrt(tmp);
-}
-
-void vectorScale(lanczos_real* vector, uint_least8_t nbElements,
-                 lanczos_real scale) {
-  for (uint_least8_t i = 0; i < nbElements; ++i) {
-    vector[i] *= scale;
-  }
-}
-
-void vectorSubstract(lanczos_real* vector1, lanczos_real* vector2,
-                     uint_least8_t dim) {
-  for (uint_least8_t i = 0; i < dim; ++i) {
-    vector1[i] = vector1[i] - vector2[i];
-  }
-}
-
-void makeUnitVector(lanczos_real* vector, uint_least8_t nbElements) {
-  lanczos_real norm = computeNorm(vector, nbElements);
-  vectorScale(vector, nbElements, 1.0 / norm);
-}
 
 /**
  * Assume all vectors in vectorList
@@ -77,12 +22,12 @@ static void gramSchmidt(lanczos_real* vectorList, uint_least8_t nbVectors,
                         lanczos_real* vectorToChange) {
   for (uint_least8_t i = 0; i < nbVectors; ++i) {
     lanczos_real dotProduct;
-    uint_least8_t dims[] = {1, vectorLength, 1};
+    unsigned int dims[] = {1, vectorLength, 1};
     lanczos_real tmpVector[vectorLength];
 
     memcpy(tmpVector, &vectorList[i * vectorLength],
            vectorLength * sizeof(lanczos_real));
-    matrixMultiply(tmpVector, vectorToChange, dims, &dotProduct);
+    matrixMultiply(tmpVector, vectorToChange, dims, &dotProduct, 0);
     vectorScale(tmpVector, vectorLength, dotProduct);
     vectorSubstract(vectorToChange, tmpVector, vectorLength);
   }
@@ -124,15 +69,15 @@ void lanczos(lanczos_real* matrix, uint_least8_t dim, uint_least8_t nbIter,
     // Compute the value of v from the equation
     // v = A*qn
     lanczos_real v[dim];
-    uint_least8_t dims[3] = {dim, dim, 1};
-    matrixMultiply(matrix, q1, dims, v);
+    unsigned int dims[3] = {dim, dim, 1};
+    matrixMultiply(matrix, q1, dims, v, 0);
 
     // Compute the value of alpha using the equation
     // alpha = transpose(q) * v
     // also, since q is a vector we do not really need to transpose it
     lanczos_real alpha;
-    uint_least8_t dims2[3] = {1, dim, 1};
-    matrixMultiply(q1, v, dims2, &alpha);
+    unsigned int dims2[3] = {1, dim, 1};
+    matrixMultiply(q1, v, dims2, &alpha, 0);
 
     // Recompute a new v using the equation
     // v = v - beta(n-1) * q(n-1) - alpha * q(n)
@@ -176,6 +121,6 @@ void lanczos(lanczos_real* matrix, uint_least8_t dim, uint_least8_t nbIter,
     }
   }
 
-  uint_least8_t vMatrixSize[] = {nbIter, dim};
-  transpose(vTranspose[0], vMatrix, vMatrixSize);
+  matrix_size vMatrixSize[] = {nbIter, dim};
+  matrixTranspose(vTranspose[0], vMatrix, vMatrixSize);
 }
