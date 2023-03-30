@@ -55,9 +55,9 @@ typedef gradient_real (*f1dimension)(function func, gradient_real x,
 extern "C" {
 #endif
 
-int gradient_descent(function func, derivative dfunc, gradient_real *min,
+int gradient_descent(function func, derivative dfunc, gradient_real* min,
                      gradient_real guess[], int n, gradient_real tol,
-                     int *iterations);
+                     int* iterations);
 
 #ifdef __cplusplus
 }

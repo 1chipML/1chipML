@@ -44,7 +44,7 @@ static gradient_real oneDimension(function func, gradient_real x,
  * square-root of the machine floating point precision
  * @return Value indicating if brent was a succes or an error
  */
-static int brent(gradient_real *xMin, gradient_real *min, Bracket bracket,
+static int brent(gradient_real* xMin, gradient_real* min, Bracket bracket,
                  f1dimension func, function f, gradient_real initialPoint[],
                  gradient_real direction[], int n, gradient_real tol) {
 
@@ -207,9 +207,9 @@ static Bracket bracketMinimum(f1dimension func, function f,
     if (fabs(diff) < EPS) {
       diff = EPS; // Prevent division by 0
     }
-    gradient_real inflexion = (bracket.b) - ((bracket.b - bracket.c) * q -
-                                             (bracket.b - bracket.a) * r) /
-                                                (2.0 * diff);
+    gradient_real inflexion = bracket.b - ((bracket.b - bracket.c) * q -
+                                           (bracket.b - bracket.a) * r) /
+                                              (2.0 * diff);
 
     // Value of function at inflexion point
     gradient_real fInflexion;
@@ -302,7 +302,7 @@ static Bracket bracketMinimum(f1dimension func, function f,
  * square-root of the machine floating point precision
  * @return Value indicating if brent was a succes or an error
  */
-static int lineSearch(gradient_real point[], gradient_real *min,
+static int lineSearch(gradient_real point[], gradient_real* min,
                       gradient_real direction[], int n, function func,
                       gradient_real tol) {
 
@@ -347,9 +347,9 @@ static int lineSearch(gradient_real point[], gradient_real *min,
  * Return parameter containing the number of iterations done
  * @return Value indicating if the descent was a succes or an error
  */
-int gradient_descent(function func, derivative dfunc, gradient_real *min,
+int gradient_descent(function func, derivative dfunc, gradient_real* min,
                      gradient_real guess[], int n, gradient_real tol,
-                     int *iterations) {
+                     int* iterations) {
   // Gradient of the function
   gradient_real gradient[n];
   gradient_real nextGradient[n];
