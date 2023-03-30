@@ -47,6 +47,9 @@ monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linea
 fast_sincos: ./$(TEST_FOLDER)/test_fast_sincos.c ./src/fast_sincos.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+finite_difference: ./$(TEST_FOLDER)/test_finite_difference.c ./src/finite_difference.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
@@ -60,6 +63,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_gradient_descent.out
 	./$(BUILD_FOLDER)/test_fast_sincos.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
+	./$(BUILD_FOLDER)/test_finite_difference.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)

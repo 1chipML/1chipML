@@ -25,5 +25,6 @@
 #include "./lanczos.h"
 #include "./linear_congruential_random_generator.h"
 #include "./poly_interpolation.h"
+#include "./finite_difference.h"
 
 /* -- End of file -- */
