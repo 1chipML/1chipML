@@ -15,10 +15,7 @@ def computeRegression(port: CustomSerial, x: "list[float]", y: "list[float]", de
     port.writeElement('<i', degree)
 
     # Receive the coefficients of the regression from the arduino
-    coeff: list[float] = []
-    for _ in range(degree + 1):
-        readCoeff = port.readElement('<f', ctypes.sizeof(ctypes.c_float))
-        coeff.append(readCoeff)
+    coeff: list[float] = port.readArray('<f', ctypes.sizeof(ctypes.c_float), degree + 1)
 
     return coeff
 
