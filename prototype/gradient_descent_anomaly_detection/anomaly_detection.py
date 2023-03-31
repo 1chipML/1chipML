@@ -55,7 +55,7 @@ def detectAnomaly(filename: str, degree: int, treshold: int):
 
         y_predict: float = predict(coeff, x[n])
 
-        # If the value is to far off the prediction. It is probably an anomaly
+        # If the value is too far off the prediction. It is probably an anomaly
         if abs(y[n] - y_predict) > treshold:
             anomaly_x.append(x[n])
             anomaly_y.append(y[n])

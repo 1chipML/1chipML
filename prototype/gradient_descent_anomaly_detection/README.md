@@ -2,9 +2,9 @@
 
 ## Presentation
 
-The current prototype offers the necessary logic to perform simple anomaly detection on data points comming from a CSV file.
+The current prototype offers the necessary logic to perform simple anomaly detection on data points coming from a CSV file.
 To do so the arduino is sent the data points and will then compute the polynomial regression coefficients that best fits them.
-A python script will the use these coefficients to predict the next data point and check if it is close to the next data point from the CSV file.
+A python script will use these coefficients to predict the next data point and check if it is close to the next data point from the CSV file.
 
 ## Requirements
 
