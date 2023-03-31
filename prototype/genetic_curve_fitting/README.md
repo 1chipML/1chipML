@@ -13,12 +13,12 @@ The current prototype uses a genetic algorithm to estimate the polynomial equati
 ## Quick launch guide
 
 Follow these steps for a quick launch:
-1. Open the Arduino project folder [genetic_curve_fitting](./genetic_curve_fitting) with Arduino IDE.
-2. From [genetic_curve_fitting.ino](./genetic_curve_fitting/genetic_curve_fitting.ino) Upload the project unto the Arduino board.
-3. Open [genetic_curve_fitting.py](genetic_curve_fitting.py). In the curveFitting function, change the `serial.Serial` port to your board serial port. By default, it is set to `/dev/ttyACM0`.
+1. Open the Arduino project folder [genetic_curve_fitting](.) with Arduino IDE.
+2. From [genetic_curve_fitting.ino](./genetic_curve_fitting.ino) Upload the project unto the Arduino board.
+3. Open [genetic_curve_fitting.py](./genetic_curve_fitting.py). In the curveFitting function, change the `CustomSerial` port to your board serial port. By default, it is set to `/dev/ttyACM0`.
 4. (Optional) Open [genetic_curve_fitting.py](genetic_curve_fitting.py). In the curveFitting function, change the `data.csv` to the file you wish to load. By default, it is set to `data.csv`.
 5. (Optional) Open [genetic_curve_fitting.py](genetic_curve_fitting.py). In the curveFitting function, all the parameters for the genetic algorithm are defined and can be modified to match the dataset
-6. In the current folder [genetic_curve_fitting_prototype](.),launch the prototype with the following command:
+6. In the current folder [genetic_curve_fitting](.),launch the prototype with the following command:
 ```bash
 python3 genetic_curve_fitting.py
 ```
