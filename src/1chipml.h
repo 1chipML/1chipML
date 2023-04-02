@@ -24,6 +24,7 @@
 #include "./jacobi.h"
 #include "./lanczos.h"
 #include "./linear_congruential_random_generator.h"
+#include "./lu_decomposition.h"
 #include "./poly_interpolation.h"
 
 /* -- End of file -- */

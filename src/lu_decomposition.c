@@ -13,8 +13,9 @@
  */
 void LUDecomposition(const lu_real* initialMatrix, lu_real* lMatrix,
                      lu_real* uMatrix, const int size) {
-  lu_real tmpMatrix[size * size];
-  memcpy(tmpMatrix, initialMatrix, size * size * sizeof(lu_real));
+  const int sizeSquared = size * size;
+  lu_real tmpMatrix[sizeSquared];
+  memcpy(tmpMatrix, initialMatrix, sizeSquared * sizeof(lu_real));
 
   for (int k = 0; k < size - 1; ++k) {
     for (int i = k + 1; i < size; ++i) {
