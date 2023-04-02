@@ -1,6 +1,4 @@
-import time
-import struct
-import serial
+from serial_port import CustomSerial
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
@@ -29,36 +27,31 @@ def predict(x,parameters,limits, polynomialDegree):
 :param nbOfCoordinatesToSend: The number of coordinates to send through serial connection
 :param port: The PySerial port connection
 """
-def sendCoordinates(xCoordinates,yCoordinates,nbOfCoordinatesToSend,port):
-  port.write(struct.pack('<H',nbOfCoordinatesToSend))
+def sendCoordinates(xCoordinates, yCoordinates, nbOfCoordinatesToSend, port: CustomSerial):
+  port.writeElement('H', nbOfCoordinatesToSend)
   
   for x in xCoordinates[:nbOfCoordinatesToSend]:
-    port.write(struct.pack('<f',float(x)))
+    port.writeElement('<f', float(x))
   
   for y in yCoordinates[:nbOfCoordinatesToSend]:
-    port.write(struct.pack('<f',float(y)))
+    port.writeElement('<f', float(y))
 
 """Sends the limits for each coefficient through the serial connection to the Arduino
 
 :param limits: A list containing the limits for each coefficient
 :param port: The PySerial port connection
 """    
-def sendLimits(limits,port):
-    for x in limits:
-      port.write(struct.pack('<f',x))
+def sendLimits(limits, port: CustomSerial):
+    port.writeArray('<f', limits)
 
 """Obtains the values calulated by the Arduino 
 
 :param port: The PySerial port connection
 :param polynomialDegree: The maximum polynomial degree of the equation
 """ 
-def getResults(port,polynomialDegree):
-  fitness = struct.unpack('<f',port.read(4))[0]
-
-  values = list()
-  for _ in range(polynomialDegree+1):
-    value = struct.unpack('<f',port.read(4))[0]
-    values.append(value)
+def getResults(port: CustomSerial, polynomialDegree):
+  fitness = port.readElement('<f', 4)
+  values = port.readArray('<f', 4, polynomialDegree + 1)
 
   return fitness,values
 
@@ -89,28 +82,24 @@ def curveFitting():
   polynomialDegree = 2
   cutoffValue =  10.0
 
-  port = serial.Serial("/dev/ttyACM0", 9600)
-  
-  #Necessary after establishing a serial connection with the Arduino
-  time.sleep(2)
-
+  port: CustomSerial = CustomSerial("/dev/ttyACM0", 9600)
 
   anomaly_listX = list()
   anomaly_listY = list()
 
   while (minCoordinates < coordinatesSize):
-    port.write(struct.pack('<f',epsilon))
-    port.write(struct.pack('<f',mutationRate))
-    port.write(struct.pack('<H',populationSize))
-    port.write(struct.pack('<H',tourneySize))
-    port.write(struct.pack('<H',maxIterations))
-    port.write(struct.pack('<H',polynomialDegree))
+    port.writeElement('f', epsilon)
+    port.writeElement('f', mutationRate)
+    port.writeElement('H', populationSize)
+    port.writeElement('H', tourneySize)
+    port.writeElement('H', maxIterations)
+    port.writeElement('H', polynomialDegree)
 
     sendCoordinates(xCoordinates,yCoordinates,minCoordinates,port)   
     sendLimits(limits,port)
     
     
-    _,bestValues =  getResults(port,polynomialDegree)
+    _, bestValues =  getResults(port, polynomialDegree)
     
     # We exclude a point if it is very far from the predicted value
     
@@ -129,7 +118,7 @@ def curveFitting():
     else:
       minCoordinates += 1
 
-  port.close()
+  port.closeSerial()
 
   fig = plt.figure()
   ax1 = fig.add_subplot(111)
@@ -155,7 +144,6 @@ def curveFitting():
 
   plt.plot(line_x, line_y)
   plt.show()
-  port.close()
 
 if __name__ == "__main__":
   curveFitting()

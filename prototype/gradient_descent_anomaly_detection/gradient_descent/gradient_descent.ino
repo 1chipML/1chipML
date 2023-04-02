@@ -2,7 +2,7 @@
 #define TOL 2.0e-4
 #define REAL_NUMBER float
 
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 #include "gradient_descent.h"
 
 uint32_t degree = 1;
@@ -88,7 +88,7 @@ void loop() {
   }
 
   // Output coefficients
-  writeFloatArray(degree + 1, coeff);
+  writeArray(degree + 1, coeff, sizeof(float));
 
   // Free memory
   free(x);

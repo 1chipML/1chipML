@@ -1,28 +1,21 @@
-import struct
-import serial
+from serial_port import CustomSerial
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import time
 import ctypes
 
-def computeRegression(port: serial.Serial, x: "list[float]", y: "list[float]", degree: int) -> "list[float]":
+def computeRegression(port: CustomSerial, x: "list[float]", y: "list[float]", degree: int) -> "list[float]":
     # Send the number of points
-    port.write(struct.pack('<i', len(x)))
+    port.writeElement('<i', len(x))
 
     # Send the points
-    for val in x:
-        port.write(struct.pack('<f', val))
+    port.writeArray('<f', x)
+    port.writeArray('<f', y)
 
-    for val in y:
-        port.write(struct.pack('<f', val))
-
-    port.write(struct.pack('<i', degree))
+    port.writeElement('<i', degree)
 
     # Receive the coefficients of the regression from the arduino
-    coeff: list[float] = []
-    for _ in range(degree + 1):
-        coeff.append(struct.unpack('<f', port.read(ctypes.sizeof(ctypes.c_float)))[0])
+    coeff: list[float] = port.readArray('<f', ctypes.sizeof(ctypes.c_float), degree + 1)
 
     return coeff
 
@@ -35,7 +28,7 @@ def predict(coeff: "list[float]", x: float) -> float:
     return y_predict
 
 def detectAnomaly(filename: str, degree: int, treshold: int):
-    port = serial.Serial('/dev/ttyACM0', 115200)
+    port: CustomSerial = CustomSerial('/dev/ttyACM0', 115200)
 
     minPoints: int = 10
 
@@ -45,9 +38,6 @@ def detectAnomaly(filename: str, degree: int, treshold: int):
 
     anomaly_x: list[float] = []
     anomaly_y: list[float] = []
-
-    # Let arduino have enough time to initialise serial connection
-    time.sleep(2)
 
     n = minPoints + 1
     while (n < len(x)):
@@ -75,7 +65,7 @@ def detectAnomaly(filename: str, degree: int, treshold: int):
     plt.plot(line_x, predict(coeff, line_x))
     plt.show()
     
-    port.close()
+    port.closeSerial()
 
 if __name__ == "__main__":
     detectAnomaly("data/Linear.csv", 1, 300)
