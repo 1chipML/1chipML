@@ -412,8 +412,27 @@ Work in progress.
 
 \subsection{First and second order finite differences approach}
 
-Work in progress.
+The file "src/finite\_difference.c" implements a function allowing to approximate the gradient of a multivariate function by implementing a first and second order finite difference approximation. Three different approximations are available depending on the function for which we want to know the gradient.
 
+The first order forward finite difference approximation uses the following formula to compute the partials derivatives of the function needed for the gradient :
+
+$$
+\frac{\partial{f(x_0, x_1, ..., x_n)}}{\partial{x_0}} = \lim_{h\to 0} \frac{f(x_0 + h, x_1, ..., x_n) - f(x_0, x_1, ..., x_n)}{h}
+$$
+
+The first order backward finite difference approximation uses the following formula to compute the partials derivatives of the function needed for the gradient :
+
+$$
+\frac{\partial{f(x_0, x_1, ..., x_n)}}{\partial{x_0}} = \lim_{h\to 0} \frac{f(x_0, x_1, ..., x_n) - f(x_0 + h, x_1, ..., x_n)}{h}
+$$
+
+The second order central finite difference approximation uses the following formula to compute the partials derivatives of the function needed for the gradient :
+
+$$
+\frac{\partial{f(x_0, x_1, ..., x_n)}}{\partial{x_0}} = \lim_{h\to 0} \frac{f(x_0 + h, x_1, ..., x_n) - f(x_0 - h, x_1, ..., x_n)}{2h}
+$$
+
+The central finite difference approximation will usually lead to better gradient approximations, however it is possible that this method is not suited for certain functions if they are not smooth.
 \subsection{The Monte Carlo approach}
 
 The file "src/mc\_integration.c " describes the function of doing integration with Monte Carlo approach.

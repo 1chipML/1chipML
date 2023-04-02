@@ -18,6 +18,7 @@
 #include "./DFT.h"
 #include "./FFT.h"
 #include "./fast_sincos.h"
+#include "./finite_difference.h"
 #include "./gauss_elimination.h"
 #include "./genetic.h"
 #include "./gradient_descent.h"
