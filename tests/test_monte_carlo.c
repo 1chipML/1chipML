@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define BOARD_LENGTH 3
-#define BOARD_SIZE 8 // From 0 to 8
+#define BOARD_SIZE 9
 
 void playAction(Board* board, Action* action) {
   board->values[action->xPos * BOARD_LENGTH + action->yPos] = action->player;
