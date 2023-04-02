@@ -1,4 +1,4 @@
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 
 
 /**
@@ -17,9 +17,13 @@ void setupSerial(const unsigned long baudRate) {
  * @param outArray The array in which to store the result of the read data.
  * @param sizeOfElement The size of each element in the array.
  */
-int readArray(const uint32_t arraySize, void* outArray,
-              const uint32_t sizeOfElement) {
-  readElement(outArray, arraySize * sizeOfElement);
+void readArray(const unsigned arraySize, void* outArray,
+              const unsigned sizeOfElement) {
+  unsigned char* elementIndex = (unsigned char*)outArray;
+  for (unsigned i = 0; i < arraySize; ++i) {
+    readElement(elementIndex, sizeOfElement);
+    elementIndex += sizeOfElement;
+  }
 }
 
 /**
@@ -27,26 +31,30 @@ int readArray(const uint32_t arraySize, void* outArray,
  * This function will block until all elements are written.
  * @param arraySize The size of the array to read.
  * @param array The array containing the data to be written.
+ * @param sizeOfElement The size of each element in the array.
  */
-void writeFloatArray(const uint32_t arraySize, float* array) {
-  for (uint32_t i = 0; i < arraySize; ++i) {
-    writeElement(&array[i], sizeof(float));
+void writeArray(const unsigned arraySize, 
+                              void* array, 
+                              const unsigned sizeOfElement) {
+  unsigned char* elementIndex = (unsigned char*)array;
+  for (unsigned i = 0; i < arraySize; ++i) {
+    writeElement(elementIndex, sizeOfElement);
+    elementIndex += sizeOfElement;
   }
 }
 
 /**
  * @brief Read an element of an arbitrary size
- * One byte is read at a time
- * This function will block until all elements are read.
+ * This function will block until the element is read.
  * @param element The element to read.
  * @param sizeOfElement The size of the element to read.
  */
-void readElement(void* element, const uint32_t sizeOfElement) {
+void readElement(void* element, const unsigned sizeOfElement) {
+  while (Serial.available() < sizeOfElement); // Wait for element
+  
+  // read
   unsigned char* readElement = (unsigned char*)element;
-  for (uint32_t i = 0; i < sizeOfElement; ++i) {
-    while (Serial.available() < 1); // Wait for element
-    Serial.readBytes(&readElement[i], sizeof(unsigned char));
-  }
+  Serial.readBytes(readElement, sizeOfElement);
 }
 
 /**
@@ -55,7 +63,7 @@ void readElement(void* element, const uint32_t sizeOfElement) {
  * @param element The element to write.
  * @param sizeOfElement The size of the element to write.
  */
-void writeElement(void* element, const uint32_t sizeOfElement) {
+void writeElement(void* element, const unsigned sizeOfElement) {
   while (Serial.availableForWrite() < sizeOfElement); // wait for write
   Serial.write((unsigned char*)element, sizeOfElement);
   Serial.flush(); // wait until data is sent

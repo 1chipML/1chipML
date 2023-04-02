@@ -1,5 +1,5 @@
 #include "genetic.h"
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 
 // Global variables that are used by the evaluation function
 float* coordinatesY;
@@ -91,6 +91,6 @@ void loop() {
 
   // Send answers through the serial connection
   writeElement(&value,sizeof(value));
-  writeFloatArray((dimensions),bestValues);
+  writeArray(dimensions, bestValues, sizeof(float));
   
 }
