@@ -1,4 +1,4 @@
-# Shortest path graph traversal (Monte Carlo Reinforcement Learning Method)
+# Shortest path graph traversal(Monte Carlo Reinforcement Learning Method)
 
 ## Presentation
 
@@ -21,7 +21,7 @@ Follow these steps for a quick launch:
 4. (Optional) Open [mc_shortest_path.py](mc_shortest_path.py). In the main function, change the values of the board to change the weights of each node.
 6. In the current folder [mc_shortest_path](.), launch the prototype with the following command:
 ```bash
-python3 ./arduino_mc_shortest_path/genetic_curve_fitting.py
+python3 ./arduino_mc_shortest_path/mc_shortest_path.py
 ```
 
 ## How it works
@@ -32,4 +32,4 @@ The starting point is the top left corner of a 3x3 graph (9 nodes), and the end 
 
 The only possible directions when moving from one node to another are UP, DOWN, LEFT or RIGHT. If there is no node in a given direction, it isn't possible to go in that direction. 
 
-After simulating a number of episodes or after reaching a certain threshold, the next best action is returned to the user. 
+After simulating a number of episodes or after reaching a certain threshold, the next best action is returned to the user.

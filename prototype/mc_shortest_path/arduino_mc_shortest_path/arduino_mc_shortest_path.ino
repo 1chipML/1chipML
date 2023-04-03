@@ -5,10 +5,10 @@
 #include <string.h>
 
 #define BOARD_LENGTH 3
-#define BOARD_SIZE 9 // 3 x 3 board
+#define BOARD_SIZE (BOARD_LENGTH * BOARD_LENGTH) // 3 x 3 board
 
 uint8_t totalLength = 0;
-uint8_t initialBoard[9];
+uint8_t initialBoard[BOARD_SIZE];
 
 void setup() {
   // Initialize serial
@@ -54,7 +54,7 @@ void loop() {
   writeElement(&action.yPos, sizeof(uint8_t));
 }
 
-uint8_t findCurrentPosition(Board* board) {
+uint8_t findCurrentPosition(const Board* board) {
   for (uint8_t i = 0; i < BOARD_SIZE; ++i) {
     if (board->values[i] == -1) {
       return i;
@@ -74,7 +74,7 @@ void playAction(Board* board, Action* action) {
 bool isValidAction(Board* board, Action* action, int player) {
   uint8_t currentPos = findCurrentPosition(board);
   uint8_t actionPos = action->xPos * BOARD_LENGTH + action->yPos;
-  if (board->values[actionPos] != -1 && board->values[actionPos] != -2) {
+  if (actionPos != currentPos && board->values[actionPos] != -2) {
     // Check if action is above or below current position
     if ((currentPos < 3 && currentPos + 3 == actionPos) ||
         ((currentPos < 6 && currentPos >= 3) &&
@@ -112,11 +112,8 @@ void getPossibleActions(Board* board, Action* possibleActions) {
 }
 
 bool isDone(Board* board) {
-  if (board->values[BOARD_SIZE - 1] == -1 ||
-      board->values[BOARD_SIZE - 1] == -2) {
-    return true;
-  }
-  return false;
+  return (board->values[BOARD_SIZE - 1] == -1 ||
+          board->values[BOARD_SIZE - 1] == -2);
 }
 
 int getNumPossibleActions(Board* board) {
