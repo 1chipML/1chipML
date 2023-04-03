@@ -26,12 +26,14 @@ static void writeImageToFile(const unsigned char* image,
  * @param imageData The image data that will be transformed to Greyscale.
  * Expected channel format: B, G, R (default bitmap format)
  * @param numberOfPixels The number of pixels of the incoming RGB image data
- * @return A 8-bit channel containing the Greyscale value. This data must be freed by the 
- * user after use to prevent memory leaks
-*/
-unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int numberOfPixels) {
-  
-  unsigned char* greyData = malloc(numberOfPixels * GREY_BYTES * sizeof(unsigned char));
+ * @return A 8-bit channel containing the Greyscale value. This data must be
+ * freed by the user after use to prevent memory leaks
+ */
+unsigned char* convertRGBtoGrey(unsigned char* imageData,
+                                const unsigned int numberOfPixels) {
+
+  unsigned char* greyData =
+      malloc(numberOfPixels * GREY_BYTES * sizeof(unsigned char));
   if (greyData == NULL) {
     return NULL;
   }
@@ -42,14 +44,13 @@ unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int num
   const double wRed = 0.299;
 
   for (int i = 0; i < numberOfPixels; ++i) {
-      double y = imageData[i * RGB_BYTES] * wBlue
-      + imageData[i * RGB_BYTES + 1] * wGreen
-      + imageData[i * RGB_BYTES + 2] * wRed;
-      greyData[i] = (unsigned char) y; 
+    double y = imageData[i * RGB_BYTES] * wBlue +
+               imageData[i * RGB_BYTES + 1] * wGreen +
+               imageData[i * RGB_BYTES + 2] * wRed;
+    greyData[i] = (unsigned char)y;
   }
 
   return greyData;
-
 }
 
 /**
@@ -57,80 +58,98 @@ unsigned char* convertRGBtoGrey(unsigned char* imageData, const unsigned int num
  * @param filename The bitmap filename with the extension
  * @param bitmapInfoHeader The struct that will hold the BITMAPINFOHEADER
  * of the opened bitmap file
- * @return The entire image data, in bytes. This data must be freed by the 
+ * @return The entire image data, in bytes. This data must be freed by the
  * user after use to prevent memory leaks
-*/
-unsigned char* readBitmapImage(char *filename, BitmapInfoHeader *bitmapInfoHeader) {
-  
-  FILE *imageFile;
+ */
+unsigned char* readBitmapImage(char* filename,
+                               BitmapInfoHeader* bitmapInfoHeader) {
+
+  FILE* imageFile;
   BitmapFileHeader bitmapFileHeader;
 
-  //open file in read binary mode
-  imageFile = fopen(filename,"rb");
+  // open file in read binary mode
+  imageFile = fopen(filename, "rb");
   if (imageFile == NULL) {
     return NULL;
   }
 
   // Read individual bitmap file header properties
   // Must be read individually to prevent packing issues
-  fread(&bitmapFileHeader.bfType, sizeof(bitmapFileHeader.bfType), 1, imageFile);
-  fread(&bitmapFileHeader.bfSize, sizeof(bitmapFileHeader.bfSize), 1, imageFile);
-  fread(&bitmapFileHeader.bfReserved1, sizeof(bitmapFileHeader.bfReserved1), 1, imageFile);
-  fread(&bitmapFileHeader.bfReserved2, sizeof(bitmapFileHeader.bfReserved2), 1, imageFile);
-  fread(&bitmapFileHeader.bfOffBits, sizeof(bitmapFileHeader.bfOffBits), 1, imageFile);
+  fread(&bitmapFileHeader.bfType, sizeof(bitmapFileHeader.bfType), 1,
+        imageFile);
+  fread(&bitmapFileHeader.bfSize, sizeof(bitmapFileHeader.bfSize), 1,
+        imageFile);
+  fread(&bitmapFileHeader.bfReserved1, sizeof(bitmapFileHeader.bfReserved1), 1,
+        imageFile);
+  fread(&bitmapFileHeader.bfReserved2, sizeof(bitmapFileHeader.bfReserved2), 1,
+        imageFile);
+  fread(&bitmapFileHeader.bfOffBits, sizeof(bitmapFileHeader.bfOffBits), 1,
+        imageFile);
 
   // Verify for the bm file type
-  if (bitmapFileHeader.bfType != 0x4D42)
-  {
-      fclose(imageFile);
-      return NULL;
+  if (bitmapFileHeader.bfType != 0x4D42) {
+    fclose(imageFile);
+    return NULL;
   }
 
   // Read individual bitmap file header properties
   // Must be read individually to prevent packing issues
-  fread(&bitmapInfoHeader->biSize, sizeof(bitmapInfoHeader->biSize), 1, imageFile);
-  fread(&bitmapInfoHeader->biWidth, sizeof(bitmapInfoHeader->biWidth), 1, imageFile);
-  fread(&bitmapInfoHeader->biHeight, sizeof(bitmapInfoHeader->biHeight), 1, imageFile);
-  fread(&bitmapInfoHeader->biPlanes, sizeof(bitmapInfoHeader->biPlanes), 1, imageFile);
-  fread(&bitmapInfoHeader->biBitCount, sizeof(bitmapInfoHeader->biBitCount), 1, imageFile);
-  fread(&bitmapInfoHeader->biCompression, sizeof(bitmapInfoHeader->biCompression), 1, imageFile);
-  fread(&bitmapInfoHeader->biSizeImage, sizeof(bitmapInfoHeader->biSizeImage), 1, imageFile);
-  fread(&bitmapInfoHeader->biXPelsPerMeter, sizeof(bitmapInfoHeader->biXPelsPerMeter), 1, imageFile);
-  fread(&bitmapInfoHeader->biYPelsPerMeter, sizeof(bitmapInfoHeader->biYPelsPerMeter), 1, imageFile);
-  fread(&bitmapInfoHeader->biClrUsed, sizeof(bitmapInfoHeader->biClrUsed), 1, imageFile);
-  fread(&bitmapInfoHeader->biClrImportant, sizeof(bitmapInfoHeader->biClrImportant), 1, imageFile);
+  fread(&bitmapInfoHeader->biSize, sizeof(bitmapInfoHeader->biSize), 1,
+        imageFile);
+  fread(&bitmapInfoHeader->biWidth, sizeof(bitmapInfoHeader->biWidth), 1,
+        imageFile);
+  fread(&bitmapInfoHeader->biHeight, sizeof(bitmapInfoHeader->biHeight), 1,
+        imageFile);
+  fread(&bitmapInfoHeader->biPlanes, sizeof(bitmapInfoHeader->biPlanes), 1,
+        imageFile);
+  fread(&bitmapInfoHeader->biBitCount, sizeof(bitmapInfoHeader->biBitCount), 1,
+        imageFile);
+  fread(&bitmapInfoHeader->biCompression,
+        sizeof(bitmapInfoHeader->biCompression), 1, imageFile);
+  fread(&bitmapInfoHeader->biSizeImage, sizeof(bitmapInfoHeader->biSizeImage),
+        1, imageFile);
+  fread(&bitmapInfoHeader->biXPelsPerMeter,
+        sizeof(bitmapInfoHeader->biXPelsPerMeter), 1, imageFile);
+  fread(&bitmapInfoHeader->biYPelsPerMeter,
+        sizeof(bitmapInfoHeader->biYPelsPerMeter), 1, imageFile);
+  fread(&bitmapInfoHeader->biClrUsed, sizeof(bitmapInfoHeader->biClrUsed), 1,
+        imageFile);
+  fread(&bitmapInfoHeader->biClrImportant,
+        sizeof(bitmapInfoHeader->biClrImportant), 1, imageFile);
 
   // Go where the data is
   fseek(imageFile, bitmapFileHeader.bfOffBits, SEEK_SET);
 
   // handle cases where the size is 0
   if (bitmapInfoHeader->biSizeImage == 0) {
-    bitmapInfoHeader->biSizeImage = bitmapFileHeader.bfSize - bitmapFileHeader.bfOffBits;
+    bitmapInfoHeader->biSizeImage =
+        bitmapFileHeader.bfSize - bitmapFileHeader.bfOffBits;
   }
 
   // Allocate memory for the bitmap data
-  unsigned char* imageData = (unsigned char*)malloc(bitmapInfoHeader->biSizeImage);
+  unsigned char* imageData =
+      (unsigned char*)malloc(bitmapInfoHeader->biSizeImage);
   if (imageData == NULL) {
     fclose(imageFile);
     return NULL;
   }
 
-  //read in the bitmap image data
+  // read in the bitmap image data
   fread(imageData, bitmapInfoHeader->biSizeImage, 1, imageFile);
 
   // close file and return bitmap image data in the BGR format
   fclose(imageFile);
   return imageData;
-
 }
 
 /**
  * @brief Creates a RGB bitmap image from data
- * @param image The image data. One byte per channel in the order: B, G, R is expected
+ * @param image The image data. One byte per channel in the order: B, G, R is
+ * expected
  * @param height The image height, in pixels
  * @param width The image width, in pixels
  * @param imageFileName The image file name, with the bitmap extension
-*/
+ */
 void generateBitmapImageRGB(unsigned char* image, const unsigned int height,
                             const unsigned int width, char* imageFileName) {
 
@@ -144,12 +163,13 @@ void generateBitmapImageRGB(unsigned char* image, const unsigned int height,
 }
 
 /**
- * @brief Creates a Grayscale bitmap image from data, with a single 8-bit channel
+ * @brief Creates a Grayscale bitmap image from data, with a single 8-bit
+ * channel
  * @param image The image data. One byte per pixel is expected
  * @param height The image height, in pixels
  * @param width The image width, in pixels
  * @param imageFileName The image file name, with the bitmap extension
-*/
+ */
 void generateBitmapImageGrey(unsigned char* image, const unsigned int height,
                              const unsigned int width, char* imageFileName) {
   const unsigned int paddingSize = getPaddingSize(width, GREY_BYTES);
@@ -187,10 +207,12 @@ static void writeGenericHeader(const unsigned int numberOfColors,
                                const ImageProperties properties,
                                FILE* imageFile) {
 
-  const unsigned int paddedWidthInBytes = properties.width * properties.bytesPerPixel + properties.paddingSize;
-      
+  const unsigned int paddedWidthInBytes =
+      properties.width * properties.bytesPerPixel + properties.paddingSize;
+
   const unsigned int imageSize = paddedWidthInBytes * properties.height;
-  const unsigned int totalHeaderSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + numberOfColors * 4;
+  const unsigned int totalHeaderSize =
+      FILE_HEADER_SIZE + INFO_HEADER_SIZE + numberOfColors * 4;
   const unsigned int fileSize = totalHeaderSize + imageSize;
 
   uint32_t largeHeaders[12] = {

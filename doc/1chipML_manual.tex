@@ -304,8 +304,49 @@ Work in progress.
 Work in progress.
 
 \subsection{The gradient descent method}
+The gradient descent method is an optimization algorithm to find a local minimum of a given function using it's gradient.
 
-Work in progress.
+Many variations of the gradient descent algorithm exist, the simplest one probably being the steepest gradient descent method. However, this naive implementation of the algorithm tends to converge too slowly on the minimum as it approaches it using only right angle turns.
+
+The variation implemented here is the conjugate gradient method, which seeks to reach the local minimum faster by approaching it using series of direction conjugate to the previous direction traveled.
+
+Here is a pseudo-code of the algorithm optimizing $f(x)$:
+
+\begin{algorithm}
+  \caption{Conjugate Gradient Descent Algorithm}
+  \begin{algorithmic}[1]
+    \State $x_{0} \gets \text{Initial guess point}$
+    \State $g_{0} \gets -\nabla f(x)$ \Comment{g is the gradient vector}
+    \State $h_{0} \gets g_{0}$ \Comment{h is the conjugate vector}
+    \State $i \gets 0$
+  \While{\texttt{$g_{i} \neq 0$}}  \Comment{Continue until the gradient is 0}
+    \State $\lambda_{i} \gets \text{LineSearch(f, $x_{i}$, $h_{i}$)}$
+    \State $x_{i+1} \gets x_{i} + \lambda_{i} h_{i}$
+    \State $g_{i+1} \gets -\nabla f(x_{i+1})$
+    \State $\gamma_{i} \gets \frac{(g_{i+1} - g_{i}) \cdot g_{i+1}}{g_{i} \cdot g_{i}}$ \Comment{Adjustment factor for the gradient}
+    \State $h_{i+1} \gets g_{i+1} + \gamma_{i} h_{i}$
+    \State $i \gets i + 1$
+  \EndWhile
+    \State \Return $x_{i}$
+  \end{algorithmic}
+\end{algorithm}
+
+At each iteration, the conjugate gradient descent algorithm travels to the minimum of the function in the direction of the current conjugate. It then computes the gradient at that new point. Using the previous and current gradient, we can calculate the adjustment factor to get the new conjugate. We then continue to the next iteration until we find a local minimum.
+
+In order to find the minimum of the function in the direction of the conjugate we use a the line search strategy. 
+
+We start by broadly bracketing the minimum between three points by using a succession of quadratic interpolation. 
+
+Quadratic interpolation relies on the assumption that the minimum of a one dimensional function resembles a parabola. In order to approach this minimum, we can take three points on our function and move to the abscissa at the minimum the parabola passing by these 3 points. By applying this interpolation multiple times we can eventually arrive to a local minimum. 
+
+Here is the formula for the interpolation using three points $f(a)$, $f(b)$ and $f(c)$ :
+\begin{equation}
+    x = b - \frac{1}{2} \frac{(b - a)^2(f(b) - f(c)) - (b - c)^2(f(b) - f(a))}{(b - a)(f(b) - f(c)) - (b - c)(f(b) - f(a))}
+\end{equation}
+
+Once the minimum is broadly bracketed by three points, we can use Brent's algorithm to find the exact abscissa and value of the minimum. This algorithm uses a combination of parabolic interpolation and golden section search to reach the minimum.
+
+It is possible for the gradient descent method to not be able to find a minimum if for example such a minimum does not exist or the initial guess starting point provided does not allow to converge to a minimum. In order to differentiate between successful an unsuccessful descent, a status of either GRADIENT\_SUCCESS or GRADIENT\_ERROR is returned by the function.
 
 \subsection{The genetic approach}
 
@@ -611,7 +652,7 @@ Here is a pseudo-code of the method :
     \State $\text{expandChild}$
     \State $\textit{score} \gets\text{mcEpisode}$
     \State $\text{backpropagate(\textit{score})}$
-  \EndFor
+  \EndWhile
   \end{algorithmic}
 \end{algorithm}
 

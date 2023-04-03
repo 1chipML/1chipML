@@ -9,7 +9,7 @@
   1chipML
 </h1>
 
-![Build and Tests](https://github.com/1chipML/1chipML/actions/workflows/make.yml/badge.svg?style=flat)
+![Lint, Build and Tests](https://github.com/1chipML/1chipML/actions/workflows/make.yml/badge.svg?style=flat)
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5704/badge)](https://bestpractices.coreinfrastructure.org/projects/5704)
 

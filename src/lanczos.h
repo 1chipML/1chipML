@@ -22,13 +22,6 @@ extern "C" {
 void lanczos(lanczos_real* matrix, uint_least8_t dim, uint_least8_t nbIter,
              lanczos_real* initialVector, lanczos_real* tMatrix,
              lanczos_real* vMatrix);
-void vectorScale(lanczos_real* vector, uint_least8_t nbElements,
-                 lanczos_real scale);
-void vectorSubstract(lanczos_real* vector1, lanczos_real* vector2,
-                     uint_least8_t dim);
-void matrixMultiply(lanczos_real* firstMatrix, lanczos_real* secondMatrix,
-                    uint_least8_t size[3], lanczos_real* output);
-void makeUnitVector(lanczos_real* vector, uint_least8_t nbElements);
 #ifdef __cplusplus
 }
 #endif
