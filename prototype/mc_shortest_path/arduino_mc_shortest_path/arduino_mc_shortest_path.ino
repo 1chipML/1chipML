@@ -1,4 +1,4 @@
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 #include "monte_carlo.h"
 #include <stdbool.h>
 #include <stdlib.h>
