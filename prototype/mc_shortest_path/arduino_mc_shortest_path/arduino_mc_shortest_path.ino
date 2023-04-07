@@ -112,8 +112,7 @@ void getPossibleActions(Board* board, Action* possibleActions) {
 }
 
 bool isDone(Board* board) {
-  return (board->values[BOARD_SIZE - 1] == -1 ||
-          board->values[BOARD_SIZE - 1] == -2);
+  return board->values[BOARD_SIZE - 1] < 0;
 }
 
 int getNumPossibleActions(Board* board) {
@@ -122,7 +121,7 @@ int getNumPossibleActions(Board* board) {
   }
   int nActions = 0;
   for (int i = 0; i < BOARD_SIZE; ++i) {
-    if (board->values[i] != -2 && board->values[i] != -1) {
+    if (board->values[i] >= 0) {
       nActions++;
     }
   }
@@ -133,38 +132,42 @@ int getBoardSize() { return BOARD_SIZE; }
 
 bool isStuck(Board* board) {
   uint8_t currentPos = findCurrentPosition(board);
-  if (currentPos == 0 && board->values[currentPos + 1] == -2 &&
-      board->values[currentPos + 3] == -2) {
-    return true;
-  } else if (currentPos == 1 && board->values[currentPos - 1] == -2 &&
+  switch(currentPos)
+  {
+    case 0:
+      return (board->values[currentPos + 1] == -2 &&
+      board->values[currentPos + 3] == -2);
+    case 1:
+      return (board->values[currentPos - 1] == -2 &&
              board->values[currentPos + 1] == -2 &&
-             board->values[currentPos + 3] == -2) {
-    return true;
-  } else if (currentPos == 2 && board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 3] == -2) {
-    return true;
-  } else if (currentPos == 3 && board->values[currentPos - 3] == -2 &&
+             board->values[currentPos + 3] == -2);
+    case 2:
+      return (currentPos == 2 && board->values[currentPos - 1] == -2 &&
+             board->values[currentPos + 3] == -2);
+    case 3:
+      return (board->values[currentPos - 3] == -2 &&
              board->values[currentPos + 1] == -2 &&
-             board->values[currentPos + 3] == -2) {
-    return true;
-  } else if (currentPos == 4 && board->values[currentPos - 3] == -2 &&
+             board->values[currentPos + 3] == -2);
+    case 4:
+      return (board->values[currentPos - 3] == -2 &&
              board->values[currentPos - 1] == -2 &&
              board->values[currentPos + 1] == -2 &&
-             board->values[currentPos + 3] == -2) {
-    return true;
-  } else if (currentPos == 5 && board->values[currentPos - 3] == -2 &&
+             board->values[currentPos + 3] == -2);
+    case 5:
+      return (board->values[currentPos - 3] == -2 &&
              board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 3] == -2) {
-    return true;
-  } else if (currentPos == 6 && board->values[currentPos - 3] == -2 &&
-             board->values[currentPos + 1] == -2) {
-    return true;
-  } else if (currentPos == 7 && board->values[currentPos - 3] == -2 &&
+             board->values[currentPos + 3] == -2);
+    case 6:
+      return (board->values[currentPos - 3] == -2 &&
+             board->values[currentPos + 1] == -2);
+    case 7:
+      return (board->values[currentPos - 3] == -2 &&
              board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 1] == -2) {
-    return true;
+             board->values[currentPos + 1] == -2);
+    default:
+      return false;
+
   }
-  return false;
 }
 
 int getScore(Board* board, int player) {
