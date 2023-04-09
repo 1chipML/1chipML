@@ -26,6 +26,10 @@
 #define INT_MAX_DIGIT_COUNT 5
 #endif
 
+#ifndef INT_MAX_DIGIT_COUNT_AS_STRING
+#define INT_MAX_DIGIT_COUNT_AS_STRING_FORMATTER "%.5hu"
+#endif
+
 #ifndef genetic_int
 #define genetic_int uint16_t
 #endif
@@ -40,9 +44,9 @@ genetic_real
 geneticAlgorithm(genetic_real* bestFitValues, const unsigned int parameterCount,
                  const genetic_real epsilon, const genetic_real mutationChance,
                  unsigned int generationSize, unsigned int tourneySize,
-                 const unsigned int maximumIterationCount,
-                 fitness_evaluation_function evaluationFunction,
-                 const unsigned int lowMemoryMode);
+                 const unsigned int maxIterations,
+                 fitness_evaluation_function function,
+                 unsigned numberOfEliteValues, const unsigned lowMemoryMode);
 
 #ifdef __cplusplus
 }

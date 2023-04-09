@@ -28,7 +28,7 @@ def predict(x,parameters,limits, polynomialDegree):
 :param port: The PySerial port connection
 """
 def sendCoordinates(xCoordinates, yCoordinates, nbOfCoordinatesToSend, port: CustomSerial):
-  port.writeElement('H', nbOfCoordinatesToSend)
+  port.writeElement('<H', nbOfCoordinatesToSend)
   
   for x in xCoordinates[:nbOfCoordinatesToSend]:
     port.writeElement('<f', float(x))
@@ -76,6 +76,7 @@ def curveFitting():
   populationSize = 50
   tourneySize = 10
   maxIterations = 5
+  numberOfEliteValues = 2
   
   # The absolute limits of each coefficient (must be positive)
   limits = [1.,1.,1.]
@@ -88,13 +89,13 @@ def curveFitting():
   anomaly_listY = list()
 
   while (minCoordinates < coordinatesSize):
-    port.writeElement('f', epsilon)
-    port.writeElement('f', mutationRate)
-    port.writeElement('H', populationSize)
-    port.writeElement('H', tourneySize)
-    port.writeElement('H', maxIterations)
-    port.writeElement('H', polynomialDegree)
-
+    port.writeElement('<f', epsilon)
+    port.writeElement('<f', mutationRate)
+    port.writeElement('<H', populationSize)
+    port.writeElement('<H', tourneySize)
+    port.writeElement('<H', maxIterations)
+    port.writeElement('<H', polynomialDegree)
+    port.writeElement('<H', numberOfEliteValues)
     sendCoordinates(xCoordinates,yCoordinates,minCoordinates,port)   
     sendLimits(limits,port)
     
