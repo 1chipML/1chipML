@@ -22,9 +22,9 @@ typedef struct {
 } Board;
 
 typedef struct {
-  uint8_t xPos : 6;
-  uint8_t yPos : 6;
-  int8_t player : 4;
+  uint8_t xPos;
+  uint8_t yPos;
+  int8_t player;
 } Action;
 
 typedef void (*playActionType)(Board*, Action*);
