@@ -79,8 +79,8 @@ void copyBoard(Game* game, Board* board, Board* copiedBoard) {
  */
 void expandLeaf(Node* node, Game game, Board* board) {
   // Do not expand leaf if it is a terminal node
-  if ((game.getScore(board, node->action.player) > game.drawValue) ||
-      game.isDone(board)) {
+  if (game.isDone(board) ||
+      (game.getScore(board, node->action.player) > game.drawValue)) {
     return;
   }
 
@@ -150,7 +150,7 @@ int mcEpisode(Node* node, int initialPlayer, Game* game, Board* board) {
       // Remove action from possible actions
       nPossibleActions -= simulationBoard.nPlayers;
       game->removeAction(randomActionIdx, possibleActions, nPossibleActions);
-      int score = game->getScore(&simulationBoard, varPlayer);
+      score = game->getScore(&simulationBoard, varPlayer);
       if (score > 1) {
         free(simulationBoard.values);
         if (varPlayer == initialPlayer) {
