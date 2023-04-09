@@ -12,7 +12,15 @@
 #endif
 
 #ifndef REAL_NUMBER
-    #define REAL_NUMBER double
+    #define REAL_NUMBER float
+#endif
+
+#ifndef MAX_REAL_NUMBER
+    #define MAX_REAL_NUMBER __FLT_MAX__
+#endif
+
+#ifndef MIN_REAL_NUMBER
+    #define MIN_REAL_NUMBER (-(MAX_REAL_NUMBER) - 1)
 #endif
 
 #ifndef INTEGER
@@ -37,9 +45,9 @@ typedef struct {
     real_number kurtosis; // The formula for the excess kurtosis was used
 } DataSummary;
 
-// Simple analyze of data
-real_number max(real_number* array, vec_size size);
-real_number min(real_number* array, vec_size size);
+// Simple analysis of data
+real_number maxOfArray(real_number* array, vec_size size);
+real_number minOfArray(real_number* array, vec_size size);
 real_number mean(real_number* array, vec_size size);
 real_number variance(real_number* array, vec_size size);
 real_number standardDeviation(real_number* array, vec_size size);
@@ -51,6 +59,7 @@ vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments);
 void simpleLinearRegression(real_number* x, real_number* y, vec_size size, real_number* a, real_number* b);
 
 // Clustering
+vec_size closest(real_number* data, vec_size dimensions, real_number* points, vec_size nbPoints);
 void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids, vec_size* assignations);
 
 #ifdef __cplusplus

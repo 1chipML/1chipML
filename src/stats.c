@@ -6,9 +6,9 @@
  * @param array array containing the values needed to calculate the maximum
  * @param size  size of the array
 */
-real_number max(real_number* array, vec_size size) {
+real_number maxOfArray(real_number* array, vec_size size) {
 
-    real_number max = -__DBL_MIN__;
+    real_number max = MIN_REAL_NUMBER;
     for (vec_size i = 0; i < size; ++i) {
         if (array[i] > max) {
             max = array[i];        
@@ -22,27 +22,27 @@ real_number max(real_number* array, vec_size size) {
  * @param array array containing the values needed to calculate the minimum
  * @param size  size of the array
 */
-real_number min(real_number* array, vec_size size) {
+real_number minOfArray(real_number* array, vec_size size) {
 
-    real_number max = __DBL_MAX__;
+    real_number min = MAX_REAL_NUMBER;
     for (vec_size i = 0; i < size; ++i) {
-        if (array[i] < max) {
-            max = array[i];        
+        if (array[i] < min) {
+            min = array[i];        
         }
     }
-    return max;
+    return min;
 }
 
 /**
  * @brief Calculates the mean of a given array
- * @param array array containing the values needed to calculate the mean
+ * @param data  array containing the values needed to calculate the mean
  * @param size  size of the array
 */
-real_number mean(real_number* array, vec_size size) {
+real_number mean(real_number* data, vec_size size) {
 
     real_number sum = 0.0;
     for (vec_size i = 0; i < size; ++i) {
-        sum += array[i];
+        sum += data[i];
     }
     return sum / size;
 }
@@ -50,20 +50,20 @@ real_number mean(real_number* array, vec_size size) {
 /**
  * @brief Computes the variance of a sample 
  * (divides by [size - 1] since the given values are considered to be a sample of the population)
- * @param array array containing the values of the sample
+ * @param data  array containing the values of the sample
  * @param size  number of samples
- * @return variance of sample
+ * @return      variance of sample
 */
-real_number variance(real_number* array, vec_size size) {
+real_number variance(real_number* data, vec_size size) {
     
-    real_number avg = mean(array, size);
+    real_number avg = mean(data, size);
     real_number var = 0.0;
     real_number adujstingFactor = 0.0;
     for (vec_size i = 0; i < size; ++i) {
-        real_number diffElem = array[i] - avg;
+        real_number diffElem = data[i] - avg;
         adujstingFactor += diffElem;
         var += diffElem * diffElem;
-    } 
+    }
 
     return (var - adujstingFactor * adujstingFactor / size) / (size - 1);
 }
@@ -89,14 +89,14 @@ real_number standardDeviation(real_number* array, vec_size size) {
 */
 real_number absAverageDeviation(real_number* array, vec_size size) {
     real_number avg = mean(array, size);
-    real_number absAverageDeviation = 0.0;
+    real_number result = 0.0;
     for (vec_size i = 0; i < size; ++i) {
         real_number elem = array[i];
         real_number diffElem = elem - avg;
-        absAverageDeviation += fabs(diffElem);
+        result += fabs(diffElem);
     }
 
-    return absAverageDeviation / (size - 1);
+    return result / (size - 1);
 }
 
 /**
@@ -205,7 +205,14 @@ void simpleLinearRegression(real_number* x, real_number* y, vec_size size, real_
 }
 
 
-// Finds the euclidian distance between two points
+/**
+ * @brief Finds the euclidiant distance between two points
+ * 
+ * @param p1    first point
+ * @param p2    second point
+ * @param size  dimensions of the points
+ * @return euclidian distance
+ */
 static real_number distance(real_number* p1,  real_number* p2, vec_size size) {
 
     real_number currentDistance = 0.0;
@@ -219,81 +226,106 @@ static real_number distance(real_number* p1,  real_number* p2, vec_size size) {
     return sqrt(currentDistance);
 }
 
-// Finds closest point to data
-static vec_size closest(real_number* data, vec_size dimensions, real_number* points, vec_size nbPoints) {
+/**
+ * @brief Given a point 'P' and an array of points, finds the closest point of the array to the point 'P' using the euclidiant distance
+ * @param point         point 'P'
+ * @param dimensions    number of dimensions of the points
+ * @param data          array of points
+ * @param nbPoints      number of points in the array
+ * @return the index of the closest point in the array to 'P'
+ */
+vec_size closest(real_number* point, vec_size dimensions, real_number* data, vec_size nbPoints) {
 
-    real_number maxDistance = __FLT_MAX__;
-    vec_size maxIndex = 0;
+    real_number minDistance = MAX_REAL_NUMBER;
+    vec_size minIndex = 0;
     for (vec_size i = 0; i < nbPoints; ++i) {
-        real_number currentDistance = distance(data, &points[i * dimensions], dimensions);
-        if (currentDistance < maxDistance) {
-            maxDistance = currentDistance;
-            maxIndex = i;
+        real_number currentDistance = distance(point, &data[i * dimensions], dimensions);
+        if (currentDistance < minDistance) {
+            minDistance = currentDistance;
+            minIndex = i;
         }
     }
 
-    return maxIndex;
+    return minIndex;
 }
 
+/**
+ * @brief Runs the K-Means clustering algorithm on a set of data points.
+ * @warning The euclidian distance is used to compute the distance between the points
+ * @param data          data to cluster (the length must be [size] * [dimensions])
+ * @param size          number of data points
+ * @param dimensions    dimensions of the data points
+ * @param nbClusters    number of clusters to group the data points
+ * @param centroids     array where the coordinates of the centroids of clusters will be stored (the length must be [nbCluster] * [dimensions])
+ * @param assignations  array containing the index of the cluster to which a point was assigned to (the length must be [size])
+ */
 void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids, vec_size* assignations) {
-    // centroids is expected to be an array of size : nbClusters * dimensions
-    // data is expected to be an array of size : size * dimensions
-    // assignations is expected to be an array of size : size
+
+    // set_linear_congruential_generator_seed(7);
+
 
     // Initialize centroids to random positions
-    real_number maxPoint = max(data, size * dimensions);
-    real_number minPoint = min(data, size * dimensions);
-    real_number range = (maxPoint - minPoint);  
-    for (vec_size i = 0; i < nbClusters; ++i) {
-        // vec_size initCentroid = (vec_size) fmax(0, (randomNumber * size) - 1);
-        for (vec_size j = 0; j < dimensions; ++j) {
-            real_number randomNumber = (linear_congruential_random_generator() * range) + minPoint;        
-            centroids[i * dimensions + j] = randomNumber;
+    {
+        #define min(a,b) ((a)<(b)?(a):(b))
+
+        for (vec_size i = 0; i < nbClusters; ++i) {
+            vec_size randomPointIndex = min(size - 1, (linear_congruential_random_generator() * size));
+            for (vec_size dim = 0; dim < dimensions; ++dim) {
+                centroids[i * dimensions + dim] = data[randomPointIndex * dimensions + dim];
+            }
         }
     }
+
+    // We initialize every point to the first cluster
+    memset(assignations, 0, sizeof(vec_size) * size);
 
     // Array containing the number of points in each cluster (needed for optimization)
     vec_size clustersSize[nbClusters];
-
-    for (vec_size i = 0; i < size; ++i) {
-        // We initialize every point to the first cluster
-        assignations[i] = 0;
-    }
-
+    memset(clustersSize, 0, sizeof(vec_size) * nbClusters);
     clustersSize[0] = size;
-    bool clustersChanged = false;
+
+    bool clustersHaveChanged = true;
     
-    // As long as groups have not changed
-    while (!clustersChanged) {
+    // As long as clusters get updated
+    while (clustersHaveChanged) {
+        clustersHaveChanged = false;
 
         // Assign group to every point
         for (vec_size i = 0; i < size; ++i) {
             vec_size cluster = closest(&data[i * dimensions], dimensions, centroids, nbClusters);
+            vec_size oldCluster = assignations[i];
             
-            if (assignations[i] != cluster) {
-                clustersChanged = true;
+            if (oldCluster != cluster) {
+                clustersHaveChanged = true;
             }
 
-            vec_size oldCluster = assignations[i];
             assignations[i] = cluster;
 
+            // Update the cluster size
             clustersSize[cluster]++;
             clustersSize[oldCluster]--;
         }
 
+        // Prevents unecessary computations if clusters have not changed
+        if (!clustersHaveChanged)
+            break;
+
+        // Calculate new centroids
         real_number newCentroids[nbClusters * dimensions];
+        memset(newCentroids, 0, sizeof(real_number) * nbClusters * dimensions);
+
         for (vec_size i = 0; i < size; ++i) {
             vec_size clusterAssignation = assignations[i];
 
             for (vec_size dim = 0; dim < dimensions; ++dim) {
-                newCentroids[clusterAssignation + dim] += data[i * dimensions + dim];
+                newCentroids[clusterAssignation * dimensions + dim] += data[i * dimensions + dim];
             }
         }
 
-        // Calculate new centroids
+        // Divide by cluster size to get the average of every positions
         for (vec_size i = 0; i < nbClusters; ++i) {
 
-            // If no points were assigned to this cluster, do not recalculate the mean
+            // If no points are assigned to this cluster, do not recalculate the mean
             if (clustersSize[i] != 0) {
                 for (vec_size dim = 0; dim < dimensions; ++dim) {
                     centroids[i * dimensions + dim] = newCentroids[i * dimensions + dim] / clustersSize[i];
