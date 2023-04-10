@@ -1,6 +1,7 @@
 #ifndef _STATS_LIB_
 #define _STATS_LIB_
 
+#include "linear_congruential_random_generator.h"
 #include <limits.h>
 #include <math.h>
 #include <stdbool.h>

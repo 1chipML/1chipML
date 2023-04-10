@@ -1,5 +1,4 @@
 #include "stats.h"
-#include "linear_congruential_random_generator.h"
 
 /**
  * @brief Calculates the maximum element of an array
