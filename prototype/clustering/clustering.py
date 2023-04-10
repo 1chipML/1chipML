@@ -42,7 +42,9 @@ def generate_data(nb_clusters, dimensions, nb_points, start=-100, end=100):
 def main():
     np.set_printoptions(suppress=True) # Prevents from printing in scientific notation
 
-    port = serial.Serial('/dev/cu.usbmodem11101', 9600)
+    SERIAL_PORT_NAME = '/dev/cu.usbmodem11101'
+
+    port = serial.Serial(SERIAL_PORT_NAME, 9600)
     time.sleep(2)
 
     nb_points = 100

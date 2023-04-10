@@ -123,7 +123,7 @@ real_number covariance(real_number* x, real_number* y, vec_size size) {
  * @param array     array containing the data
  * @param size      size of the array
  * @param sample    whether to consider the data as a sample or as the population when computing the metrics (0 = Population, 1 = Sample)
- * @return Returns the error code of the function (0 = Success, 1 = Size of data is less than 2, can't compute metrics, 2 = Variance is null, can't compute skewness and kurtosis)
+ * @return Returns the error code of the function (0 = Success, 1 = Size of data is less than 2, 2 = Variance is null, can't compute skewness and kurtosis, but other metrics are computed)
 */
 vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments) {
     
@@ -170,15 +170,15 @@ vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments) {
     
     real_number kurtosisFactor = (skewnessFactor * (size + 1)) / (size - 3);;
     real_number kurtosisFactorAdjustment = 3.0 * ((real_number)((size - 1) * (size - 1))) / ((size - 2) * (size - 3));
-    moments->kurtosis = (kurtosisFactor * kurtosis / (moments->variance * moments->variance)) - kurtosisFactorAdjustment; // Formula of kurtosis in Numerical Recipes
+    moments->kurtosis = (kurtosisFactor * kurtosis / (moments->variance * moments->variance)) - kurtosisFactorAdjustment;
 
     return 0;
 }
 
 /**
  * @brief Fits a straight line into 2d data (form is y = ax + b) 
- * @param x x values
- * @param y y values
+ * @param x     x values
+ * @param y     y values
  * @param size  number of data points
  * @param a     slope of the line to fit
  * @param b     y-intercept of the line to fit
@@ -260,9 +260,6 @@ vec_size closest(real_number* point, vec_size dimensions, real_number* data, vec
  * @param assignations  array containing the index of the cluster to which a point was assigned to (the length must be [size])
  */
 void kmeans(real_number* data, vec_size size, vec_size dimensions, vec_size nbClusters, real_number* centroids, vec_size* assignations) {
-
-    // set_linear_congruential_generator_seed(7);
-
 
     // Initialize centroids to random positions
     {
