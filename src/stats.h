@@ -60,8 +60,6 @@ void simpleLinearRegression(real_number* x, real_number* y, vec_size size,
                             real_number* a, real_number* b);
 
 // Clustering
-vec_size closest(real_number* data, vec_size dimensions, real_number* points,
-                 vec_size nbPoints);
 void kmeans(real_number* data, vec_size size, vec_size dimensions,
             vec_size nbClusters, real_number* centroids,
             vec_size* assignations);

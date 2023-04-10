@@ -250,7 +250,7 @@ static real_number distance(real_number* p1, real_number* p2, vec_size size) {
  * @param nbPoints      number of points in the array
  * @return the index of the closest point in the array to 'P'
  */
-vec_size closest(real_number* point, vec_size dimensions, real_number* data,
+static vec_size closest(real_number* point, vec_size dimensions, real_number* data,
                  vec_size nbPoints) {
 
   real_number minDistance = MAX_REAL_NUMBER;

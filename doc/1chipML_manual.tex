@@ -7,6 +7,7 @@
 \usepackage{psfrag}
 \usepackage{caption}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{setspace}
 \usepackage{listings}
 \usepackage{algorithm}
@@ -576,19 +577,74 @@ The Lanczos algorithm does not directly outputs the eigenvalues and the eigenvec
   
 \section{Statistical approaches}
 
-Work in progress.
+This library offers multiple statistical methods to analyze data.
+
+\subsection{Moments of distribution}
+
+Moments of a distribution are statistical measures that provide information about the shape, center, spread, and symmetry of a given data set. They are widely used in many fields of science, including machine learning, to extract meaningful insights from data. In this section, we will dive deeper into the different moments of a distribution implemented in the library. \\
+
+As mentioned before, the first moment of a distribution is the mean, which represents the central tendency of the data. It is computed by taking the sum of all the data points and dividing it by the number of data points. In the library, the formula used to calculate the mean is given by this equation :
+\begin{equation}
+    \bar{X} = \frac{1}{N} \; \sum_{i=1}^{N} x_i
+\end{equation}
+The second moment of a distribution is the variance, which measures the dispersion of the data around the mean. It is computed by taking the sum of the squared differences between each data point and the mean, and dividing it by the number of data points minus one. The variance is a very important concept in statistics, as it allows us to quantify the spread of the data. In the library, the formula used to calculate the variance is given by this equation : 
+\begin{equation}
+    \sigma^2 = \frac{1}{N - 1} \; \sum_{i=1}^{N} (x_i - \bar{X})^2
+\end{equation}
+The third moment of a distribution is the skewness, which measures the degree of asymmetry of the data around the mean. A positive skewness indicates that the data has a longer tail on the positive side of the mean, while a negative skewness indicates that the data has a longer tail on the negative side of the mean. In the library, the skewness is implemented using the adjusted Fisher-Pearson standardized moment coefficient, as given by this equation :
+\begin{equation}
+    Skew = \frac{N}{(N - 1)(N - 2)} \; \sum_{i=1}^{N} \Big(\frac{x_i - \bar{X}}{s}\Big)^3
+\end{equation}
+The fourth moment of a distribution is the kurtosis, which measures the degree of peakedness or flatness of the data around the mean. A high kurtosis indicates that the data has more extreme values than a normal distribution, while a low kurtosis indicates that the data has fewer extreme values than a normal distribution. In the library, the kurtosis is implemented using the formula for the excess kurtosis, as given by this equation : 
+\begin{equation}
+    Kurtosis = \frac{N(N + 1)}{(N - 1)(N - 2)(N - 3)} \; \sum_{i=1}^{N} \Big(\frac{x_i - \bar{X}}{s}\Big)^4 \; \frac{3(N - 1)^2}{(N - 2)(N - 3)}
+\end{equation}
+In addition to the four moments, other metrics based on them are also implemented in the library, such as the standard deviation. The standard deviation is the square root of the variance and provides a measure of the average deviation of the data from the mean. It is widely used since it has the same units as the data. In the library, the formula used to calculate the standard deviation is given by this equation : 
+\begin{equation}
+    \sigma = \sqrt{\frac{1}{N - 1} \; \sum_{i=1}^{N} (x_i - \bar{X})^2}
+\end{equation}
+It is important to note that all formulas used to implement the different moments assume that the given data points correspond to a sample of the population and not the population itself. This means that the computed moments are estimates of the true moments of the population, and may be subject to some degree of sampling error.
+
+\subsection{Covariance}
+
 \subsection{Analysis of variance}
 
 Work in progress.
 \subsection{Correlation}
 
 Work in progress.
-\subsection{Cluster analisys}
+\subsection{Cluster analysis}
 
+Cluster analysis is a statistical technique used to identify patterns or groups of similar data points. Its main advantage is the fact that it does not require pre-existing labels or categories. The goal of cluster analysis is to group together data points that are similar to each other based on certain characteristics or features, while also ensuring that the groups are distinct from each other.
+
+There are different methods of cluster analysis, but the one that was implemented in this library is an algorithm called K-means clustering, which involves dividing the data into K clusters based on the mean values of the features. Let $D$ be the set of all data points, the $C_i$ be the vector containing each features of a cluster and $A_{n}(x)$ a function mapping a data point $x$ to a cluster $C_i$ at iteration $n$ :
+\begin{algorithm}
+  \caption{K-Means Clustering Algorithm}
+  \begin{algorithmic}[1]
+    \For{\texttt{i = 1; i $\le$ k; i++}}
+        \State $C_i \gets \text{Set random values for each features}$
+    \EndFor
+    \State $A(x) = C_0\; \forall x \in D$
+    \While{$A_{n - 1}(x) = A_{n}(x) \; \; \forall x \in D$ }
+        \For{\texttt{$x \in D$}}
+            \State $A(x) = \min_{c \in C} dist(c, x)$
+        \EndFor
+        \For{\texttt{i = 1; i $\le$ k; i++}}
+            \State $C_i \gets \text{mean(P)}, \; \; P = \{ A(x) = C_i, \forall x \in D \}$
+        \EndFor
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
 Work in progress.
 \subsection{Regression}
 
-Work in progress.
+Linear regression is a statistical technique used to model the relationship between a dependent variable and one or more independent variables. It involves finding the line of best fit that describes the linear relationship between the dependent variable and the independent variables. Linear regression is widely used as it allows us to predict the value of the dependent variable based on the values of the independent variables. The most common type of linear regression is simple linear regression, which involves only one independent variable, while multiple linear regression involves two or more independent variables. In the case of the library, given the regression line in the form of $Y = aX + b$, a simple linear regression algorithm is implemented using the following formulas :
+\begin{equation}
+    a = \frac{N * \Big(\sum_{i=1}^{N} x_i * y_i\Big) - \Big(\sum_{i=1}^{N} x_i\Big) * \Big(\sum_{i=1}^{N} y_i\Big)}{N * \Big(\sum_{i=1}^{N} x_i^2\Big) - \Big(\sum_{i=1}^{N} x_i\Big)^2}
+\end{equation}
+\begin{equation}
+    b = \frac{\Big(\sum_{i=1}^{N} y_i\Big) * \Big(\sum_{i=1}^{N} x_i^2\Big) - \Big(\sum_{i=1}^{N} x_i\Big) * \Big(\sum_{i=1}^{N} x_i * y_i\Big)}{N * \Big(\sum_{i=1}^{N} x_i^2\Big) - \Big(\sum_{i=1}^{N} x_i\Big)^2}
+\end{equation}
 
 \section{The Fast Fourier Transform}
 
