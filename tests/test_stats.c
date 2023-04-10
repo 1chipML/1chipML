@@ -4,7 +4,6 @@
 #include "linear_congruential_random_generator.h"
 #include <stdio.h>
 
-
 int testVariance(real_number* data, vec_size size, real_number expected) {
 
     real_number output = variance(data, size);
