@@ -12,7 +12,7 @@ static inline char intDigitToChar(const unsigned int value) {
 }
 
 /**
- * @brief This method initialises the array with random unsigned integers
+ * @brief This method initializes the array with random unsigned integers
  * between 0 and UINT16_MAX
  *
  * @param population This array stores all the values of the population and will
