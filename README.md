@@ -37,8 +37,8 @@ provided by AVR and ARM microcontrollers (avr-gcc and Cortex-M compilers) by wri
 entirely in the ANSI C language.
 
 Therefore, in order to use this library in practical cases, you need to select one or more of the
-source files which can be found in the "src" forlder. A very efficient way to start is by studying
-the source files stored in the "tests" folder.
+source files which can be found in the [src](./src) forlder. A very efficient way to start is by studying
+the source files stored in the [tests](./tests) folder.
 
 ## Tests
 
@@ -49,5 +49,11 @@ on a computer before deployment on microcontrollers.
 
 To run the tests on computer, simply type the following command in a shell:
 
-> make test
+```bash
+make test
+```
 
+## Prototypes
+
+To illustrate the usage of each algorithm, some prototypes have been developed. Each prototype located in the [prototype](./prototype) folder brings to light how a specific algorithm can be used. 
+We recommend you look at these prototypes to have a better understanding of how each algorithm can be used for development. Most of them have been implemented to work with the platform Arduino IDE and all have a unique README file to better understand their implementation. 

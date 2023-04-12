@@ -2,7 +2,7 @@
 #define fft_real float
 
 #include "FFT.h"
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 
 void setup() {
   // initialize serial:
@@ -46,9 +46,9 @@ void loop() {
 
     // Writing
     // write reals
-    writeFloatArray(FFTLength, FFTreals);
+    writeArray(FFTLength, FFTreals, sizeof(float));
     // write imaginaries
-    writeFloatArray(FFTLength, FFTimgs);
+    writeArray(FFTLength, FFTimgs, sizeof(float));
 
   } else {
     digitalWrite(LED_BUILTIN, LOW);

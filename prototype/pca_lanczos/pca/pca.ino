@@ -13,7 +13,7 @@
 
 #include "lanczos.h"
 #include "jacobi.h"
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 
 /**
 * @brief Computes the mean of a column in an array
@@ -124,10 +124,7 @@ void loop()
     readElement(&nbCaracteristicPerEntries, sizeof(nbCaracteristicPerEntries));
 
     uint8_t sample[nbValues * nbCaracteristicPerEntries];
-    for(uint16_t i = 0; i < nbValues * nbCaracteristicPerEntries; ++i)
-    {
-      readElement(&sample[i], sizeof(uint8_t));
-    }
+    readArray(nbValues * nbCaracteristicPerEntries, sample, sizeof(uint8_t));
     
     //////////// Compute covariance matrix ///////////
     // We do not normalize the data before computing the covariance matrix.
