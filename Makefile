@@ -10,11 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-<<<<<<< HEAD
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic stats
-=======
-all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic fast_sincos
->>>>>>> abe8bb7 (Fast sin & cos implementation (#27))
+all: linear_congruential_random_generator gauss_elimination poly_interpolation DFT FFT lanczos jacobi genetic fast_sincos monte_carlo stats
 
 test: all run_all_tests
 
@@ -42,8 +38,12 @@ DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_ge
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
 fast_sincos: ./$(TEST_FOLDER)/test_fast_sincos.c ./src/fast_sincos.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
@@ -55,6 +55,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_FFT.out
 	./$(BUILD_FOLDER)/test_lanczos.out
 	./$(BUILD_FOLDER)/test_fast_sincos.out
+	./$(BUILD_FOLDER)/test_monte_carlo.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)
