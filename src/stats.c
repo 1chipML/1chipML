@@ -1,5 +1,8 @@
 #include "stats.h"
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+
 /**
  * @brief Calculates the maximum element of an array
  * @param array array containing the values needed to calculate the maximum
@@ -161,7 +164,6 @@ vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments) {
   moments->mean = avg;
 
   real_number dividingFactor = 1.0 / (size - 1);
-  ;
 
   moments->absAverageDeviation = absAverageDeviation * dividingFactor;
   moments->variance =
@@ -220,7 +222,7 @@ void simpleLinearRegression(real_number* x, real_number* y, vec_size size,
 }
 
 /**
- * @brief Finds the euclidiant distance between two points
+ * @brief Finds the euclidian distance between two points
  *
  * @param p1    first point
  * @param p2    second point
@@ -242,7 +244,7 @@ static real_number distance(real_number* p1, real_number* p2, vec_size size) {
 
 /**
  * @brief Given a point 'P' and an array of points, finds the closest point of
- * the array to the point 'P' using the euclidiant distance
+ * the array to the point 'P' using the euclidian distance
  * @param point         point 'P'
  * @param dimensions    number of dimensions of the points
  * @param data          array of points
@@ -286,11 +288,11 @@ void kmeans(real_number* data, vec_size size, vec_size dimensions,
 
   // Initialize centroids to random positions
   {
-#define min(a, b) ((a) < (b) ? (a) : (b))
 
     for (vec_size i = 0; i < nbClusters; ++i) {
+      real_number randomNumber = linear_congruential_random_generator();
       vec_size randomPointIndex =
-          min(size - 1, (linear_congruential_random_generator() * size));
+          min(size - 1, (randomNumber * size));
       for (vec_size dim = 0; dim < dimensions; ++dim) {
         centroids[i * dimensions + dim] =
             data[randomPointIndex * dimensions + dim];

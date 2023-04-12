@@ -606,7 +606,10 @@ In addition to the four moments, other metrics based on them are also implemente
 It is important to note that all formulas used to implement the different moments assume that the given data points correspond to a sample of the population and not the population itself. This means that the computed moments are estimates of the true moments of the population, and may be subject to some degree of sampling error.
 
 \subsection{Covariance}
-
+Covariance is a statistical measure that quantifies the degree to which two variables are related to each other. It measures how much two variables change together. If the covariance between two variables is positive, it means that they tend to increase or decrease together. If the covariance is negative, it means that when one variable increases, the other variable tends to decrease. It can be computed using the following formula :
+\begin{equation}
+    COV(X, Y) = \frac{1}{N - 1} \sum_{i=1}^{N} (x_i - \bar{X})(y_i - \bar{Y})
+\end{equation}
 \subsection{Analysis of variance}
 
 Work in progress.

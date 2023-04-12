@@ -3,6 +3,7 @@
 #define DIGITS_PRECISION 3
 
 #include "stats.h"
+#include "arduino_serial_port.hpp"
 
 enum State {
   READING,
@@ -10,33 +11,6 @@ enum State {
 };
 
 State state = State::READING;
-
-void readElement(void* element, const size_t sizeOfElement) {
-  unsigned char* readElement = (unsigned char*)element;
-  for (uint16_t i = 0; i < sizeOfElement; ++i) {
-    while (Serial.available() < 1); // Wait for element
-    Serial.readBytes(&readElement[i], sizeof(unsigned char));
-  }
-}
-
-int readArray(const uint16_t arraySize, void* outArray, const size_t sizeOfElement) {
-  readElement(outArray, arraySize * sizeOfElement);
-}
-
-void writeElement(void* element, const size_t sizeOfElement) {
-  while (Serial.availableForWrite() < sizeOfElement); // wait for write
-  Serial.write((unsigned char*)element, sizeOfElement);
-  Serial.flush(); // wait until data is sent
-}
-
-
-void writeArray(const unsigned arraySize, void* array, const unsigned sizeOfElement) {
-  unsigned char* elementIndex = (unsigned char*)array;
-  for (unsigned i = 0; i < arraySize; ++i) {
-    writeElement(elementIndex, sizeOfElement);
-    elementIndex += sizeOfElement;
-  }
-}
 
 void setup() {
 
