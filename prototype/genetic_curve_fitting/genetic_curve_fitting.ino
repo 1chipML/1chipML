@@ -50,6 +50,7 @@ void loop() {
   unsigned int populationSize;
   unsigned int tourneySize;
   unsigned int maxIterations;
+  unsigned int numberOfEliteValues;
 
   // Read all of the variables from the serial connection
   readElement(&epsilon,sizeof(epsilon));
@@ -58,6 +59,7 @@ void loop() {
   readElement(&tourneySize, sizeof(tourneySize));
   readElement(&maxIterations, sizeof(maxIterations));
   readElement(&polynomialDegree, sizeof(polynomialDegree));
+  readElement(&numberOfEliteValues, sizeof(numberOfEliteValues));
   readElement(&coordinatesSize, sizeof(coordinatesSize));
 
   unsigned int dimensions = polynomialDegree+1;
@@ -85,7 +87,7 @@ void loop() {
 
   float value = geneticAlgorithm(bestValues, dimensions, epsilon,
                                  mutationRate, populationSize, tourneySize,
-                                 maxIterations, evaluationFunction, 0);
+                                 maxIterations, evaluationFunction, 0 , numberOfEliteValues);
 
   digitalWrite(LED_BUILTIN, LOW);
 
