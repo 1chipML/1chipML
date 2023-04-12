@@ -202,7 +202,7 @@ int main() {
 #define CLUSTERS 3
 #define DIMENSIONS 2
 
-  set_linear_congruential_generator_seed(7);
+  set_linear_congruential_generator_seed(5);
 
   real_number data[NB_POINTS * DIMENSIONS] = {
       22.01335086148608,   18.801364597492864,  22.274837043375705,
@@ -221,11 +221,11 @@ int main() {
       31.522144400392243};
 
   real_number expectedCentroids[CLUSTERS * DIMENSIONS] = {
-      29.82478966,  30.85948414, -28.98844033,
-      -29.42525921, 20.92266333, 19.3785176};
+      20.92266333, 19.3785176, -28.98844033,
+      -29.42525921, 29.82478966,  30.85948414};
 
-  vec_size expectedAssignations[NB_POINTS] = {2, 2, 2, 2, 2, 2, 1, 1, 1, 1,
-                                              1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+  vec_size expectedAssignations[NB_POINTS] = {0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+                                              1, 1, 2, 2, 2, 2, 2, 2, 2, 2};
 
   result |= testKMeans(data, NB_POINTS, DIMENSIONS, CLUSTERS, expectedCentroids,
                        expectedAssignations);
