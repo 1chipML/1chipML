@@ -286,8 +286,27 @@ To better understand how to use this method implemented in the library, an extra
 
 \subsection{The LU decomposition method}
 
-Work in progress. This method is not implemented in the library yet.
+The LU algorithm is a numerical method used for solving systems of linear equations.
+The LU algorithm decomposes a given matrix into the product of two matrices, a lower triangular matrix (L) and an upper triangular matrix (U). 
+The LU decomposition can be written as follows:
+\begin{equation}
+A = LU
+\end{equation}
 
+where $A$ is the original matrix, $L$ is the lower triangular matrix, and $U$ is the upper triangular matrix.
+The LU algorithm can be used to solve systems of linear equations of the form $Ax=b$, where $A$ is a square matrix, $x$ is a column vector of variables, and $b$ is a column vector of constants. 
+Once the matrix $A$ has been decomposed into $L$ and $U$, the system of equations can be rewritten as follows:
+\begin{equation}
+LUx = b
+\end{equation}
+
+Let $y=Ux$, then we can solve the following two systems of equations:
+\begin{equation}
+Ly=b\ and\ Ux=y
+\end{equation}
+
+The first equation can be easily solved by forward substitution, while the second equation can be solved by backward substitution. Once we have found the values of $y$ and $x$, we have solved the original system of linear equations.
+The LU algorithm is useful for solving large systems of linear equations, especially when the matrix $A$ is sparse.
 \section{Interpolation and extrapolation}
 
 Work in progress.
