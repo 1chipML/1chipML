@@ -20,7 +20,7 @@ void setup() {
 uint16_t nbPoints = 0;
 uint16_t nbClusters = 0;
 uint16_t dimensions = 0;
-REAL_NUMBER* data;
+real_number* data;
 
 void read() {
 
@@ -28,8 +28,8 @@ void read() {
     readElement(&nbPoints, sizeof(nbPoints));
     readElement(&nbClusters, sizeof(nbClusters));
     readElement(&dimensions, sizeof(dimensions));
-    data = (REAL_NUMBER*) malloc(sizeof(REAL_NUMBER) * nbPoints * dimensions);
-    readArray(nbPoints * dimensions, data, sizeof(REAL_NUMBER));
+    data = (real_number*) malloc(sizeof(real_number) * nbPoints * dimensions);
+    readArray(nbPoints * dimensions, data, sizeof(real_number));
 
     state = State::PROCESSING;
   }
@@ -38,15 +38,15 @@ void read() {
 
 void process() {
 
-  INTEGER assignations[nbPoints];
-  REAL_NUMBER centroids[nbClusters * dimensions];
+  vec_size assignations[nbPoints];
+  real_number centroids[nbClusters * dimensions];
 
-  memset(centroids, 0, sizeof(REAL_NUMBER) * nbClusters * dimensions);
-  memset(assignations, 0, sizeof(INTEGER) * nbPoints);
+  memset(centroids, 0, sizeof(real_number) * nbClusters * dimensions);
+  memset(assignations, 0, sizeof(vec_size) * nbPoints);
 
   kmeans(data, nbPoints, dimensions, nbClusters, centroids, assignations);
-  writeArray(nbClusters * dimensions, centroids, sizeof(REAL_NUMBER));
-  writeArray(nbPoints, assignations, sizeof(INTEGER));
+  writeArray(nbClusters * dimensions, centroids, sizeof(real_number));
+  writeArray(nbPoints, assignations, sizeof(vec_size));
 
   free(data);
   state = State::READING;

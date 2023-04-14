@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define STATS_SUCCESS 0
+#define STATS_NOT_ENOUGH_POINTS 1
+#define STATS_VARIANCE_IS_NULL 2
+
 #ifndef EPISLON
 #define EPSILON 0.01
 #endif

@@ -95,8 +95,7 @@ real_number absAverageDeviation(real_number* array, vec_size size) {
   real_number avg = mean(array, size);
   real_number result = 0.0;
   for (vec_size i = 0; i < size; ++i) {
-    real_number elem = array[i];
-    real_number diffElem = elem - avg;
+    real_number diffElem = array[i] - avg;
     result += fabs(diffElem);
   }
 
@@ -129,14 +128,12 @@ real_number covariance(real_number* x, real_number* y, vec_size size) {
  * @param size      size of the array
  * @param sample    whether to consider the data as a sample or as the
  * population when computing the metrics (0 = Population, 1 = Sample)
- * @return Returns the error code of the function (0 = Success, 1 = Size of data
- * is less than 2, 2 = Variance is null, can't compute skewness and kurtosis,
- * but other metrics are computed)
+ * @return Returns the error code of the function ()
  */
 vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments) {
 
   if (size < 2)
-    return 1;
+    return STATS_NOT_ENOUGH_POINTS;
 
   real_number avg = mean(array, size);
   real_number max = array[0], min = array[0], absAverageDeviation = 0.0,
@@ -171,7 +168,7 @@ vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments) {
   moments->standardDeviation = sqrt(moments->variance);
 
   if (fabs(moments->variance) < EPSILON) {
-    return 2; // Cannot compute skewness and kurtosis if variance is 0
+    return STATS_VARIANCE_IS_NULL; // Cannot compute skewness and kurtosis if variance is 0
   }
 
   real_number skewnessFactor = ((real_number)size) / ((size - 1) * (size - 2));
@@ -188,7 +185,7 @@ vec_size analyzeData(real_number* array, vec_size size, DataSummary* moments) {
       (kurtosisFactor * kurtosis / (moments->variance * moments->variance)) -
       kurtosisFactorAdjustment;
 
-  return 0;
+  return STATS_SUCCESS;
 }
 
 /**
