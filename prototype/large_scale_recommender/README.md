@@ -2,7 +2,7 @@
 
 ## Presentation
 
-This prototype tries to solve the matrix factorization problem used in some large scale recommendation system. To do so,
+This prototype tries to solve the matrix factorization problem used in some large scale recommendation systems. To do so,
 it takes a square matrix as an input with some missing values. In this case, the input matrix is called the "feedback matrix". 
 The feedback matrix contains the feedback of some users (rows) about some products (columns). When a value is '-1' this means
 that we did not gather the feedback of the user for this particular product. This prototype then tries to predict the missing

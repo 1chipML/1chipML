@@ -8,9 +8,11 @@
 #include "finite_difference.h"
 #include "gradient_descent.h"
 #include "matrix.h"
-#include "arduino_serial_port.h"
+#include "arduino_serial_port.hpp"
 
 #define LATENT_SIZE 2
+#define NUMBER_OF_MATRICES 2 
+#define EPS 0.00001
 uint8_t feedbackSize = 0;
 double *feedbackMatrix;
 
@@ -60,7 +62,7 @@ static gradient_real func(gradient_real* parameters)
 
 static void dfunc(gradient_real* parameters, gradient_real* gradient)
 {
-  gradientApproximation(func, parameters, gradient, feedbackSize * LATENT_SIZE * 2, 0.0001, Central);
+  gradientApproximation(func, parameters, gradient, feedbackSize * LATENT_SIZE * NUMBER_OF_MATRICES, EPS, Central);
 } 
 
 void setup()
@@ -75,11 +77,7 @@ void loop()
 
   feedbackMatrix = malloc(totalSize * sizeof(double));
 
-  for(uint8_t i = 0; i < totalSize; ++i)
-  {
-    readElement(&feedbackMatrix[i], sizeof(double));
-  }
-
+  readArray(totalSize, feedbackMatrix, sizeof(double));
 
   {
     double lMatrix[totalSize];
@@ -108,10 +106,7 @@ void loop()
   double resultMatrix[totalSize];
   matrixMultiply(gradientMatrix, transposeProductMatrix, dims, resultMatrix, 0);
 
-  for(uint8_t i = 0; i < totalSize; ++i)
-  {
-    writeElement(&resultMatrix[i], sizeof(double));
-  }
+  writeArray(totalSize, resultMatrix, sizeof(double));
 
   free(feedbackMatrix);
   free(gradientMatrix);

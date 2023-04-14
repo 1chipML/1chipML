@@ -1,17 +1,11 @@
-import csv, struct, serial, time, array
 import matplotlib.pyplot as plt
 import numpy as np
 from math import sqrt
+from serial_port import CustomSerial
 
 def wait_for_arduino(port, nbValues):
-    new_dataset = [0 for x in range(nbValues)] 
     print("waiting for arduino...")
-    for i in range(nbValues):
-        new_dataset[i] = struct.unpack('<f', port.read(4))[0]
-        if(new_dataset[i] < 0):
-            new_dataset[i] = 0
-        if(new_dataset[i] > 1):
-            new_dataset[i] = 1
+    new_dataset = port.readArray('<f', 4, nbValues)
     return  new_dataset
 
 def display_results(dataset_initial, dataset_final):
@@ -52,18 +46,17 @@ def send_data_through_serial(port, dataset):
     nb_data = len(dataset)
     size_side = sqrt(nb_data)
 
-    port.write(struct.pack('<B', int(size_side)))
+    port.writeElement('<B', int(size_side))
 
     print(f"We need to send a matrix of {size_side}x{size_side} = {nb_data} values")
 
     for val in dataset:
-        port.write(struct.pack('<f', val))
+        port.writeElement('<f', val)
     return
 
 
 def main():
-    port = serial.Serial('/dev/ttyACM0', 9600)
-    time.sleep(2)
+    port: CustomSerial = CustomSerial("/dev/ttyACM0", 9600)
 
     data = [0.2, -1, -1,  1, -1, -1,  0.6,
             -1,  0.4, -1,  0.6, -1, -1,  1,
