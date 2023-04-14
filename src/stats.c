@@ -220,7 +220,6 @@ void simpleLinearRegression(real_number* x, real_number* y, vec_size size,
 
 /**
  * @brief Finds the euclidian distance between two points
- *
  * @param p1    first point
  * @param p2    second point
  * @param size  dimensions of the points
