@@ -7,9 +7,6 @@
 #define BOARD_LENGTH 3
 #define BOARD_SIZE (BOARD_LENGTH * BOARD_LENGTH) // 3 x 3 board
 
-uint8_t totalLength = 0;
-uint8_t initialBoard[BOARD_SIZE];
-
 void setup() {
   // Initialize serial
   Serial.begin(9600);
@@ -25,11 +22,6 @@ void loop() {
   readArray(nbValues, &boardValues, sizeof(int8_t));
   uint8_t nPlayers;
   readElement(&nPlayers, sizeof(nPlayers));
-
-  initialBoard[0] = 1;
-  for (int i = 1; i < nbValues; ++i) {
-    initialBoard[i] = boardValues[i];
-  }
 
   int minSimulation = 10;
   int maxSimulation = 48;
@@ -65,7 +57,6 @@ uint8_t findCurrentPosition(const Board* board) {
 
 // Current position is -1, if a node has been visited, it is -2
 void playAction(Board* board, Action* action) {
-  totalLength += initialBoard[action->xPos * BOARD_LENGTH + action->yPos];
   uint8_t currentPos = findCurrentPosition(board);
   board->values[currentPos] = -2;
   board->values[action->xPos * BOARD_LENGTH + action->yPos] = -1;
@@ -111,9 +102,7 @@ void getPossibleActions(Board* board, Action* possibleActions) {
   }
 }
 
-bool isDone(Board* board) {
-  return board->values[BOARD_SIZE - 1] < 0;
-}
+bool isDone(Board* board) { return board->values[BOARD_SIZE - 1] < 0; }
 
 int getNumPossibleActions(Board* board) {
   if (isDone(board)) {
@@ -132,60 +121,54 @@ int getBoardSize() { return BOARD_SIZE; }
 
 bool isStuck(Board* board) {
   uint8_t currentPos = findCurrentPosition(board);
-  switch(currentPos)
-  {
-    case 0:
-      return (board->values[currentPos + 1] == -2 &&
-      board->values[currentPos + 3] == -2);
-    case 1:
-      return (board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 1] == -2 &&
-             board->values[currentPos + 3] == -2);
-    case 2:
-      return (currentPos == 2 && board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 3] == -2);
-    case 3:
-      return (board->values[currentPos - 3] == -2 &&
-             board->values[currentPos + 1] == -2 &&
-             board->values[currentPos + 3] == -2);
-    case 4:
-      return (board->values[currentPos - 3] == -2 &&
-             board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 1] == -2 &&
-             board->values[currentPos + 3] == -2);
-    case 5:
-      return (board->values[currentPos - 3] == -2 &&
-             board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 3] == -2);
-    case 6:
-      return (board->values[currentPos - 3] == -2 &&
-             board->values[currentPos + 1] == -2);
-    case 7:
-      return (board->values[currentPos - 3] == -2 &&
-             board->values[currentPos - 1] == -2 &&
-             board->values[currentPos + 1] == -2);
-    default:
-      return false;
-
+  switch (currentPos) {
+  case 0:
+    return (board->values[currentPos + 1] == -2 &&
+            board->values[currentPos + 3] == -2);
+  case 1:
+    return (board->values[currentPos - 1] == -2 &&
+            board->values[currentPos + 1] == -2 &&
+            board->values[currentPos + 3] == -2);
+  case 2:
+    return (currentPos == 2 && board->values[currentPos - 1] == -2 &&
+            board->values[currentPos + 3] == -2);
+  case 3:
+    return (board->values[currentPos - 3] == -2 &&
+            board->values[currentPos + 1] == -2 &&
+            board->values[currentPos + 3] == -2);
+  case 4:
+    return (board->values[currentPos - 3] == -2 &&
+            board->values[currentPos - 1] == -2 &&
+            board->values[currentPos + 1] == -2 &&
+            board->values[currentPos + 3] == -2);
+  case 5:
+    return (board->values[currentPos - 3] == -2 &&
+            board->values[currentPos - 1] == -2 &&
+            board->values[currentPos + 3] == -2);
+  case 6:
+    return (board->values[currentPos - 3] == -2 &&
+            board->values[currentPos + 1] == -2);
+  case 7:
+    return (board->values[currentPos - 3] == -2 &&
+            board->values[currentPos - 1] == -2 &&
+            board->values[currentPos + 1] == -2);
+  default:
+    return false;
   }
 }
 
 int getScore(Board* board, int player) {
   int score = 0;
   if (isStuck(board)) {
-    totalLength = 0;
     score = 2;
   } else if (isDone(board)) {
-    if (totalLength == 6) {
-      score = 10; // Best path
+    if (board->values[1] == 10 && board->values[2] == 10 &&
+        board->values[5] == 10 && board->values[6] == 10 &&
+        board->values[8] == -1) {
+      return 10;
+    } else {
+      score = 2;
     }
-    if (totalLength >= 9) {
-      score = 3; // Worst path
-    }
-    if (totalLength >= 7) {
-      score = 4; // Okay path
-    }
-    totalLength = 0;
   }
   return score;
 }
