@@ -1,16 +1,16 @@
 #ifndef LU_DECOMPOSITION_H
 #define LU_DECOMPOSITION_H
 
-typedef float lu_real;
+typedef double lu_real;
 
-#ifdef _cpluplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 void LUDecomposition(const lu_real* initialMatrix, lu_real* lMatrix,
                      lu_real* uMatrix, const int size);
 
-#ifdef _cpluplus
+#ifdef __cplusplus
 }
 #endif
 
