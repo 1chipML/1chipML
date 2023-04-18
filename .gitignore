@@ -1,2 +1,4 @@
 local/*
 tests/build*
+.vscode/*
+__pycache__/

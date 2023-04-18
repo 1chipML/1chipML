@@ -2,13 +2,13 @@
 #include <stdio.h>
 
 // This is a function that we want to optimize
-static float evaluateStrength(float *population) {
+static float evaluateStrength(float* population) {
 
   // We want to minimize this function
   return fabs(4 * population[0] - exp(2 * population[1]) + 2);
 }
 
-static int verifyCoordinates(float *firstSet, float *secondSet,
+static int verifyCoordinates(float* firstSet, float* secondSet,
                              int parameterCount) {
 
   for (unsigned int i = 0; i < parameterCount; i++) {
@@ -26,22 +26,23 @@ int main() {
   float bestFitValues[2];
   float lowMemoryBestFitValues[2];
   const unsigned int dimensions = 2;
+  unsigned int numberOfEliteValues = 2;
   const unsigned int maxIterations = 10000;
   unsigned int populationSize = 100;
   unsigned int tournamentSize = 20;
 
   set_linear_congruential_generator_seed(16);
 
-  float result = geneticAlgorithm(bestFitValues, dimensions, epsilon,
-                                  mutationRate, populationSize, tournamentSize,
-                                  maxIterations, evaluateStrength, 0);
+  float result = geneticAlgorithm(
+      bestFitValues, dimensions, epsilon, mutationRate, populationSize,
+      tournamentSize, maxIterations, evaluateStrength, numberOfEliteValues, 0);
 
   // We reset the seed
   set_linear_congruential_generator_seed(16);
 
   float lowMemoryResult = geneticAlgorithm(
       lowMemoryBestFitValues, dimensions, epsilon, mutationRate, populationSize,
-      tournamentSize, maxIterations, evaluateStrength, 1);
+      tournamentSize, maxIterations, evaluateStrength, numberOfEliteValues, 1);
 
   float fitness = evaluateStrength(bestFitValues);
 
