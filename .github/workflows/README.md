@@ -2,7 +2,7 @@
 
 ## Presentation
 
-These pipelines allow us to maintain 
+These pipelines allow us to make sure that a PR does not destroy the current functionalities.
 
 ## Current Workflows
 
