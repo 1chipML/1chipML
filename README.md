@@ -1,5 +1,3 @@
-
-
 <html>
 <p align="center">
   <img src="https://github.com/1chipML/artwork/blob/main/1chipML%2BLFAI%26Data.png" alt="1chipML logo and LF AI & Data Logo" width="300">
@@ -8,6 +6,9 @@
 <h1 align="center">
   1chipML
 </h1>
+
+⚠️ **Archived Project**  
+Due to inactivity, the 1ChipML project was archived in May 2025. The contents remain available for historical purposes.
 
 ![Lint, Build and Tests](https://github.com/1chipML/1chipML/actions/workflows/make.yml/badge.svg?style=flat)
 
